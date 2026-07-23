@@ -12,11 +12,14 @@ import {
     Mail,
     MapPin,
     Phone,
+    Share2,
     TrendingDown,
     TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PriceChart } from "@/components/stock/price-chart";
+import { TickerLogo } from "@/components/stock/ticker-logo";
+import { ShareSheet } from "@/components/stock/share-sheet";
 import {
     formatCedis,
     formatCompact,
@@ -28,31 +31,6 @@ import {
     type Stock,
 } from "@/lib/gse";
 import { getSeries, periodChange, recordClose, RANGES, sliceRange, type RangeKey } from "@/lib/history";
-
-/** Stable brand-ish hue per ticker so each logo tile is recognisable. */
-export function tickerHue(symbol: string): number {
-    let h = 0;
-    for (let i = 0; i < symbol.length; i++) h = (h * 31 + symbol.charCodeAt(i)) % 360;
-    return h;
-}
-
-export function TickerLogo({ symbol, size = 56 }: { symbol: string; size?: number }) {
-    const hue = tickerHue(symbol);
-    return (
-        <div
-            className="flex shrink-0 items-center justify-center rounded-xl font-bold text-white"
-            style={{
-                width: size,
-                height: size,
-                fontSize: size * 0.32,
-                background: `linear-gradient(135deg, hsl(${hue} 62% 42%), hsl(${(hue + 40) % 360} 58% 26%))`,
-            }}
-            aria-hidden="true"
-        >
-            {symbol.slice(0, 2)}
-        </div>
-    );
-}
 
 function StatRow({ label, value }: { label: string; value: string }) {
     return (
@@ -99,6 +77,7 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
     const [range, setRange] = useState<RangeKey>("ALL");
     const [tab, setTab] = useState<Tab>("details");
     const [holdingsVisible, setHoldingsVisible] = useState(false);
+    const [shareOpen, setShareOpen] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -188,9 +167,32 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                         <ArrowLeft size={20} />
                     </button>
                     <h1 className="flex-1 text-center text-base font-bold tracking-widest">{stock.symbol}</h1>
-                    <div className="w-9" />
+                    <button
+                        onClick={() => setShareOpen(true)}
+                        aria-label={`Share ${stock.symbol}`}
+                        className="rounded-full p-2 text-white/70 transition-colors hover:bg-white/[0.06] hover:text-white"
+                    >
+                        <Share2 size={19} />
+                    </button>
                 </div>
             </header>
+
+            <ShareSheet
+                open={shareOpen}
+                onClose={() => setShareOpen(false)}
+                card={{
+                    symbol: stock.symbol,
+                    company: stock.company,
+                    sector: meta.sector,
+                    price: stock.price,
+                    change: stock.change,
+                    changePercent: stock.changePercent,
+                    points: visible,
+                    range,
+                    periodPercent: windowChange.percent,
+                    hasBackfill: visible.some((p) => !p.recorded),
+                }}
+            />
 
             <div className="mx-auto max-w-3xl px-4 md:px-6">
                 {/* Identity + price */}

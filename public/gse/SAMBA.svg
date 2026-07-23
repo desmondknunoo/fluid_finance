@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SAMBA Foods logo</title>
+  <desc id="desc">Green SAMBA Foods logo with dark wordmark and leaf motif.</desc>
+  <rect width="512" height="512" fill="none"/>
+  <path
+    fill="#8cc83f"
+    d="M62 80 276 4c9-3 18-2 26 3l160 101c9 6 15 16 16 27l30 212c2 14-4 29-16 37L354 485c-9 7-21 8-32 4L84 403c-13-5-22-17-24-31L11 239c-2-8-1-17 2-25l42-119c1-7 3-12 7-15Z"
+  />
+  <path
+    fill="#3f9638"
+    d="M12 237c18 34 53 57 85 82 34 26 55 55 53 102 17-33 10-72-14-104-29-39-77-61-124-80Z"
+  />
+  <path
+    fill="#2f7f2f"
+    d="M344 484 491 383c9-7 15-17 17-28-71 20-142 18-211-7-69-24-129-68-193-104 77 79 145 153 240 240Z"
+    opacity=".72"
+  />
+  <path
+    fill="#3a9636"
+    d="M154 450c25-51 79-72 163-63-54-25-116-27-168-5-33 14-58 37-73 68 30-7 56-7 78 0Z"
+  />
+  <path
+    fill="#3a9636"
+    d="M138 477c-35-20-61-46-82-78 36 11 64 24 85 43 6 5 5 22-3 35Z"
+  />
+  <circle cx="134" cy="433" r="18" fill="#8cc83f"/>
+  <text
+    x="258"
+    y="205"
+    fill="#111111"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="83"
+    font-weight="500"
+    letter-spacing="4"
+    text-anchor="middle"
+  >SAMBA</text>
+  <text
+    x="305"
+    y="315"
+    fill="#111111"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="92"
+    font-weight="500"
+    letter-spacing="4"
+    text-anchor="middle"
+  >FOODS</text>
+</svg>

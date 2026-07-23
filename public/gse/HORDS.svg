@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">HORDS logo</title>
+  <desc id="desc">Red circular HORDS logo with blue wordmark.</desc>
+  <rect width="256" height="256" fill="#ffffff"/>
+  <circle cx="128" cy="128" r="114" fill="#df1f1f"/>
+  <circle cx="128" cy="128" r="98" fill="#ffffff"/>
+  <circle cx="128" cy="128" r="76" fill="#df1f1f"/>
+  <rect x="32" y="105" width="192" height="46" fill="#ffffff"/>
+  <text
+    x="128"
+    y="141"
+    fill="#1b197d"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="45"
+    font-weight="800"
+    letter-spacing="1"
+    text-anchor="middle"
+  >HORDS</text>
+</svg>

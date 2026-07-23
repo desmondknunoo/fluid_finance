@@ -103,9 +103,11 @@ export function PriceChart({ points, positive, height = 300, unit = "₵", class
             xTicks.push({ x: x(i), label });
         }
 
+        // The live-price pill owns the gutter; drop gridlines it would cover.
+        const lastY = y(points[points.length - 1].close);
         const yTicks = niceTicks(min, max, 4)
             .filter((v) => y(v) > PAD.top - 2 && y(v) < PAD.top + innerH + 2)
-            .map((v) => ({ y: y(v), label: axisPrice(v) }));
+            .map((v) => ({ y: y(v), label: axisPrice(v), clear: Math.abs(y(v) - lastY) >= 18 }));
 
         // Index of the first genuinely observed close, for the recorded-data marker.
         const firstRecorded = points.findIndex((p) => p.recorded);
@@ -171,15 +173,17 @@ export function PriceChart({ points, positive, height = 300, unit = "₵", class
                                 stroke="rgba(255,255,255,0.05)"
                                 strokeWidth={1}
                             />
-                            <text
-                                x={PAD.left + geometry.innerW + 10}
-                                y={tick.y + 4}
-                                fill="rgba(255,255,255,0.35)"
-                                fontSize={11}
-                                fontFamily="monospace"
-                            >
-                                {tick.label}
-                            </text>
+                            {tick.clear && (
+                                <text
+                                    x={PAD.left + geometry.innerW + 10}
+                                    y={tick.y + 4}
+                                    fill="rgba(255,255,255,0.35)"
+                                    fontSize={11}
+                                    fontFamily="monospace"
+                                >
+                                    {tick.label}
+                                </text>
+                            )}
                         </g>
                     ))}
 

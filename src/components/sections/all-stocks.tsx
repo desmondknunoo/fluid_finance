@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ChevronRight, Loader2, Search, TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sparkline } from "@/components/stock/price-chart";
-import { TickerLogo } from "@/components/stock/stock-detail";
+import { TickerLogo } from "@/components/stock/ticker-logo";
 import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
 import { getSeries, recordAll, sliceRange } from "@/lib/history";
 
