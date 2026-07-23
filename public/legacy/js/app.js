@@ -1,5 +1,5 @@
 /**
- * MoMo Stocks - Main Application
+ * Fluid Finance - Main Application
  */
 
 // ===== Application Controller =====
@@ -10,7 +10,7 @@ const App = {
 
   // ===== Initialization =====
   async init() {
-    console.log('[App] Initializing MoMo Stocks...');
+    console.log('[App] Initializing Fluid Finance...');
 
     // Initialize store
     Store.init();
@@ -148,7 +148,7 @@ const App = {
     };
     const headerTitle = document.getElementById('header-title');
     if (headerTitle) {
-      headerTitle.textContent = titles[screen] || 'MoMo Stocks';
+      headerTitle.textContent = titles[screen] || 'Fluid Finance';
     }
 
     // Render screen content

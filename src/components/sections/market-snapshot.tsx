@@ -1,50 +1,55 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, ChevronRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
+import { recordAll } from "@/lib/history";
+import { openStock } from "@/lib/navigation";
 
-interface Stock {
-    name: string;
-    price: number;
-    change: number;
-    volume: number;
-}
+type Tab = "gainers" | "losers" | "active";
 
 export const MarketSnapshot = () => {
     const [stocks, setStocks] = useState<Stock[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<"gainers" | "losers" | "active">("gainers");
+    const [activeTab, setActiveTab] = useState<Tab>("gainers");
 
     useEffect(() => {
-        const fetchStocks = async () => {
+        let cancelled = false;
+        (async () => {
             try {
-                const response = await fetch("https://dev.kwayisi.org/apis/gse/live");
-                if (!response.ok) throw new Error("Failed to fetch market data");
-                const data: Stock[] = await response.json();
+                const data = await getAllStocks();
+                if (cancelled) return;
+                recordAll(data.map((s) => ({ symbol: s.symbol, price: s.price })));
                 setStocks(data);
             } catch (err) {
-                setError(err instanceof Error ? err.message : "An error occurred");
+                if (!cancelled) setError(err instanceof Error ? err.message : "An error occurred");
             } finally {
-                setLoading(false);
+                if (!cancelled) setLoading(false);
             }
+        })();
+        return () => {
+            cancelled = true;
         };
-
-        fetchStocks();
     }, []);
 
-    const getMovers = () => {
+    const movers = useMemo(() => {
         if (stocks.length === 0) return [];
-
         switch (activeTab) {
             case "gainers":
-                return [...stocks].filter(s => s.change > 0).sort((a, b) => b.change - a.change).slice(0, 5);
+                return stocks
+                    .filter((s) => s.change > 0)
+                    .sort((a, b) => b.changePercent - a.changePercent)
+                    .slice(0, 5);
             case "losers":
-                return [...stocks].filter(s => s.change < 0).sort((a, b) => a.change - b.change).slice(0, 5);
+                return stocks
+                    .filter((s) => s.change < 0)
+                    .sort((a, b) => a.changePercent - b.changePercent)
+                    .slice(0, 5);
             case "active":
                 return [...stocks].sort((a, b) => b.volume - a.volume).slice(0, 5);
         }
-    };
+    }, [stocks, activeTab]);
 
     if (loading) {
         return (
@@ -66,8 +71,6 @@ export const MarketSnapshot = () => {
         );
     }
 
-    const movers = getMovers();
-
     return (
         <section id="market-snapshot" className="pt-4 md:pt-12 pb-24 bg-black relative">
             <div className="container mx-auto px-4 md:px-6 relative z-10">
@@ -81,33 +84,24 @@ export const MarketSnapshot = () => {
                     className="rounded-2xl bg-white/[0.03] border border-white/[0.08] overflow-hidden"
                 >
                     <div className="flex border-b border-white/[0.08]">
-                        <button
-                            onClick={() => setActiveTab("gainers")}
-                            className={cn(
-                                "flex-1 py-4 text-sm font-medium transition-colors",
-                                activeTab === "gainers" ? "text-white bg-white/[0.05]" : "text-white/40 hover:text-white"
-                            )}
-                        >
-                            Top Gainers
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("losers")}
-                            className={cn(
-                                "flex-1 py-4 text-sm font-medium transition-colors",
-                                activeTab === "losers" ? "text-white bg-white/[0.05]" : "text-white/40 hover:text-white"
-                            )}
-                        >
-                            Top Losers
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("active")}
-                            className={cn(
-                                "flex-1 py-4 text-sm font-medium transition-colors",
-                                activeTab === "active" ? "text-white bg-white/[0.05]" : "text-white/40 hover:text-white"
-                            )}
-                        >
-                            Most Active
-                        </button>
+                        {(
+                            [
+                                ["gainers", "Top Gainers"],
+                                ["losers", "Top Losers"],
+                                ["active", "Most Active"],
+                            ] as [Tab, string][]
+                        ).map(([key, label]) => (
+                            <button
+                                key={key}
+                                onClick={() => setActiveTab(key)}
+                                className={cn(
+                                    "flex-1 py-4 text-sm font-medium transition-colors",
+                                    activeTab === key ? "text-white bg-white/[0.05]" : "text-white/40 hover:text-white"
+                                )}
+                            >
+                                {label}
+                            </button>
+                        ))}
                     </div>
 
                     <div className="overflow-x-auto">
@@ -130,11 +124,16 @@ export const MarketSnapshot = () => {
                                     </tr>
                                 ) : (
                                     movers.map((stock) => (
-                                        <tr key={stock.name} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors group">
+                                        <tr
+                                            key={stock.symbol}
+                                            onClick={() => openStock(stock.symbol)}
+                                            className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors cursor-pointer"
+                                        >
                                             <td className="px-6 py-4">
-                                                <span className="font-bold text-white uppercase">{stock.name}</span>
+                                                <span className="font-bold text-white uppercase">{stock.symbol}</span>
+                                                <span className="block max-w-[180px] truncate text-xs text-white/40">{stock.company}</span>
                                             </td>
-                                            <td className="px-6 py-4 font-mono text-white">GHS {stock.price.toFixed(2)}</td>
+                                            <td className="px-6 py-4 font-mono text-white">{formatCedis(stock.price)}</td>
                                             <td className="px-6 py-4">
                                                 <span className={cn(
                                                     "inline-flex items-center gap-1 font-medium",
@@ -148,12 +147,9 @@ export const MarketSnapshot = () => {
                                                 {stock.volume.toLocaleString()}
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <button
-                                                    onClick={() => window.location.href = `/legacy/index.html?symbol=${stock.name}`}
-                                                    className="inline-flex items-center gap-1 text-sm text-white/60 hover:text-white transition-colors"
-                                                >
-                                                    Trade <ChevronRight size={14} />
-                                                </button>
+                                                <span className="inline-flex items-center gap-1 text-sm text-white/60">
+                                                    View <ChevronRight size={14} />
+                                                </span>
                                             </td>
                                         </tr>
                                     ))
@@ -170,14 +166,14 @@ export const MarketSnapshot = () => {
                     transition={{ duration: 0.6, delay: 0.2 }}
                     className="mt-12 text-center"
                 >
-                    <motion.button
+                    <motion.a
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => window.location.href = "/legacy/index.html"}
+                        href="#all-stocks"
                         className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-white/10 text-white/60 hover:text-white hover:border-white/20 transition-all font-medium"
                     >
-                        View Full Market Data <ChevronRight size={18} />
-                    </motion.button>
+                        View All Listed Companies <ChevronRight size={18} />
+                    </motion.a>
                 </motion.div>
             </div>
 

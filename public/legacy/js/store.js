@@ -1,14 +1,14 @@
 /**
- * MoMo Stocks - State Management
+ * Fluid Finance - State Management
  */
 
 // Storage keys
 const STORAGE_KEYS = {
-    THEME: 'momo_stocks_theme',
-    PORTFOLIO: 'momo_stocks_portfolio',
-    WATCHLIST: 'momo_stocks_watchlist',
-    TRANSACTIONS: 'momo_stocks_transactions',
-    ALERTS: 'momo_stocks_alerts'
+    THEME: 'fluidfinance_theme',
+    PORTFOLIO: 'fluidfinance_portfolio',
+    WATCHLIST: 'fluidfinance_watchlist',
+    TRANSACTIONS: 'fluidfinance_transactions',
+    ALERTS: 'fluidfinance_alerts'
 };
 
 // Initial state

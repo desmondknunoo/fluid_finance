@@ -1,5 +1,5 @@
 /**
- * MoMo Stocks - Utility Functions
+ * Fluid Finance - Utility Functions
  */
 
 // ===== Currency Formatting =====

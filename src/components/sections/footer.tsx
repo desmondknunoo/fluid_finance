@@ -49,7 +49,7 @@ export const EnhancedFooter = () => {
                         transition={{ duration: 0.6, delay: 0.1 }}
                         className="md:col-span-1"
                     >
-                        <div className="text-xl font-bold text-white mb-6 font-poppins">MoMo Stocks</div>
+                        <div className="text-xl font-bold text-white mb-6 font-poppins">Fluid Finance</div>
                         <p className="text-sm text-white/40 leading-relaxed mb-6 font-poppins">
                             The ultimate financial aggregator for the Ghana Stock Exchange.
                             Built for accuracy, speed, and ease of use.
@@ -104,7 +104,7 @@ export const EnhancedFooter = () => {
                         <p className="text-[11px] text-white/30 leading-relaxed font-poppins">
                             Trading stocks on the Ghana Stock Exchange (GSE) involves significant risk of loss and is not suitable
                             for every investor. Past performance is not indicative of future results. Information provided
-                            by MoMo Stocks is for educational purposes only and does not constitute financial advice.
+                            by Fluid Finance is for educational purposes only and does not constitute financial advice.
                             <br /><br />
                             <span className="text-white/40 font-bold">Data Delay Notice:</span> Free tier market data is delayed by 15-20 minutes.
                             Upgrade to Pro for real-time streaming data.
@@ -112,7 +112,7 @@ export const EnhancedFooter = () => {
                     </div>
                     <div className="text-right flex flex-col justify-end">
                         <p className="text-sm text-white/20 font-poppins">
-                            © 2026 MoMo Stocks. All rights reserved.
+                            © 2026 Fluid Finance. All rights reserved.
                         </p>
                     </div>
                 </motion.div>

@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import { HeroGeometric } from "@/components/ui/shape-landing-hero";
 import { MarketSnapshot } from "@/components/sections/market-snapshot";
+import { AllStocks } from "@/components/sections/all-stocks";
+import { openStock } from "@/lib/navigation";
 import { FeatureHighlights, EducationalSection } from "@/components/sections/features";
 import { SocialProof } from "@/components/sections/pricing";
 import { EnhancedFooter } from "@/components/sections/footer";
@@ -19,11 +21,14 @@ const Navigation = memo(() => {
         <header className="fixed top-0 w-full z-50 border-b border-white/[0.08] bg-black/80 backdrop-blur-md">
             <nav className="max-w-7xl mx-auto px-6 py-4">
                 <div className="flex items-center justify-between">
-                    <div className="text-xl font-bold text-white tracking-widest font-poppins">MOMO STOCKS</div>
+                    <a href="#" className="text-xl font-bold text-white tracking-widest font-poppins">FLUID FINANCE</a>
 
                     <div className="hidden md:flex items-center justify-center gap-8 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                         <a href="#market-snapshot" className="text-xs font-semibold uppercase tracking-widest text-white/40 hover:text-white transition-colors font-poppins">
                             Market
+                        </a>
+                        <a href="#all-stocks" className="text-xs font-semibold uppercase tracking-widest text-white/40 hover:text-white transition-colors font-poppins">
+                            Stocks
                         </a>
                         <a href="#features" className="text-xs font-semibold uppercase tracking-widest text-white/40 hover:text-white transition-colors font-poppins">
                             Features
@@ -61,6 +66,7 @@ const Navigation = memo(() => {
                 <div className="md:hidden bg-black border-t border-white/[0.08] animate-in fade-in slide-in-from-top-4 duration-300">
                     <div className="px-6 py-8 flex flex-col gap-6">
                         <a href="#market-snapshot" onClick={() => setMobileMenuOpen(false)} className="text-sm font-bold uppercase tracking-widest text-white/60 font-poppins">Market</a>
+                        <a href="#all-stocks" onClick={() => setMobileMenuOpen(false)} className="text-sm font-bold uppercase tracking-widest text-white/60 font-poppins">Stocks</a>
                         <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-sm font-bold uppercase tracking-widest text-white/60 font-poppins">Features</a>
                         {/* <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-sm font-bold uppercase tracking-widest text-white/60 font-poppins">Pricing</a> */}
                         <hr className="border-white/10" />
@@ -89,6 +95,8 @@ export default function LandingPage() {
             />
 
             <MarketSnapshot />
+
+            <AllStocks onSelect={openStock} />
 
             <FeatureHighlights />
 

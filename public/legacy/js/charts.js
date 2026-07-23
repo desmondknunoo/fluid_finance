@@ -1,5 +1,5 @@
 /**
- * MoMo Stocks - Chart Components
+ * Fluid Finance - Chart Components
  * Using Canvas API for lightweight chart rendering
  */
 

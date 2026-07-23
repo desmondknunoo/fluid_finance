@@ -71,7 +71,7 @@ function ElegantShape({
 }
 
 function HeroGeometric({
-    badge = "MoMo Stocks",
+    badge = "Fluid Finance",
     title1 = "Trade Ghana Stocks",
     title2 = "With Mobile Money",
     description = "Real-time GSE data, portfolio tracking, and AI-powered insights. Invest in your future with the most secure platform in Ghana.",

@@ -12,7 +12,7 @@ const partners = [
 
 const testimonials = [
     {
-        quote: "The real-time indices and active movers table saved me hours of manual tracking. MoMo Stocks is a game changer for GSE traders.",
+        quote: "The real-time indices and active movers table saved me hours of manual tracking. Fluid Finance is a game changer for GSE traders.",
         author: "Akosua O.",
         role: "Retail Investor"
     },

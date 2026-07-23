@@ -1,5 +1,5 @@
 /**
- * MoMo Stocks - GSE API Integration
+ * Fluid Finance - GSE API Integration
  */
 
 const API_BASE_URL = 'https://dev.kwayisi.org/apis/gse';
