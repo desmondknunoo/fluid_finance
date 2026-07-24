@@ -15,15 +15,13 @@ const SECTIONS = [
     { label: "Features", href: "#features" },
 ] as const;
 
-interface NavigationProps {
-    active?: "home" | "gse-live";
-}
+interface NavigationProps {}
 
 /**
  * The single site header. Shared by the landing page and GSE Live so both
  * surfaces read as one product.
  */
-export const Navigation = memo(({ active = "home" }: NavigationProps) => {
+export const Navigation = memo(() => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
