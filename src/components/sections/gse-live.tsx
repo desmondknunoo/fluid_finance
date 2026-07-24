@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Loader2, RotateCw, Search, TrendingDown, TrendingUp } from "lucide-react";
+import { Loader2, RotateCw, Search, TrendingDown, TrendingUp, Grid2X2, LayoutGrid, Rows3 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { VIEW_ICONS } from "@/components/ui/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
 import { Sparkline } from "@/components/stock/price-chart";
 import { Heatmap } from "@/components/stock/heatmap";

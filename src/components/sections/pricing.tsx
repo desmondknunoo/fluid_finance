@@ -1,26 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Check, Star, Globe, Shield, Users, Trophy } from "lucide-react";
+import { Check, Globe, Shield, Users, Trophy } from "lucide-react";
 
 const partners = [
     { name: "Ghana Stock Exchange", icon: Globe },
     { name: "Bank of Ghana", icon: Shield },
     { name: "SEC Ghana", icon: Users },
     { name: "Refinitiv", icon: Trophy }
-];
-
-const testimonials = [
-    {
-        quote: "The real-time indices and active movers table saved me hours of manual tracking. Fluid Finance is a game changer for GSE traders.",
-        author: "Akosua O.",
-        role: "Retail Investor"
-    },
-    {
-        quote: "Professional grade analytics with the convenience of Mobile Money. Best financial tool built for the Ghanaian market.",
-        author: "Eric T.",
-        role: "Portfolio Manager"
-    }
 ];
 
 export const SocialProof = () => {
@@ -80,30 +67,6 @@ export const SocialProof = () => {
                         >
                             <h4 className="text-3xl md:text-5xl font-bold text-ink mb-2">{stat.value}</h4>
                             <p className="text-xs text-ink/40 uppercase tracking-widest">{stat.label}</p>
-                        </motion.div>
-                    ))}
-                </div>
-
-                {/* Testimonials */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {testimonials.map((t, idx) => (
-                        <motion.div
-                            key={idx}
-                            initial={{ opacity: 0, x: idx === 0 ? -30 : 30 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: idx * 0.2 }}
-                            whileHover={{ y: -5 }}
-                            className="p-10 rounded-3xl bg-ink/[0.03] border border-ink/[0.08] hover:border-ink/20 transition-all"
-                        >
-                            <div className="flex gap-1 text-ink/40 mb-6">
-                                {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" stroke="none" />)}
-                            </div>
-                            <p className="text-lg text-ink/80 italic mb-8">"{t.quote}"</p>
-                            <div>
-                                <h5 className="font-bold text-ink">{t.author}</h5>
-                                <p className="text-sm text-ink/40">{t.role}</p>
-                            </div>
                         </motion.div>
                     ))}
                 </div>
