@@ -501,7 +501,8 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                             )}
                         </div>
                 )}
-            </div>
-        </section>
+            </motion.div>
+        </div>
+    </section>
     );
 }
