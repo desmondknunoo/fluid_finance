@@ -223,8 +223,6 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                         <Stat label="Decliners" value={String(stats.decliners)} tone="down" />
                         <Stat label="Unchanged" value={String(stats.unchanged)} />
                     </div>
-                </motion.div>
-
                 {/* View toggle + search */}
                 <div className="mt-8 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                     <div className="inline-flex rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-1">

@@ -15,8 +15,6 @@ const SECTIONS = [
     { label: "Features", href: "#features" },
 ] as const;
 
-interface NavigationProps {}
-
 /**
  * The single site header. Shared by the landing page and GSE Live so both
  * surfaces read as one product.
