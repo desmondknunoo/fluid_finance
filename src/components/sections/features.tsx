@@ -57,7 +57,7 @@ const educationalStories = [
 export const FeatureHighlights = () => {
     return (
         <section id="features" className="py-24 bg-canvas">
-            <div className="container mx-auto px-4 md:px-6">
+            <div className="page-container">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -98,7 +98,7 @@ export const FeatureHighlights = () => {
 export const EducationalSection = () => {
     return (
         <section id="education" className="py-24 bg-canvas border-t border-ink/[0.05]">
-            <div className="container mx-auto px-4 md:px-6">
+            <div className="page-container">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}

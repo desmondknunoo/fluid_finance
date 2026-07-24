@@ -8,6 +8,12 @@
   .text-foreground { color: hsl(var(--foreground)); }
 }
 
+@layer components {
+  .page-container {
+    @apply mx-auto w-full max-w-7xl px-4 md:px-6;
+  }
+}
+
 /**
  * `canvas` is the page surface and `ink` is everything drawn on it. Swapping the
  * two channels is what flips the whole app between light and dark, so component

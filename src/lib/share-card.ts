@@ -22,12 +22,16 @@ export interface ShareCardInput {
     periodPercent: number;
     /** True when part of the plotted span is backfilled rather than observed. */
     hasBackfill: boolean;
+    theme?: ShareCardTheme;
 }
+
+export type ShareCardTheme = "light" | "dark";
 
 const W = 1080;
 const H = 1080;
 
-const INK = {
+const PALETTES = {
+dark: {
     canvas: "#08090b",
     surface: "#101114",
     border: "rgba(255,255,255,0.09)",
@@ -37,7 +41,27 @@ const INK = {
     grid: "rgba(255,255,255,0.06)",
     up: "#34d399",
     down: "#fb7185",
-};
+    chip: "rgba(255,255,255,0.09)",
+    chipText: "rgba(255,255,255,0.75)",
+    selected: "rgba(255,255,255,0.12)",
+},
+light: {
+    canvas: "#ffffff",
+    surface: "#f5f6f8",
+    border: "rgba(9,10,14,0.12)",
+    text: "#090a0e",
+    muted: "rgba(9,10,14,0.58)",
+    faint: "rgba(9,10,14,0.42)",
+    grid: "rgba(9,10,14,0.10)",
+    up: "#059669",
+    down: "#e11d48",
+    chip: "rgba(9,10,14,0.08)",
+    chipText: "rgba(9,10,14,0.72)",
+    selected: "rgba(9,10,14,0.10)",
+},
+} as const;
+
+type ShareCardPalette = (typeof PALETTES)[ShareCardTheme];
 
 function font(weight: number, size: number, mono = false): string {
     const family = mono
@@ -117,6 +141,7 @@ async function drawLogo(
     x: number,
     y: number,
     size: number,
+    ink: ShareCardPalette,
 ): Promise<void> {
     const src = logoUrl(symbol);
     const img = src ? await loadImage(src) : null;
@@ -129,7 +154,7 @@ async function drawLogo(
         ctx.fillStyle = gradient;
         roundRect(ctx, x, y, size, size, 20);
         ctx.fill();
-        ctx.fillStyle = INK.text;
+        ctx.fillStyle = ink.text;
         ctx.font = font(700, size * 0.32);
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -162,6 +187,7 @@ function drawChart(
     points: PricePoint[],
     box: { x: number; y: number; w: number; h: number },
     positive: boolean,
+    ink: ShareCardPalette,
 ): void {
     if (points.length < 2) return;
 
@@ -190,7 +216,7 @@ function drawChart(
     for (const value of niceTicks(min, max, 4)) {
         const y = py(value);
         if (y < box.y - 2 || y > box.y + plotH + 2) continue;
-        ctx.strokeStyle = INK.grid;
+        ctx.strokeStyle = ink.grid;
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(box.x, y);
@@ -198,12 +224,12 @@ function drawChart(
         ctx.stroke();
         // The live-price pill owns the gutter; drop labels it would cover.
         if (Math.abs(y - lastY) < pillH) continue;
-        ctx.fillStyle = INK.faint;
+        ctx.fillStyle = ink.faint;
         ctx.textAlign = "left";
         ctx.fillText(axisPrice(value), box.x + plotW + 18, y);
     }
 
-    const stroke = positive ? INK.up : INK.down;
+    const stroke = positive ? ink.up : ink.down;
 
     // area fill
     const gradient = ctx.createLinearGradient(0, box.y, 0, box.y + plotH);
@@ -242,7 +268,7 @@ function drawChart(
     ctx.fillStyle = stroke;
     roundRect(ctx, box.x + plotW + 8, lastY - pillH / 2, pillW, pillH, 8);
     ctx.fill();
-    ctx.fillStyle = "#08090b";
+    ctx.fillStyle = ink.canvas;
     ctx.font = font(700, 21, true);
     ctx.textAlign = "center";
     ctx.fillText(axisPrice(points[points.length - 1].close), box.x + plotW + 8 + pillW / 2, lastY);
@@ -250,7 +276,7 @@ function drawChart(
     // date axis
     const spanDays = (points[points.length - 1].t - points[0].t) / 86_400_000;
     const seen = new Set<string>();
-    ctx.fillStyle = INK.faint;
+    ctx.fillStyle = ink.faint;
     ctx.font = font(500, 22);
     ctx.textBaseline = "top";
     for (let k = 0; k < 5; k++) {
@@ -287,9 +313,10 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
 
     const positive = input.change >= 0;
     const periodPositive = input.periodPercent >= 0;
+    const ink = PALETTES[input.theme ?? "dark"];
 
     // background
-    ctx.fillStyle = INK.canvas;
+    ctx.fillStyle = ink.canvas;
     ctx.fillRect(0, 0, W, H);
     const glow = ctx.createRadialGradient(W * 0.8, H * 0.12, 0, W * 0.8, H * 0.12, W * 0.75);
     glow.addColorStop(0, positive ? "rgba(52,211,153,0.10)" : "rgba(251,113,133,0.10)");
@@ -300,12 +327,12 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
     const M = 64;
 
     // brand strip
-    ctx.fillStyle = INK.text;
+    ctx.fillStyle = ink.text;
     ctx.font = font(700, 26);
     ctx.letterSpacing = "4px";
     ctx.fillText("FLUID FINANCE", M, M + 22);
     ctx.letterSpacing = "0px";
-    ctx.fillStyle = INK.muted;
+    ctx.fillStyle = ink.muted;
     ctx.font = font(500, 22);
     ctx.textAlign = "right";
     ctx.fillText("Ghana Stock Exchange", W - M, M + 22);
@@ -314,7 +341,7 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
     // identity
     const logoTop = M + 76;
     const logoSize = 120;
-    await drawLogo(ctx, input.symbol, M, logoTop, logoSize);
+    await drawLogo(ctx, input.symbol, M, logoTop, logoSize, ink);
 
     const textX = M + logoSize + 32;
 
@@ -328,52 +355,52 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
     ctx.font = font(600, 28);
     const priceBlockW = Math.max(priceW, ctx.measureText(changeLabel).width);
 
-    ctx.fillStyle = INK.text;
+    ctx.fillStyle = ink.text;
     ctx.font = font(700, 46);
     ctx.fillText(truncate(ctx, input.company, W - textX - M - priceBlockW - 40), textX, logoTop + 48);
 
     // ticker chip
     ctx.font = font(600, 24, true);
     const chipW = ctx.measureText(input.symbol).width + 28;
-    ctx.fillStyle = "rgba(255,255,255,0.09)";
+    ctx.fillStyle = ink.chip;
     roundRect(ctx, textX, logoTop + 70, chipW, 38, 8);
     ctx.fill();
-    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    ctx.fillStyle = ink.chipText;
     ctx.textBaseline = "middle";
     ctx.fillText(input.symbol, textX + 14, logoTop + 90);
     ctx.textBaseline = "alphabetic";
 
-    ctx.fillStyle = INK.muted;
+    ctx.fillStyle = ink.muted;
     ctx.font = font(500, 24);
     ctx.fillText(`Equity · ${input.sector}`, textX + chipW + 18, logoTop + 98);
 
     // price block
     ctx.textAlign = "right";
-    ctx.fillStyle = INK.text;
+    ctx.fillStyle = ink.text;
     ctx.font = font(700, 62);
     ctx.fillText(priceLabel, W - M, logoTop + 52);
-    ctx.fillStyle = positive ? INK.up : INK.down;
+    ctx.fillStyle = positive ? ink.up : ink.down;
     ctx.font = font(600, 28);
     ctx.fillText(changeLabel, W - M, logoTop + 98);
     ctx.textAlign = "left";
 
     // chart panel
     const panel = { x: M, y: logoTop + 168, w: W - M * 2, h: 520 };
-    ctx.fillStyle = INK.surface;
+    ctx.fillStyle = ink.surface;
     roundRect(ctx, panel.x, panel.y, panel.w, panel.h, 28);
     ctx.fill();
-    ctx.strokeStyle = INK.border;
+    ctx.strokeStyle = ink.border;
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    ctx.fillStyle = INK.muted;
+    ctx.fillStyle = ink.muted;
     ctx.font = font(600, 22);
     ctx.letterSpacing = "2px";
     ctx.fillText("PRICE HISTORY", panel.x + 36, panel.y + 52);
     ctx.letterSpacing = "0px";
 
     ctx.textAlign = "right";
-    ctx.fillStyle = periodPositive ? INK.up : INK.down;
+    ctx.fillStyle = periodPositive ? ink.up : ink.down;
     ctx.font = font(600, 24, true);
     ctx.fillText(
         `${periodPositive ? "+" : ""}${input.periodPercent.toFixed(2)}% over ${input.range}`,
@@ -387,6 +414,7 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
         input.points,
         { x: panel.x + 36, y: panel.y + 92, w: panel.w - 72, h: panel.h - 132 },
         periodPositive,
+        ink,
     );
 
     // range strip
@@ -398,12 +426,12 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
     ranges.forEach((key, i) => {
         const cx = M + cell * i + cell / 2;
         if (key === input.range) {
-            ctx.fillStyle = "rgba(255,255,255,0.12)";
+            ctx.fillStyle = ink.selected;
             roundRect(ctx, cx - cell / 2 + 8, strip - 26, cell - 16, 48, 12);
             ctx.fill();
-            ctx.fillStyle = INK.text;
+            ctx.fillStyle = ink.text;
         } else {
-            ctx.fillStyle = INK.faint;
+            ctx.fillStyle = ink.faint;
         }
         ctx.textBaseline = "middle";
         ctx.fillText(key, cx, strip);
@@ -420,7 +448,7 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
         minute: "2-digit",
         timeZone: "UTC",
     });
-    ctx.fillStyle = INK.faint;
+    ctx.fillStyle = ink.faint;
     ctx.font = font(500, 21);
     ctx.fillText(`As of ${asOf} GMT`, M, H - M - 12);
 

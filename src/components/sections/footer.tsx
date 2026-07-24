@@ -42,7 +42,7 @@ export const EnhancedFooter = () => {
 
     return (
         <footer className="bg-canvas pt-24 pb-12 border-t border-ink/[0.05]">
-            <div className="container mx-auto px-4 md:px-6">
+            <div className="page-container">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                     {/* Brand column */}
                     <motion.div
@@ -52,7 +52,7 @@ export const EnhancedFooter = () => {
                         transition={{ duration: 0.6, delay: 0.1 }}
                         className="md:col-span-1"
                     >
-                        <BrandLogo variant="stacked" className="h-20 mb-6" />
+                        <BrandLogo variant="stacked" className="mb-6 h-[12.5rem]" />
                         <p className="text-sm text-ink/40 leading-relaxed mb-6 font-poppins">
                             The ultimate financial aggregator for the Ghana Stock Exchange.
                             Built for accuracy, speed, and ease of use.

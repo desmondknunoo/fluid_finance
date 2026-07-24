@@ -13,6 +13,7 @@ import {
     X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/lib/theme";
 import { renderShareCard, type ShareCardInput } from "@/lib/share-card";
 
 type Status = "rendering" | "ready" | "error";
@@ -66,6 +67,7 @@ const NETWORKS = [
 ] as const;
 
 export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
+    const { resolved } = useTheme();
     const [status, setStatus] = useState<Status>("rendering");
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [toast, setToast] = useState<string | null>(null);
@@ -79,7 +81,7 @@ export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
 
         (async () => {
             try {
-                const blob = await renderShareCard(card);
+                const blob = await renderShareCard({ ...card, theme: resolved });
                 if (cancelled) return;
                 blobRef.current = blob;
                 setPreviewUrl((old) => {
@@ -97,7 +99,7 @@ export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
         };
         // `card` is rebuilt each render; the open transition is the real trigger.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open, card.symbol, card.range, card.price]);
+    }, [open, card.symbol, card.range, card.price, resolved]);
 
     useEffect(
         () => () => {

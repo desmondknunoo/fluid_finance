@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Activity, ChevronRight, Loader2, TrendingDown, TrendingUp } from "lucide-react";
+import { ChevronRight, Loader2, TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
 import { recordAll } from "@/lib/history";
@@ -9,10 +9,10 @@ import { TickerLogo } from "@/components/stock/ticker-logo";
 
 type Tab = "gainers" | "losers" | "active";
 
-const MOVER_TABS: { key: Tab; label: string; description: string; icon: typeof TrendingUp }[] = [
-    { key: "gainers", label: "Top Gainers", description: "Leading today", icon: TrendingUp },
-    { key: "losers", label: "Top Losers", description: "Trailing today", icon: TrendingDown },
-    { key: "active", label: "Most Active", description: "Highest volume", icon: Activity },
+const MOVER_TABS: { key: Tab; label: string }[] = [
+    { key: "gainers", label: "Top Gainers" },
+    { key: "losers", label: "Top Losers" },
+    { key: "active", label: "Most Active" },
 ];
 
 export const MarketSnapshot = () => {
@@ -60,8 +60,8 @@ export const MarketSnapshot = () => {
 
     if (loading) {
         return (
-            <section id="market-snapshot" className="pt-4 md:pt-12 pb-24 bg-canvas relative">
-                <div className="container mx-auto px-4 md:px-6 flex justify-center items-center min-h-[300px]">
+            <section id="market-snapshot" className="relative bg-canvas py-24">
+                <div className="page-container flex min-h-[300px] items-center justify-center">
                     <Loader2 className="w-8 h-8 animate-spin text-ink/40" />
                 </div>
             </section>
@@ -70,8 +70,8 @@ export const MarketSnapshot = () => {
 
     if (error) {
         return (
-            <section id="market-snapshot" className="pt-4 md:pt-12 pb-24 bg-canvas relative">
-                <div className="container mx-auto px-4 md:px-6 flex justify-center items-center min-h-[300px]">
+            <section id="market-snapshot" className="relative bg-canvas py-24">
+                <div className="page-container flex min-h-[300px] items-center justify-center">
                     <p className="text-ink/40">Failed to load market data</p>
                 </div>
             </section>
@@ -79,8 +79,8 @@ export const MarketSnapshot = () => {
     }
 
     return (
-        <section id="market-snapshot" className="pt-4 md:pt-12 pb-24 bg-canvas relative">
-            <div className="container mx-auto px-4 md:px-6 relative z-10">
+        <section id="market-snapshot" className="relative bg-canvas py-24">
+            <div className="page-container relative z-10">
 
                 {/* Movers Table */}
                 <motion.div
@@ -96,22 +96,18 @@ export const MarketSnapshot = () => {
                             <h2 className="mt-1 text-lg font-bold text-ink">Today&apos;s standouts</h2>
                         </div>
                         <div className="grid grid-cols-3 rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-1 sm:min-w-[440px]">
-                            {MOVER_TABS.map(({ key, label, description, icon: Icon }) => (
+                            {MOVER_TABS.map(({ key, label }) => (
                                 <button
                                     key={key}
                                     onClick={() => setActiveTab(key)}
                                     className={cn(
-                                        "flex min-w-0 items-center justify-center gap-2 rounded-lg px-2 py-2.5 text-left transition-all sm:px-3",
+                                        "min-w-0 rounded-lg px-2 py-2.5 text-xs font-semibold transition-all sm:px-3",
                                         activeTab === key
                                             ? "bg-canvas text-ink shadow-sm"
                                             : "text-ink/40 hover:text-ink/70",
                                     )}
                                 >
-                                    <Icon size={15} className="shrink-0" />
-                                    <span className="min-w-0">
-                                        <span className="block truncate text-xs font-semibold">{label}</span>
-                                        <span className="hidden truncate text-[10px] text-ink/40 sm:block">{description}</span>
-                                    </span>
+                                    <span className="block truncate">{label}</span>
                                 </button>
                             ))}
                         </div>
