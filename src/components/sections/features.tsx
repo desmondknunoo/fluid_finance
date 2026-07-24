@@ -35,22 +35,46 @@ const features = [
 
 const educationalStories = [
     {
-        category: "Featured Analysis",
-        title: "MTN Ghana: Why Analysts are Bullish for Q3 2026",
-        snippet: "A deep dive into the telco giant's expanding mobile money ecosystem and its impact on dividend yields.",
-        date: "Jan 5, 2026"
+        category: "Press Release",
+        title: "GSE Press Releases",
+        snippet: "Official announcements and press releases from the Ghana Stock Exchange.",
+        date: "2026",
+        link: "https://gse.com.gh/press-release/"
     },
     {
-        category: "Stock of the Week",
-        title: "GCB Bank PLC (GCB)",
-        snippet: "Stable growth and digital transformation makes GCB a top pick for retail investors this quarter.",
-        date: "Jan 4, 2026"
+        category: "Media",
+        title: "GSE Testimonials",
+        snippet: "Watch testimonial videos from market participants and stakeholders.",
+        date: "2026",
+        link: "https://gse.com.gh/gse-testimonial-video/"
     },
     {
-        category: "Market Summary",
-        title: "Week in Review: GSE Composite Index Gains 2.4%",
-        snippet: "Financial stocks lead the rally as inflation fears subside and local investor participation hits record highs.",
-        date: "Jan 3, 2026"
+        category: "Financial Reports",
+        title: "Financial Statements",
+        snippet: "Browse published financial statements and filings from listed companies.",
+        date: "2026",
+        link: "https://gse.com.gh/financial-statements/"
+    },
+    {
+        category: "Market Notices",
+        title: "GSE Market Notices",
+        snippet: "Official market notices, circulars, and regulatory updates from the GSE.",
+        date: "2026",
+        link: "https://gse.com.gh/gse-market-notice/"
+    },
+    {
+        category: "Articles",
+        title: "GSE Educational Articles",
+        snippet: "Educational content and articles covering market fundamentals and investing.",
+        date: "2026",
+        link: "http://gse.com.gh/gse-articles/"
+    },
+    {
+        category: "Resources",
+        title: "GSE Brochures & Guides",
+        snippet: "Downloadable guides, brochures, and resources for market participants.",
+        date: "2026",
+        link: "https://gse.com.gh/gse-brochures/"
     }
 ];
 
@@ -116,38 +140,42 @@ export const EducationalSection = () => {
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
+                        onClick={() => window.location.hash = "#/learning-center"}
                         className="flex items-center gap-2 text-ink font-medium hover:text-ink/60 transition-colors"
                     >
                         Explore Learning Center <TrendingUp size={18} />
                     </motion.button>
                 </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {educationalStories.map((story, idx) => (
-                        <motion.div
+                        <motion.a
                             key={story.title}
+                            href={story.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             initial={{ opacity: 0, scale: 0.95 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ delay: idx * 0.1 }}
-                            className="p-8 rounded-3xl bg-gradient-to-br from-ink/[0.05] to-transparent border border-ink/[0.08] hover:border-ink/20 transition-all cursor-pointer group"
+                            className="block p-8 rounded-3xl bg-gradient-to-br from-ink/[0.05] to-transparent border border-ink/[0.08] hover:border-ink/20 transition-all cursor-pointer group"
                         >
                             <span className="text-xs font-bold uppercase tracking-widest text-ink/30 mb-6 block group-hover:text-ink/60 transition-colors">
                                 {story.category}
                             </span>
-                            <h3 className="text-2xl font-bold text-ink mb-4 leading-tight group-hover:translate-x-1 transition-transform">
+                            <h3 className="text-xl font-bold text-ink mb-4 leading-tight group-hover:translate-x-1 transition-transform">
                                 {story.title}
                             </h3>
-                            <p className="text-sm text-ink/40 mb-8 leading-relaxed">
+                            <p className="text-sm text-ink/40 mb-6 leading-relaxed">
                                 {story.snippet}
                             </p>
                             <div className="flex items-center justify-between text-xs text-ink/20">
                                 <span>{story.date}</span>
                                 <span className="flex items-center gap-1 group-hover:text-ink transition-colors">
-                                    Read Article <Zap size={10} />
+                                    Visit <Zap size={10} />
                                 </span>
                             </div>
-                        </motion.div>
+                        </motion.a>
                     ))}
                 </div>
             </div>
