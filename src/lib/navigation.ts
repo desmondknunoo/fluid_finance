@@ -13,9 +13,9 @@
  *   #/market-education     market education page
  */
 
-export type ViewMode = "table" | "grid" | "heatmap";
+export type ViewMode = "table" | "heatmap";
 
-export const VIEW_MODES: ViewMode[] = ["table", "grid", "heatmap"];
+export const VIEW_MODES: ViewMode[] = ["table", "heatmap"];
 
 export const GSE_LIVE_SECTION = "gse-live";
 

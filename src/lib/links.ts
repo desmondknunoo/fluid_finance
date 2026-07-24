@@ -9,7 +9,6 @@ export const GSE_LIVE_HREF = "#gse-live";
 
 export const GSE_LIVE_VIEWS = [
     { key: "table", label: "Table", href: "#gse-live/table" },
-    { key: "grid", label: "Grid", href: "#gse-live/grid" },
     { key: "heatmap", label: "Heatmap", href: "#gse-live/heatmap" },
 ] as const;
 

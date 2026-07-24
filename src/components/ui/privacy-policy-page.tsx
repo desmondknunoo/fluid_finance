@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { Shield, Lock, FileText, Cookie, Globe, Mail, ArrowUpRight } from "lucide-react";
+import { Shield, Lock, FileText, Cookie, Globe, Mail } from "lucide-react";
 
 function PrivacyPolicyPage() {
     const fadeUpVariants = {

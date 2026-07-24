@@ -101,14 +101,14 @@ function squarify(
     return tiles;
 }
 
-interface HeatmapProps {
+interface HeatSquaresProps {
     stocks: Stock[];
     onSelect: (symbol: string) => void;
     marketCaps?: Record<string, number>;
     height?: number;
 }
 
-export function Heatmap({ stocks, onSelect, marketCaps = {}, height = 560 }: HeatmapProps) {
+export function HeatSquares({ stocks, onSelect, marketCaps = {}, height = 560 }: HeatSquaresProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
 

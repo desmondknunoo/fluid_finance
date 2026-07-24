@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { HelpCircle, MessageCircle, Search, Video, FileText, Mail, ArrowUpRight } from "lucide-react";
+import { HelpCircle, MessageCircle, Search, Video, FileText, Mail } from "lucide-react";
 
 function HelpCenterPage() {
     const fadeUpVariants = {

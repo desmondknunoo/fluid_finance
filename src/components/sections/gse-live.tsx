@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Loader2, RotateCw, Search, TrendingDown, TrendingUp, Grid2X2, LayoutGrid, Rows3 } from "lucide-react";
+import { Loader2, RotateCw, Search, TrendingDown, TrendingUp, LayoutGrid, Rows3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TickerLogo } from "@/components/stock/ticker-logo";
 import { Sparkline } from "@/components/stock/price-chart";
-import { heatColor, Heatmap } from "@/components/stock/heatmap";
+import { heatColor } from "@/components/stock/heat-squares";
+// import { HeatSquares } from "@/components/stock/heat-squares";
 import {
     formatCedis,
     formatCompact,
@@ -24,8 +25,7 @@ import {
 
 const VIEW_ICONS = {
     table: Rows3,
-    grid: LayoutGrid,
-    heatmap: Grid2X2,
+    heatmap: LayoutGrid,
 } as const;
 
 const REFRESH_MS = 30_000;
@@ -60,7 +60,7 @@ function tileSpanClass(marketCap: number | undefined, largestMarketCap: number) 
 
 /**
  * The market floor of the landing page: every listed company, readable as a
- * table, a grid of cards, or a heatmap, alongside session stats and movers.
+ * table, a heatmap of cards, or a heatmap, alongside session stats and movers.
  */
 export function GseLive({ view }: { view: ViewMode | null }) {
     const [stocks, setStocks] = useState<Stock[]>([]);
@@ -459,7 +459,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                 </div>
                             )}
 
-                            {mode === "grid" && (
+                            {mode === "heatmap" && (
                                 <div className="grid auto-rows-[88px] grid-flow-dense grid-cols-2 gap-1.5 sm:auto-rows-[96px] sm:grid-cols-6 lg:auto-rows-[108px] lg:grid-cols-12">
                                     {filtered.length === 0 ? (
                                         <p className="col-span-full py-10 text-center text-ink/40">
@@ -502,11 +502,11 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                 </div>
                             )}
 
-                            {mode === "heatmap" && (
+                            {/* mode === "heatmap" && (
                                 <div className="rounded-2xl border border-ink/[0.08] bg-ink/[0.03] p-2 sm:p-4">
-                                    <Heatmap stocks={filtered} onSelect={openStock} marketCaps={marketCaps} />
+                                    <HeatSquares stocks={filtered} onSelect={openStock} marketCaps={marketCaps} />
                                 </div>
-                            )}
+                            ) */}
                         </div>
                     </div>
                 )}

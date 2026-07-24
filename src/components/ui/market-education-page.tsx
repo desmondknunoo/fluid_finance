@@ -82,36 +82,6 @@ function MarketEducationPage() {
         }
     ];
 
-    const learningModules = [
-        {
-            icon: BookOpen,
-            title: "Economic Indicators Explained",
-            description: "Master the key economic metrics that drive market movements and stock performance.",
-            lessons: 8,
-            level: "Intermediate",
-            duration: "3 weeks",
-            students: "2,341"
-        },
-        {
-            icon: GraduationCap,
-            title: "GSE Sector Analysis",
-            description: "Deep dive into the six major sectors of the Ghana Stock Exchange and their performance drivers.",
-            lessons: 12,
-            level: "Advanced",
-            duration: "4 weeks",
-            students: "892"
-        },
-        {
-            icon: TrendingUp,
-            title: "Financial Statement Analysis",
-            description: "Learn how to read balance sheets, income statements, and cash flow statements of GSE companies.",
-            lessons: 10,
-            level: "Beginner",
-            duration: "2.5 weeks",
-            students: "3,567"
-        }
-    ];
-
     return (
         <div className="relative min-h-screen w-full overflow-hidden bg-canvas">
             <div className="absolute inset-0 bg-gradient-to-br from-ink/[0.05] via-transparent to-ink/[0.05] blur-3xl" />
