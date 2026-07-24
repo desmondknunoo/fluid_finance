@@ -47,34 +47,6 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: "up
     );
 }
 
-function MoverRow({ stock, onSelect }: { stock: Stock; onSelect: (s: string) => void }) {
-    const positive = stock.change >= 0;
-    return (
-        <button
-            type="button"
-            onClick={() => onSelect(stock.symbol)}
-            className="flex w-full items-center gap-3 border-b border-ink/[0.05] py-3 text-left transition-colors last:border-0 hover:bg-ink/[0.03]"
-        >
-            <TickerLogo symbol={stock.symbol} size={30} />
-            <div className="min-w-0 flex-1">
-                <div className="text-sm font-bold text-ink">{stock.symbol}</div>
-                <div className="truncate text-[11px] text-ink/40">{stock.company}</div>
-            </div>
-            <div className="text-right">
-                <div className="font-mono text-sm text-ink">{formatCedis(stock.price)}</div>
-                <div
-                    className={cn(
-                        "font-mono text-[11px]",
-                        positive ? "text-emerald-400" : "text-rose-400",
-                    )}
-                >
-                    {positive ? "▲" : "▼"} {Math.abs(stock.changePercent).toFixed(2)}%
-                </div>
-            </div>
-        </button>
-    );
-}
-
 /**
  * The market floor of the landing page: every listed company, readable as a
  * table, a grid of cards, or a heatmap, alongside session stats and movers.
@@ -162,15 +134,6 @@ export function GseLive({ view }: { view: ViewMode | null }) {
         }
         return map;
     }, [stocks]);
-
-    const gainers = useMemo(
-        () => stocks.filter((s) => s.change > 0).sort((a, b) => b.changePercent - a.changePercent).slice(0, 5),
-        [stocks],
-    );
-    const losers = useMemo(
-        () => stocks.filter((s) => s.change < 0).sort((a, b) => a.changePercent - b.changePercent).slice(0, 5),
-        [stocks],
-    );
 
     const toggleSort = (key: SortKey) => {
         if (sort === key) setDescending((d) => !d);
@@ -537,42 +500,6 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                 </div>
                             )}
                         </div>
-
-                        {/* Movers */}
-                        <aside className="flex flex-col gap-4">
-                            <div className="rounded-2xl border border-ink/[0.08] bg-ink/[0.03] px-5 py-4">
-                                <div className="mb-1 flex items-center justify-between">
-                                    <h3 className="text-xs font-bold uppercase tracking-widest text-ink">
-                                        Top gainers
-                                    </h3>
-                                    <TrendingUp size={14} className="text-emerald-400" />
-                                </div>
-                                {gainers.length === 0 ? (
-                                    <p className="py-6 text-center text-xs text-ink/40">No advancers today.</p>
-                                ) : (
-                                    gainers.map((stock) => (
-                                        <MoverRow key={stock.symbol} stock={stock} onSelect={openStock} />
-                                    ))
-                                )}
-                            </div>
-
-                            <div className="rounded-2xl border border-ink/[0.08] bg-ink/[0.03] px-5 py-4">
-                                <div className="mb-1 flex items-center justify-between">
-                                    <h3 className="text-xs font-bold uppercase tracking-widest text-ink">
-                                        Top losers
-                                    </h3>
-                                    <TrendingDown size={14} className="text-rose-400" />
-                                </div>
-                                {losers.length === 0 ? (
-                                    <p className="py-6 text-center text-xs text-ink/40">No decliners today.</p>
-                                ) : (
-                                    losers.map((stock) => (
-                                        <MoverRow key={stock.symbol} stock={stock} onSelect={openStock} />
-                                    ))
-                                )}
-                            </div>
-                        </aside>
-                    </div>
                 )}
             </div>
         </section>
