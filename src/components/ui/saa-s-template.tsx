@@ -4,7 +4,6 @@ import { HeroGeometric } from "@/components/ui/shape-landing-hero";
 import { MarketSnapshot } from "@/components/sections/market-snapshot";
 import { GseLive } from "@/components/sections/gse-live";
 import { FeatureHighlights, EducationalSection } from "@/components/sections/features";
-import { SocialProof } from "@/components/sections/social-proof";
 import type { ViewMode } from "@/lib/navigation";
 
 // Main Landing Page Component
@@ -25,8 +24,6 @@ export default function LandingPage({ liveView }: { liveView: ViewMode | null })
             <FeatureHighlights />
 
             <EducationalSection />
-
-            <SocialProof />
         </>
     );
 }
