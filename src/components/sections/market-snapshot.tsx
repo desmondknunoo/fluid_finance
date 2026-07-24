@@ -6,13 +6,10 @@ import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
 import { recordAll } from "@/lib/history";
 import { openStock } from "@/lib/navigation";
 
-type Tab = "gainers" | "losers" | "active";
-
 export const MarketSnapshot = () => {
     const [stocks, setStocks] = useState<Stock[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<Tab>("gainers");
 
     useEffect(() => {
         let cancelled = false;
@@ -35,21 +32,10 @@ export const MarketSnapshot = () => {
 
     const movers = useMemo(() => {
         if (stocks.length === 0) return [];
-        switch (activeTab) {
-            case "gainers":
-                return stocks
-                    .filter((s) => s.change > 0)
-                    .sort((a, b) => b.changePercent - a.changePercent)
-                    .slice(0, 5);
-            case "losers":
-                return stocks
-                    .filter((s) => s.change < 0)
-                    .sort((a, b) => a.changePercent - b.changePercent)
-                    .slice(0, 5);
-            case "active":
-                return [...stocks].sort((a, b) => b.volume - a.volume).slice(0, 5);
-        }
-    }, [stocks, activeTab]);
+        return [...stocks]
+            .sort((a, b) => b.volume - a.volume)
+            .slice(0, 5);
+    }, [stocks]);
 
     if (loading) {
         return (
@@ -83,27 +69,6 @@ export const MarketSnapshot = () => {
                     transition={{ duration: 0.6 }}
                     className="rounded-2xl bg-ink/[0.03] border border-ink/[0.08] overflow-hidden"
                 >
-                    <div className="flex border-b border-ink/[0.08]">
-                        {(
-                            [
-                                ["gainers", "Top Gainers"],
-                                ["losers", "Top Losers"],
-                                ["active", "Most Active"],
-                            ] as [Tab, string][]
-                        ).map(([key, label]) => (
-                            <button
-                                key={key}
-                                onClick={() => setActiveTab(key)}
-                                className={cn(
-                                    "flex-1 py-4 text-sm font-medium transition-colors",
-                                    activeTab === key ? "text-ink bg-ink/[0.05]" : "text-ink/40 hover:text-ink"
-                                )}
-                            >
-                                {label}
-                            </button>
-                        ))}
-                    </div>
-
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
                             <thead>
@@ -119,7 +84,7 @@ export const MarketSnapshot = () => {
                                 {movers.length === 0 ? (
                                     <tr>
                                         <td colSpan={5} className="px-6 py-8 text-center text-ink/40">
-                                            No {activeTab === "gainers" ? "gainers" : activeTab === "losers" ? "losers" : "active stocks"} at this time
+                                            No active stocks at this time
                                         </td>
                                     </tr>
                                 ) : (
