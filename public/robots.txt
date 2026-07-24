@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /legacy/
+
+Sitemap: https://finance.fluidterra.com/sitemap.xml
