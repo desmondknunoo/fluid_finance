@@ -22,9 +22,9 @@ export default function LandingPage({ liveView }: { liveView: ViewMode | null })
                 description="Live GSE prices, full company histories, and market education in one place."
             />
 
-            <MarketSnapshot />
-
             <GseLive view={liveView} />
+
+            <MarketSnapshot />
 
             <FeatureHighlights />
 
