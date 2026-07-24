@@ -2,8 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
     ArrowLeft,
-    Bell,
-    BellRing,
     Download,
     Globe,
     Loader2,
@@ -292,10 +290,8 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                     </p>
                 </motion.section>
 
-                {/* Alerts */}
+                    {/* Alerts */}
                 <div className="mt-4 flex gap-2">
-                    <ActionChip icon={<Bell size={16} />} label="Price alert" />
-                    <ActionChip icon={<BellRing size={16} />} label="Dividend alert" tone="positive" />
                     <ActionChip
                         icon={<Download size={16} />}
                         label="Export CSV"
