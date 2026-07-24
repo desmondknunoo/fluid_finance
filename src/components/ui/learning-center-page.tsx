@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, GraduationCap, FileText, BookOpen } from "lucide-react";
 
 function LearningCenterPage() {
@@ -74,36 +73,6 @@ function LearningCenterPage() {
             snippet: "Directive to market operators on investments in commercial papers.",
             icon: FileText,
             link: "https://sec.gov.gh/directive-to-market-operators-on-investments-in-commercial-papers/"
-        }
-    ];
-
-    const courses = [
-        {
-            title: "GSE Fundamentals",
-            description: "A comprehensive introduction to Ghana Stock Exchange operations, trading, and investment strategies.",
-            duration: "2 weeks",
-            level: "Beginner",
-            lessons: 12,
-            students: "1,234",
-            icon: BookOpen
-        },
-        {
-            title: "Technical Analysis Masterclass",
-            description: "Advanced chart patterns, indicators, and price action strategies for GSE stocks.",
-            duration: "4 weeks",
-            level: "Advanced",
-            lessons: 24,
-            students: "567",
-            icon: TrendingUp
-        },
-        {
-            title: "Fundamental Stock Analysis",
-            description: "Learning how to evaluate company financials, valuation, and growth prospects.",
-            duration: "3 weeks",
-            level: "Intermediate",
-            lessons: 18,
-            students: "892",
-            icon: FileText
         }
     ];
 

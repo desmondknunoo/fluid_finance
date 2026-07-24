@@ -181,62 +181,6 @@ function MarketEducationPage() {
                         </div>
                     </motion.div>
 
-                    {/* Learning Modules - commented out for now
-                    <motion.div
-                        custom={3}
-                        variants={fadeUpVariants}
-                        initial="hidden"
-                        animate="visible"
-                    >
-                        <h2 className="text-3xl font-bold mb-8 text-left font-poppins">Learning Modules</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {learningModules.map((module) => (
-                                <Card
-                                    key={module.title}
-                                    className="bg-ink/[0.02] border border-ink/[0.08] hover:bg-ink/[0.04] transition-all duration-300 group"
-                                >
-                                    <CardContent className="p-8">
-                                        <div className="flex items-start gap-4 mb-6">
-                                            <div className="p-3 rounded-lg bg-ink/[0.05]">
-                                                <module.icon className="h-6 w-6 text-ink/60" />
-                                            </div>
-                                            <div>
-                                                <h3 className="text-xl font-bold mb-4 font-poppins group-hover:text-ink transition-colors">
-                                                    {module.title}
-                                                </h3>
-                                                <p className="text-sm text-ink/60 mb-6 leading-relaxed">
-                                                    {module.description}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-3 mb-6">
-                                            <div className="flex items-center justify-between text-sm">
-                                                <span className="text-ink/40">Level:</span>
-                                                <span className="font-medium">{module.level}</span>
-                                            </div>
-                                            <div className="flex items-center justify-between text-sm">
-                                                <span className="text-ink/40">Duration:</span>
-                                                <span className="font-medium">{module.duration}</span>
-                                            </div>
-                                            <div className="flex items-center justify-between text-sm">
-                                                <span className="text-ink/40">Lessons:</span>
-                                                <span className="font-medium">{module.lessons}</span>
-                                            </div>
-                                            <div className="flex items-center justify-between text-sm">
-                                                <span className="text-ink/40">Students:</span>
-                                                <span className="font-medium">{module.students}</span>
-                                            </div>
-                                        </div>
-                                        <button className="w-full py-3 px-4 bg-fluid-cyan/10 text-fluid-cyan-ink border border-fluid-cyan/25 rounded-xl font-semibold text-sm hover:bg-fluid-cyan/20 hover:border-fluid-cyan/40 transition-colors">
-                                            Start Module
-                                        </button>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    </motion.div>
-                    */}
-
                 </div>
             </div>
         </div>
