@@ -1,9 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, HelpCircle, MessageCircle, Search, Phone, Video, FileText } from "lucide-react";
+import { HelpCircle, MessageCircle, Search, Video, FileText, Mail, ArrowUpRight } from "lucide-react";
 
 function HelpCenterPage() {
     const fadeUpVariants = {
@@ -82,9 +81,6 @@ function HelpCenterPage() {
                         animate="visible"
                         className="text-center mb-12"
                     >
-                        <Badge className="mb-6 bg-ink/[0.03] border border-ink/[0.08]">
-                            Support & Help
-                        </Badge>
                         <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight font-poppins">
                             <span className="bg-clip-text text-transparent bg-gradient-to-b from-ink to-ink/80">
                                 Help Center
@@ -107,7 +103,7 @@ function HelpCenterPage() {
                             <input
                                 type="text"
                                 placeholder="Search for help..."
-                                className="w-full pl-12 pr-4 py-4 bg-ink/[0.02] border border-ink/[0.08] rounded-xl focus:border-ink/20 focus:outline-none text-lg"
+                                className="w-full pl-12 pr-4 py-4 bg-ink/[0.02] border border-ink/[0.08] rounded-xl focus:border-fluid-cyan/60 focus:outline-none text-lg"
                             />
                         </div>
                     </motion.div>
@@ -119,7 +115,7 @@ function HelpCenterPage() {
                         animate="visible"
                         className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20"
                     >
-                        {supportTopics.map((topic, index) => (
+                        {supportTopics.map((topic) => (
                             <Card
                                 key={topic.title}
                                 className="bg-ink/[0.02] border border-ink/[0.08] hover:bg-ink/[0.04] transition-all duration-300 cursor-pointer group"
@@ -162,7 +158,9 @@ function HelpCenterPage() {
                                 >
                                     <CardContent className="p-6">
                                         <div className="flex items-start gap-4">
-                                            <HelpCircle className="h-5 w-5 text-ink/40 mt-1 shrink-0" />
+                                            <div className="p-2 rounded-lg bg-ink/[0.05]">
+                                                <HelpCircle className="h-5 w-5 text-ink/40 shrink-0" />
+                                            </div>
                                             <div>
                                                 <h3 className="text-lg font-semibold mb-2 font-poppins">
                                                     {faq.question}
@@ -186,25 +184,18 @@ function HelpCenterPage() {
                     >
                         <div className="bg-gradient-to-br from-ink/[0.05] to-transparent border border-ink/[0.1] rounded-2xl p-8 md:p-12">
                             <div className="text-center">
-                                <h2 className="text-3xl font-bold mb-4 font-poppins">Still Need Help?</h2>
+                                <div className="flex items-center justify-center gap-4 mb-4">
+                                    <div className="p-3 rounded-lg bg-ink/[0.05]">
+                                        <Mail className="h-6 w-6 text-ink/60" />
+                                    </div>
+                                    <h2 className="text-3xl font-bold font-poppins">Still Need Help?</h2>
+                                </div>
                                 <p className="text-lg text-ink/60 mb-8 max-w-2xl mx-auto">
                                     Our support team is here to help you succeed. Get in touch with our experts.
                                 </p>
-                                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                    <button className="px-8 py-4 bg-ink text-canvas font-semibold rounded-xl hover:bg-ink/90 transition-colors">
-                                        Contact Support
-                                    </button>
-                                    <button className="px-8 py-4 bg-ink/[0.02] border border-ink/[0.08] text-ink font-semibold rounded-xl hover:bg-ink/[0.04] transition-colors">
-                                        Live Chat
-                                    </button>
-                                </div>
-                                <div className="mt-8 p-6 bg-ink/[0.03] rounded-xl border border-ink/[0.08] max-w-md mx-auto">
-                                    <p className="text-sm text-ink/60">
-                                        <strong className="text-ink">Support Hours:</strong> Monday - Friday, 9:00 AM - 6:00 PM GMT
-                                        <br />
-                                        <strong className="text-ink">Response Time:</strong> Typically within 24 hours
-                                    </p>
-                                </div>
+                                <a href="mailto:info@fluidterra.com" className="inline-block px-8 py-4 bg-fluid-cyan text-fluid-action-ink font-semibold rounded-xl shadow-glow hover:bg-fluid-cyan-hover hover:shadow-glow-lg transition-all">
+                                    Contact Support
+                                </a>
                             </div>
                         </div>
                     </motion.div>

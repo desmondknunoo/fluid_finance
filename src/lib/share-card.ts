@@ -448,28 +448,21 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
         minute: "2-digit",
         timeZone: "UTC",
     });
-    ctx.fillStyle = ink.faint;
+    ctx.fillStyle = ink.muted;
     ctx.font = font(500, 21);
     ctx.fillText(`As of ${asOf} GMT`, M, H - M - 12);
 
     if (input.hasBackfill) {
         ctx.textAlign = "right";
-        ctx.fillStyle = "rgba(251,191,36,0.55)";
-        ctx.fillText("Chart includes backfilled history", W - M, H - M - 12);
-        ctx.textAlign = "left";
+        ctx.fillStyle = ink.muted;
+        ctx.font = font(500, 18);
+        ctx.fillText("Chart includes backfilled history", W - M, H - M - 30);
+        ctx.fillText("🔗 finance.fluidterra.com", W - M, H - M - 1);
+    } else {
+        ctx.textAlign = "center";
+        ctx.font = font(500, 18);
+        ctx.fillText("🔗 finance.fluidterra.com", W / 2, H - M - 1);
     }
-
-    // globe icon and domain
-    ctx.textAlign = "center";
-    ctx.fillText("finance.fluidterra.com", W / 2, H - M - 30);
-    // simple globe icon (circle with meridian lines)
-    ctx.save();
-    ctx.strokeStyle = ink.faint;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.ellipse(W / 2, H - M - 50, 20, 14, 0, 0, 2 * Math.PI);
-    ctx.stroke();
-    ctx.restore();
 
     return new Promise((resolve, reject) => {
         canvas.toBlob(

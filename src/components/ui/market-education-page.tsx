@@ -1,9 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, BarChart3, Clock, DollarSign, Users, Newspaper, Cpu } from "lucide-react";
+import { TrendingUp, DollarSign, Banknote, Building2, BookOpen, GraduationCap } from "lucide-react";
 
 function MarketEducationPage() {
     const fadeUpVariants = {
@@ -20,49 +19,72 @@ function MarketEducationPage() {
     };
 
     const economicIndicators = [
-        { label: "GSE All-Share Index", value: "12,456.78", change: "+1.2%", tone: "up" },
-        { label: "Inflation Rate", value: "32.1%", change: "-0.5%", tone: "down" },
-        { label: "GDP Growth", value: "3.8%", change: "+0.2%", tone: "up" },
-        { label: "Interest Rate", value: "27.0%", change: "+0.25%", tone: "up" }
+        { label: "GSE All-Share Index", value: "12,456.78", change: "+1.2%", tone: "up", icon: TrendingUp },
+        { label: "Inflation Rate", value: "32.1%", change: "-0.5%", tone: "down", icon: DollarSign },
+        { label: "GDP Growth", value: "3.8%", change: "+0.2%", tone: "up", icon: Banknote },
+        { label: "Interest Rate", value: "27.0%", change: "+0.25%", tone: "up", icon: Building2 }
     ];
 
     const educationalArticles = [
         {
-            category: "Market Analysis",
-            title: "Understanding Technical Analysis in the GSE",
-            author: "Kwame Asante",
-            date: "Jan 8, 2026",
-            readTime: "12 min read",
-            image: "📈"
+            category: "Press Release",
+            title: "GSE Press Releases & Announcements",
+            author: "Ghana Stock Exchange",
+            date: "2026",
+            readTime: "5 min read",
+            icon: TrendingUp,
+            link: "https://gse.com.gh/press-release/"
         },
         {
-            category: "Economics",
-            title: "Monetary Policy Impact on Stock Markets",
-            author: "Dr. Ama Nkrumah",
-            date: "Jan 7, 2026",
-            readTime: "15 min read",
-            image: "💰"
+            category: "Media",
+            title: "GSE Testimonial Video",
+            author: "Ghana Stock Exchange",
+            date: "2026",
+            readTime: "3 min watch",
+            icon: DollarSign,
+            link: "https://gse.com.gh/gse-testimonial-video/"
         },
         {
-            category: "Investing",
-            title: "Dividend Investing Strategy for GSE Stocks",
-            author: "Kofi Boakye",
-            date: "Jan 6, 2026",
+            category: "Financial Reports",
+            title: "Financial Statements & Filings",
+            author: "Ghana Stock Exchange",
+            date: "2026",
             readTime: "10 min read",
-            image: "💸"
+            icon: Banknote,
+            link: "https://gse.com.gh/financial-statements/"
         },
         {
-            category: "Sector Analysis",
-            title: "Banking Sector Outlook 2026",
-            author: "Esi Agyei",
-            date: "Jan 5, 2026",
+            category: "Market Notices",
+            title: "GSE Market Notices & Circulars",
+            author: "Ghana Stock Exchange",
+            date: "2026",
+            readTime: "5 min read",
+            icon: Building2,
+            link: "https://gse.com.gh/gse-market-notice/"
+        },
+        {
+            category: "Articles",
+            title: "GSE Educational Articles",
+            author: "Ghana Stock Exchange",
+            date: "2026",
+            readTime: "15 min read",
+            icon: BookOpen,
+            link: "http://gse.com.gh/gse-articles/"
+        },
+        {
+            category: "Resources",
+            title: "GSE Brochures & Guides",
+            author: "Ghana Stock Exchange",
+            date: "2026",
             readTime: "8 min read",
-            image: "🏦"
+            icon: GraduationCap,
+            link: "https://gse.com.gh/gse-brochures/"
         }
     ];
 
     const learningModules = [
         {
+            icon: BookOpen,
             title: "Economic Indicators Explained",
             description: "Master the key economic metrics that drive market movements and stock performance.",
             lessons: 8,
@@ -71,6 +93,7 @@ function MarketEducationPage() {
             students: "2,341"
         },
         {
+            icon: GraduationCap,
             title: "GSE Sector Analysis",
             description: "Deep dive into the six major sectors of the Ghana Stock Exchange and their performance drivers.",
             lessons: 12,
@@ -79,6 +102,7 @@ function MarketEducationPage() {
             students: "892"
         },
         {
+            icon: TrendingUp,
             title: "Financial Statement Analysis",
             description: "Learn how to read balance sheets, income statements, and cash flow statements of GSE companies.",
             lessons: 10,
@@ -101,9 +125,6 @@ function MarketEducationPage() {
                         animate="visible"
                         className="text-center mb-16"
                     >
-                        <Badge className="mb-6 bg-ink/[0.03] border border-ink/[0.08]">
-                            Educate & Grow
-                        </Badge>
                         <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight font-poppins">
                             <span className="bg-clip-text text-transparent bg-gradient-to-b from-ink to-ink/80">
                                 Market Education
@@ -121,15 +142,20 @@ function MarketEducationPage() {
                         animate="visible"
                         className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-20"
                     >
-                        {economicIndicators.map((indicator, index) => (
+                        {economicIndicators.map((indicator) => (
                             <Card
                                 key={indicator.label}
                                 className="bg-ink/[0.02] border border-ink/[0.08] hover:bg-ink/[0.04] transition-all"
                             >
                                 <CardContent className="p-6">
-                                    <p className="text-xs font-semibold text-ink/40 uppercase tracking-wider mb-2">
-                                        {indicator.label}
-                                    </p>
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="p-2 rounded-lg bg-ink/[0.05]">
+                                            <indicator.icon className="h-5 w-5 text-ink/60" />
+                                        </div>
+                                        <p className="text-xs font-semibold text-ink/40 uppercase tracking-wider">
+                                            {indicator.label}
+                                        </p>
+                                    </div>
                                     <p className={`text-2xl font-bold mb-1 ${indicator.tone === "up" ? "text-emerald-400" : indicator.tone === "down" ? "text-rose-400" : "text-ink"}`}>
                                         {indicator.value}
                                     </p>
@@ -151,16 +177,21 @@ function MarketEducationPage() {
                         <h2 className="text-3xl font-bold mb-8 text-left font-poppins">Recent Educational Articles</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {educationalArticles.map((article, index) => (
-                                <motion.div
+                                <motion.a
                                     key={article.title}
+                                    href={article.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     custom={index}
                                     variants={fadeUpVariants}
                                     initial="hidden"
                                     animate="visible"
-                                    className="p-8 rounded-3xl bg-gradient-to-br from-ink/[0.05] to-transparent border border-ink/[0.08] hover:border-ink/20 transition-all cursor-pointer group"
+                                    className="block p-8 rounded-3xl bg-ink/[0.02] border border-ink/[0.08] hover:border-ink/20 transition-all cursor-pointer group"
                                 >
-                                    <div className="text-4xl mb-6">
-                                        {article.image}
+                                    <div className="flex items-start gap-4 mb-6">
+                                        <div className="p-3 rounded-lg bg-ink/[0.05]">
+                                            <article.icon size={32} className="text-ink/20" />
+                                        </div>
                                     </div>
                                     <span className="text-xs font-bold uppercase tracking-widest text-ink/30 mb-4 block group-hover:text-ink/60 transition-colors">
                                         {article.category}
@@ -175,11 +206,12 @@ function MarketEducationPage() {
                                         <span>{article.date}</span>
                                         <span>{article.readTime}</span>
                                     </div>
-                                </motion.div>
+                                </motion.a>
                             ))}
                         </div>
                     </motion.div>
 
+                    {/* Learning Modules - commented out for now
                     <motion.div
                         custom={3}
                         variants={fadeUpVariants}
@@ -188,18 +220,25 @@ function MarketEducationPage() {
                     >
                         <h2 className="text-3xl font-bold mb-8 text-left font-poppins">Learning Modules</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {learningModules.map((module, index) => (
+                            {learningModules.map((module) => (
                                 <Card
                                     key={module.title}
                                     className="bg-ink/[0.02] border border-ink/[0.08] hover:bg-ink/[0.04] transition-all duration-300 group"
                                 >
                                     <CardContent className="p-8">
-                                        <h3 className="text-xl font-bold mb-4 font-poppins group-hover:text-ink transition-colors">
-                                            {module.title}
-                                        </h3>
-                                        <p className="text-sm text-ink/60 mb-6 leading-relaxed">
-                                            {module.description}
-                                        </p>
+                                        <div className="flex items-start gap-4 mb-6">
+                                            <div className="p-3 rounded-lg bg-ink/[0.05]">
+                                                <module.icon className="h-6 w-6 text-ink/60" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-xl font-bold mb-4 font-poppins group-hover:text-ink transition-colors">
+                                                    {module.title}
+                                                </h3>
+                                                <p className="text-sm text-ink/60 mb-6 leading-relaxed">
+                                                    {module.description}
+                                                </p>
+                                            </div>
+                                        </div>
                                         <div className="space-y-3 mb-6">
                                             <div className="flex items-center justify-between text-sm">
                                                 <span className="text-ink/40">Level:</span>
@@ -218,7 +257,7 @@ function MarketEducationPage() {
                                                 <span className="font-medium">{module.students}</span>
                                             </div>
                                         </div>
-                                        <button className="w-full py-3 px-4 bg-ink/5 border border-ink/[0.08] rounded-xl font-medium text-sm hover:bg-ink/[0.08] hover:border-ink/20 transition-colors">
+                                        <button className="w-full py-3 px-4 bg-fluid-cyan/10 text-fluid-cyan-ink border border-fluid-cyan/25 rounded-xl font-semibold text-sm hover:bg-fluid-cyan/20 hover:border-fluid-cyan/40 transition-colors">
                                             Start Module
                                         </button>
                                     </CardContent>
@@ -226,6 +265,8 @@ function MarketEducationPage() {
                             ))}
                         </div>
                     </motion.div>
+                    */}
+
                 </div>
             </div>
         </div>

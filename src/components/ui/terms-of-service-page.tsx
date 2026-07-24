@@ -1,9 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, Newspaper, TrendingUp, Brain, BarChart3, Database } from "lucide-react";
 
 function TermsOfServicePage() {
     const fadeUpVariants = {
@@ -32,9 +30,6 @@ function TermsOfServicePage() {
                         animate="visible"
                         className="text-center mb-12"
                     >
-                        <Badge className="mb-6 bg-ink/[0.03] border border-ink/[0.08]">
-                            Terms & Conditions
-                        </Badge>
                         <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight font-poppins">
                             <span className="bg-clip-text text-transparent bg-gradient-to-b from-ink to-ink/80">
                                 Terms of Service

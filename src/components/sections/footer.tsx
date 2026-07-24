@@ -25,31 +25,37 @@ export const EnhancedFooter = () => {
             delay: 0.25
         },
         {
-            title: "Resources",
+            title: "Education",
             links: [
-                { label: "Learning Center", href: "#education" },
-                { label: "Market Education", href: "#education" },
-                { label: "Business & Economy News", href: "#" },
-                { label: "Help Center", href: "#" }
+                { label: "Learning Center", href: "#/learning-center" },
+                { label: "Market Education", href: "#/market-education" },
+                { label: "Business & Economy News", href: "#/business-news" },
+            ],
+            delay: 0.25
+        },
+        {
+            title: "Support",
+            links: [
+                { label: "Help Center", href: "#/help-center" },
+                { label: "Contact Support", href: "#/contact-support" },
             ],
             delay: 0.3
         },
         {
             title: "Company",
             links: [
-                { label: "About Us", href: "#/about" },
-                { label: "Contact Support", href: "#/contact-support" },
+                { label: "About Us", href: "#/about-us" },
                 { label: "Privacy Policy", href: "#/privacy-policy" },
-                { label: "Terms of Service", href: "#/terms-of-service" }
+                { label: "Terms of Service", href: "#/terms-of-service" },
             ],
-            delay: 0.4
+            delay: 0.35
         }
     ];
 
     return (
         <footer className="bg-canvas pt-24 pb-12 border-t border-ink/[0.05]">
             <div className="page-container">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-12 mb-16">
                     {/* Brand column */}
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
@@ -60,7 +66,7 @@ export const EnhancedFooter = () => {
                     >
                         <BrandLogo variant="stacked" className="mb-4 h-[8.33rem]" />
                         <p className="text-sm text-ink/40 leading-relaxed mb-6 font-poppins">
-                            The ultimate financial aggregator for the Ghana Stock Exchange.
+                            Premium financial publisher for the Ghana Stock Exchange.
                             Built for accuracy, speed, and ease of use.
                         </p>
                         <div className="flex gap-4">
@@ -82,7 +88,7 @@ export const EnhancedFooter = () => {
                                 );
                             })}
                             <motion.a
-                                href="mailto:hello@fluidfinance.com"
+                                href="mailto:info@fluidterra.com"
                                 aria-label="Email Fluid Finance"
                                 whileHover={{ scale: 1.2, y: -2 }}
                                 whileTap={{ scale: 0.95 }}
@@ -140,6 +146,14 @@ export const EnhancedFooter = () => {
                         </p>
                     </div>
                 </motion.div>
+
+                {/* Clickable background area to return to top */}
+                <div
+                    className="absolute inset-0 cursor-pointer"
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    aria-label="Return to top of page"
+                    role="button"
+                />
             </div>
         </footer>
     );

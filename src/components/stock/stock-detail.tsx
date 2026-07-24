@@ -150,7 +150,7 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
     });
 
     return (
-        <div className="min-h-screen bg-canvas pb-16 text-ink selection:bg-ink selection:text-canvas">
+        <div className="min-h-screen bg-canvas pb-16 text-ink selection:bg-fluid-cyan selection:text-fluid-action-ink">
             {/* Header */}
             <header className="sticky top-0 z-40 border-b border-ink/[0.08] bg-canvas/85 backdrop-blur-md">
                 <div className="mx-auto flex max-w-3xl items-center px-4 py-4 md:px-6">

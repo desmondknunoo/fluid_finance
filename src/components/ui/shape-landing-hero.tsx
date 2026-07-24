@@ -95,8 +95,9 @@ function HeroGeometric({
     };
 
     return (
-        <div className="relative min-h-[60vh] md:min-h-[80vh] w-full flex items-center justify-center overflow-hidden bg-canvas">
-            <div className="absolute inset-0 bg-gradient-to-br from-ink/[0.05] via-transparent to-ink/[0.05] blur-3xl" />
+        <div className="relative min-h-[35vh] md:min-h-[80vh] w-full flex items-center justify-center overflow-hidden bg-canvas">
+            {/* Fluid cyan radial glow behind the hero. */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgb(var(--hero-glow)/0.13),transparent_60%)]" />
 
             <div className="absolute inset-0 overflow-hidden">
                 <ElegantShape
@@ -104,7 +105,7 @@ function HeroGeometric({
                     width={600}
                     height={140}
                     rotate={12}
-                    gradient="from-ink/[0.1]"
+                    gradient="from-cyan-300/[0.12]"
                     className="left-[-10%] md:left-[-5%] top-[15%] md:top-[20%]"
                 />
 
@@ -113,7 +114,7 @@ function HeroGeometric({
                     width={500}
                     height={120}
                     rotate={-15}
-                    gradient="from-ink/[0.1]"
+                    gradient="from-violet-400/[0.12]"
                     className="right-[-5%] md:right-[0%] top-[70%] md:top-[75%]"
                 />
 
@@ -171,11 +172,7 @@ function HeroGeometric({
                                 {title1}
                             </span>
                             <br />
-                            <span
-                                className={cn(
-                                    "bg-clip-text text-transparent bg-gradient-to-r from-ink/50 via-ink to-ink/50"
-                                )}
-                            >
+                            <span className="hero-accent bg-clip-text text-transparent">
                                 {title2}
                             </span>
                         </h1>

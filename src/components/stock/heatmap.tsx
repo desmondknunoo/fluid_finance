@@ -19,10 +19,11 @@ interface Tile {
 /** Eleven-step ramp from -5% to +5%, matching the legend below the map. */
 export function heatColor(changePercent: number): string {
     const p = Math.max(-5, Math.min(5, changePercent));
-    if (Math.abs(p) < 0.005) return "#4b5563";
+    // Fluid heatmap extension: slate neutral, greens for gains, rose-reds for losses.
+    if (Math.abs(p) < 0.005) return "#475569";
     const steps = p > 0
-        ? ["#22c55e", "#16a34a", "#15803d", "#166534", "#14532d"]
-        : ["#ef4444", "#dc2626", "#b91c1c", "#991b1b", "#7f1d1d"];
+        ? ["#4ade80", "#22c55e", "#16a34a", "#15803d", "#047857"]
+        : ["#f87171", "#ef4444", "#dc2626", "#b91c1c", "#9f1239"];
     const index = Math.min(steps.length - 1, Math.floor((Math.abs(p) / 5) * steps.length));
     return steps[index];
 }
@@ -149,7 +150,7 @@ export function Heatmap({ stocks, onSelect, marketCaps = {}, height = 560 }: Hea
                             title={`${stock.symbol} · ${stock.company} · ₵${stock.price.toFixed(2)} (${
                                 stock.changePercent >= 0 ? "+" : ""
                             }${stock.changePercent.toFixed(2)}%)`}
-                            className="absolute flex flex-col items-center justify-center overflow-hidden rounded-[3px] p-1 text-center leading-tight text-white transition-[filter] hover:brightness-125 focus:z-10 focus:outline-none focus:ring-2 focus:ring-ink/40"
+                            className="absolute flex flex-col items-center justify-center overflow-hidden rounded-[3px] p-1 text-center leading-tight text-white transition-[filter] hover:brightness-125 focus:z-10 focus:outline-none focus:ring-2 focus:ring-fluid-cyan/60"
                             style={{
                                 left: x + 1,
                                 top: y + 1,

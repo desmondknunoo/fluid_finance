@@ -229,13 +229,13 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                             <div
                                 className={cn(
                                     "mt-1.5 flex items-center gap-2 text-sm font-bold uppercase tracking-widest",
-                                    marketOpen ? "text-emerald-400" : "text-ink/50",
+                                    marketOpen ? "text-emerald-400" : "text-red-500",
                                 )}
                             >
                                 <span
                                     className={cn(
                                         "h-2 w-2 rounded-full",
-                                        marketOpen ? "animate-pulse bg-emerald-400" : "bg-ink/30",
+                                        marketOpen ? "animate-pulse bg-emerald-400" : "bg-red-500",
                                     )}
                                 />
                                 {marketOpen ? "Market open" : "Market closed"}
@@ -308,7 +308,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                 onChange={(e) => setQuery(e.target.value)}
                                 placeholder="Search stocks…"
                                 aria-label="Search stocks"
-                                className="w-full rounded-xl border border-ink/[0.08] bg-ink/[0.03] py-2.5 pl-11 pr-4 text-sm text-ink placeholder:text-ink/30 focus:border-ink/20 focus:outline-none"
+                                className="w-full rounded-xl border border-ink/[0.08] bg-ink/[0.03] py-2.5 pl-11 pr-4 text-sm text-ink placeholder:text-ink/30 focus:border-fluid-cyan/60 focus:outline-none"
                             />
                         </div>
                         <span className="whitespace-nowrap text-xs text-ink/40">
@@ -475,7 +475,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                                     onClick={() => openStock(stock.symbol)}
                                                     title={`${stock.symbol} · ${stock.company} · ${stock.changePercent >= 0 ? "+" : ""}${stock.changePercent.toFixed(2)}%`}
                                                     className={cn(
-                                                        "group relative flex min-w-0 flex-col justify-between overflow-hidden rounded-lg p-3 text-left text-white transition-transform hover:z-10 hover:scale-[1.015] focus:z-10 focus:outline-none focus:ring-2 focus:ring-ink/40 sm:p-4",
+                                                        "group relative flex min-w-0 flex-col justify-between overflow-hidden rounded-lg p-3 text-left text-white transition-transform hover:z-10 hover:scale-[1.015] focus:z-10 focus:outline-none focus:ring-2 focus:ring-fluid-cyan/60 sm:p-4",
                                                         tileSpanClass(marketCap, largestMarketCap),
                                                     )}
                                                     style={{ backgroundColor: heatColor(stock.changePercent) }}

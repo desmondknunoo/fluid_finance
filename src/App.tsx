@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react"
+import { Navigation } from "@/components/ui/navigation"
+import { ScrollToTop } from "@/components/ui/scroll-to-top"
+import { EnhancedFooter } from "@/components/sections/footer"
 import LandingPage from "@/components/ui/saa-s-template"
 import AboutUsPage from "@/components/ui/about-us-page"
+import ContactSupportPage from "@/components/ui/contact-support-page"
+import PrivacyPolicyPage from "@/components/ui/privacy-policy-page"
+import LearningCenterPage from "@/components/ui/learning-center-page"
+import HelpCenterPage from "@/components/ui/help-center-page"
+import MarketEducationPage from "@/components/ui/market-education-page"
+import BusinessNewsPage from "@/components/ui/business-news-page"
+import TermsOfServicePage from "@/components/ui/terms-of-service-page"
 import { StockDetail } from "@/components/stock/stock-detail"
 import { closeStock, parseRoute, type Route } from "@/lib/navigation"
 
@@ -13,17 +23,10 @@ function App() {
     return () => window.removeEventListener("hashchange", sync)
   }, [])
 
-  // Routing decides where the page starts; the browser restoring its own
-  // remembered offset on reload would land somewhere else entirely.
   useEffect(() => {
     if ("scrollRestoration" in history) history.scrollRestoration = "manual"
   }, [])
 
-  // `#gse-live/heatmap` has no element to anchor to, so scrolling is handled
-  // here rather than natively. Sections above the target grow as their market
-  // data arrives, which would leave the jump short, so the anchor is re-applied
-  // each frame until the layout stops moving. (A ResizeObserver on <body> is
-  // the obvious tool here and simply never fires for this growth.)
   useEffect(() => {
     if (route.kind !== "home" || !route.section) return
 
@@ -38,7 +41,6 @@ function App() {
       if (performance.now() < deadline) frame = requestAnimationFrame(tick)
     }
 
-    // Hand the scroll back the moment the reader touches it.
     const release = () => {
       released = true
       cancelAnimationFrame(frame)
@@ -58,14 +60,30 @@ function App() {
   }, [route])
 
   if (route.kind === "stock") {
-    return <StockDetail symbol={route.symbol} onBack={closeStock} />
+    return (
+      <>
+        <StockDetail symbol={route.symbol} onBack={closeStock} />
+        <ScrollToTop />
+      </>
+    )
   }
 
-  if (route.kind === "about") {
-    return <AboutUsPage />;
-  }
-
-  return <LandingPage liveView={route.view} />
+  return (
+    <div className="min-h-screen bg-canvas text-ink selection:bg-fluid-cyan selection:text-fluid-action-ink pt-24 md:pt-32">
+      <Navigation />
+      {route.kind === "about" && <AboutUsPage />}
+      {route.kind === "contact-support" && <ContactSupportPage />}
+      {route.kind === "privacy-policy" && <PrivacyPolicyPage />}
+      {route.kind === "learning-center" && <LearningCenterPage />}
+      {route.kind === "help-center" && <HelpCenterPage />}
+      {route.kind === "market-education" && <MarketEducationPage />}
+      {route.kind === "business-news" && <BusinessNewsPage />}
+      {route.kind === "terms-of-service" && <TermsOfServicePage />}
+      {route.kind === "home" && <LandingPage liveView={route.view} />}
+      <EnhancedFooter />
+      <ScrollToTop />
+    </div>
+  )
 }
 
 export default App

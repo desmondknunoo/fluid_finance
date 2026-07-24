@@ -24,28 +24,47 @@
   :root.dark {
     color-scheme: dark;
 
-    --canvas: 0 0 0;
+    /* Fluid: dark-first, near-black tinted shell (#070A0F) over pure black. */
+    --canvas: 7 10 15;
     --ink: 255 255 255;
 
-    --background: 0 0% 0%;
+    /* Fluid palette — space-separated RGB for rgb(var(--token) / <alpha>). */
+    --panel: 14 20 27; /* #0E141B — cards, panels */
+    --panel-soft: 11 17 23; /* #0B1117 — menus, inner panels */
+    --cyan: 103 232 249; /* #67E8F9 — primary accent (CTAs, focus, active) */
+    --cyan-ink: 103 232 249; /* accent used as text/icon — bright on dark */
+    --action-ink: 6 16 22; /* #061016 — text on cyan buttons */
+    --green: 52 211 153; /* #34D399 — gains / success */
+    --amber: 252 211 77; /* #FCD34D — pending / warning */
+    --rose: 251 113 133; /* #FB7185 — losses / errors */
+    --teal: 45 212 191; /* #2DD4BF — secondary accent */
+    --violet: 196 181 253; /* #C4B5FD — decorative accent (orbs, hero) */
+    --cyan-hover: 165 243 252; /* #A5F3FC — primary button hover */
+    --muted-text: 148 163 184; /* #94A3B8 slate-400 — labels, secondary */
+    --faint-text: 100 116 139; /* #64748B slate-500 — metadata, placeholders */
+    --glow: 34 211 238; /* cyan glow on primary actions */
+    --panel-shadow: 0 16px 40px rgb(0 0 0 / 0.22);
+    --hero-glow: 103 232 249; /* radial glow behind the hero */
+
+    --background: 218 36% 4%; /* matches --canvas #070A0F */
     --foreground: 0 0% 100%;
-    --card: 0 0% 3%;
+    --card: 212 32% 8%; /* matches --panel #0E141B */
     --card-foreground: 0 0% 100%;
-    --popover: 0 0% 3%;
+    --popover: 213 35% 7%; /* matches --panel-soft #0B1117 */
     --popover-foreground: 0 0% 100%;
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 0%;
+    --primary: 187 92% 69%; /* Fluid cyan */
+    --primary-foreground: 197 58% 6%; /* action ink */
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 240 3.7% 15.9%;
-    --muted-foreground: 215.4 16.3% 66.9%;
+    --muted-foreground: 215 20% 65%; /* slate-400 #94A3B8 */
     --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --ring: 187 92% 69%; /* Fluid cyan focus ring */
 
     --radius: 0.5rem;
   }
@@ -53,28 +72,46 @@
   :root.light {
     color-scheme: light;
 
-    --canvas: 255 255 255;
-    --ink: 9 10 14;
+    /* Fluid light: clean off-white shell (#F4F7FB) with slate-based dark text. */
+    --canvas: 244 247 251;
+    --ink: 15 23 42; /* slate-900 #0F172A */
 
-    --background: 0 0% 100%;
-    --foreground: 222 24% 5%;
+    --panel: 255 255 255; /* #FFFFFF */
+    --panel-soft: 248 250 252; /* #F8FAFC */
+    --cyan: 103 232 249; /* bright cyan reads well as a button fill in both modes */
+    --cyan-ink: 8 51 68; /* #083344 — dark cyan when used as text on light */
+    --action-ink: 6 16 22; /* dark text on cyan buttons */
+    --green: 6 78 59; /* #064E3B — legible green text on light */
+    --amber: 120 53 15; /* #78350F */
+    --rose: 127 29 29; /* #7F1D1D */
+    --teal: 4 47 46; /* #042F2E */
+    --violet: 91 33 182; /* violet-800 — legible decorative accent on light */
+    --cyan-hover: 8 145 178; /* darker cyan hover on light */
+    --muted-text: 100 116 139; /* #64748B slate-500 */
+    --faint-text: 100 116 139;
+    --glow: 8 145 178; /* cyan-600 glow tint on light */
+    --panel-shadow: 0 16px 40px rgb(15 23 42 / 0.08);
+    --hero-glow: 8 145 178; /* #0891B2 — softer glow behind the hero on light */
+
+    --background: 213 47% 97%; /* matches --canvas #F4F7FB */
+    --foreground: 222 47% 11%; /* slate-900 */
     --card: 0 0% 100%;
-    --card-foreground: 222 24% 5%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 24% 5%;
-    --primary: 222 24% 5%;
+    --card-foreground: 222 47% 11%;
+    --popover: 210 40% 98%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 195 79% 15%; /* dark cyan #083344 */
     --primary-foreground: 0 0% 100%;
     --secondary: 220 14% 96%;
-    --secondary-foreground: 222 24% 5%;
+    --secondary-foreground: 222 47% 11%;
     --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 40%;
+    --muted-foreground: 215 16% 47%; /* slate-500 #64748B */
     --accent: 220 14% 96%;
-    --accent-foreground: 222 24% 5%;
+    --accent-foreground: 222 47% 11%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 88%;
-    --input: 220 13% 88%;
-    --ring: 222 24% 5%;
+    --border: 215 25% 88%;
+    --input: 215 25% 88%;
+    --ring: 187 85% 43%; /* cyan focus ring, darkened for light bg */
   }
 }
 
@@ -102,3 +139,15 @@
 :root.light .border-ink\/\[0\.04\] { border-color: rgb(var(--ink) / 0.09); }
 :root.light .bg-ink\/\[0\.03\] { background-color: rgb(var(--ink) / 0.035); }
 :root.light .bg-ink\/\[0\.02\] { background-color: rgb(var(--ink) / 0.025); }
+
+/*
+ * Hero accent gradient mirrors the brand logo's own sweep — teal → mint-green →
+ * blue → indigo. Dark mode uses the bright siblings so it pops on the near-black
+ * shell; light mode uses deeper siblings to stay legible on #F4F7FB.
+ */
+.hero-accent {
+  background-image: linear-gradient(to right, #2dd4bf, #6ee7b7, #60a5fa, #818cf8);
+}
+:root.light .hero-accent {
+  background-image: linear-gradient(to right, #0d9488, #10b981, #3b82f6, #4f46e5);
+}

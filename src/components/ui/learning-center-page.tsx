@@ -1,9 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, Newspaper, TrendingUp, Brain, BarChart3, Database } from "lucide-react";
+import { TrendingUp, GraduationCap, FileText, BookOpen } from "lucide-react";
 
 function LearningCenterPage() {
     const fadeUpVariants = {
@@ -21,46 +20,67 @@ function LearningCenterPage() {
 
     const featuredArticles = [
         {
-            category: "Featured Analysis",
-            title: "MTN Ghana: Why Analysts are Bullish for Q3 2026",
-            snippet: "A deep dive into the telco giant's expanding mobile money ecosystem and its impact on dividend yields.",
-            date: "Jan 5, 2026",
-            readTime: "8 min read"
+            category: "Training",
+            title: "BOG Center for Training & Capacity Development",
+            snippet: "Official training programs and capacity development resources from the Bank of Ghana.",
+            icon: GraduationCap,
+            link: "https://www.bog.gov.gh/the-center-for-training-and-capacity-development/"
         },
         {
-            category: "Stock of the Week",
-            title: "GCB Bank PLC (GCB)",
-            snippet: "Stable growth and digital transformation makes GCB a top pick for retail investors this quarter.",
-            date: "Jan 4, 2026",
-            readTime: "6 min read"
+            category: "Training",
+            title: "SEC Corporate Training Programs",
+            snippet: "Professional development and corporate training offerings from the Securities and Exchange Commission.",
+            icon: BookOpen,
+            link: "https://sec.gov.gh/corporate-training/"
         },
         {
-            category: "Market Summary",
-            title: "Week in Review: GSE Composite Index Gains 2.4%",
-            snippet: "Financial stocks lead the rally as inflation fears subside and local investor participation hits record highs.",
-            date: "Jan 3, 2026",
-            readTime: "10 min read"
+            category: "Courses",
+            title: "ISOSEC Certified Security Courses",
+            snippet: "Certified security courses and professional qualifications from the Institute of Securities Studies.",
+            icon: FileText,
+            link: "https://isosecghanaltd.com/certified-security-courses/"
         },
         {
-            category: "Beginner",
-            title: "Understanding EPS: A Beginner's Guide",
-            snippet: "Explaining earnings per share in simple terms for new investors getting started in the GSE.",
-            date: "Dec 30, 2025",
-            readTime: "5 min read"
+            category: "Institute",
+            title: "Ghana Securities Institute",
+            snippet: "Comprehensive securities education and professional development programs.",
+            icon: GraduationCap,
+            link: "https://www.gisinstitute.org/"
         },
         {
-            category: "Market Insights",
-            title: "Sector Rotation: From Banking to Tech",
-            snippet: "Analyzing the shift in investor preferences between traditional banking and emerging technology companies.",
-            date: "Dec 28, 2025",
-            readTime": "7 min read"
+            category: "Calendar",
+            title: "GIS Training Calendar",
+            snippet: "Upcoming training sessions and workshops from the Ghana Securities Institute.",
+            icon: TrendingUp,
+            link: "https://www.gisinstitute.org/training-calendar"
         },
         {
-            category: "Economic Outlook",
-            title: "Inflation Outlook and Monetary Policy Impact",
-            snippet: "How Bank of Ghana's recent policy decisions will affect stock market performance in 2026.",
-            date: "Dec 26, 2025",
-            readTime: "9 min read"
+            category: "Courses",
+            title: "ISOSEC Course Catalog",
+            snippet: "Full range of courses offered by the Institute of Securities Studies.",
+            icon: BookOpen,
+            link: "https://isosecghanaltd.com/courses"
+        },
+        {
+            category: "Regulation",
+            title: "SEC Insider Trading Guidelines 2026",
+            snippet: "Public consultation on draft securities industry insider trading guidelines.",
+            icon: FileText,
+            link: "https://sec.gov.gh/call-for-feedback-on-the-draft-securities-industry-insider-trading-guidelines-2026/"
+        },
+        {
+            category: "Regulation",
+            title: "SEC Commercial Papers Directive",
+            snippet: "Directive to market operators on investments in commercial papers.",
+            icon: FileText,
+            link: "https://sec.gov.gh/directive-to-market-operators-on-investments-in-commercial-papers/"
+        },
+        {
+            category: "News",
+            title: "Bank of Ghana News & Updates",
+            snippet: "Latest news, announcements, and publications from the Bank of Ghana.",
+            icon: TrendingUp,
+            link: "https://www.bog.gov.gh/all-news-page/"
         }
     ];
 
@@ -71,7 +91,8 @@ function LearningCenterPage() {
             duration: "2 weeks",
             level: "Beginner",
             lessons: 12,
-            students: "1,234"
+            students: "1,234",
+            icon: BookOpen
         },
         {
             title: "Technical Analysis Masterclass",
@@ -79,7 +100,8 @@ function LearningCenterPage() {
             duration: "4 weeks",
             level: "Advanced",
             lessons: 24,
-            students: "567"
+            students: "567",
+            icon: TrendingUp
         },
         {
             title: "Fundamental Stock Analysis",
@@ -87,7 +109,8 @@ function LearningCenterPage() {
             duration: "3 weeks",
             level: "Intermediate",
             lessons: 18,
-            students: "892"
+            students: "892",
+            icon: FileText
         }
     ];
 
@@ -104,9 +127,6 @@ function LearningCenterPage() {
                         animate="visible"
                         className="text-center mb-16"
                     >
-                        <Badge className="mb-6 bg-ink/[0.03] border border-ink/[0.08]">
-                            Expand Your Knowledge
-                        </Badge>
                         <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight font-poppins">
                             <span className="bg-clip-text text-transparent bg-gradient-to-b from-ink to-ink/80">
                                 Learning Center
@@ -124,33 +144,35 @@ function LearningCenterPage() {
                         animate="visible"
                         className="mb-20"
                     >
-                        <h2 className="text-3xl font-bold mb-8 text-left font-poppins">Featured Articles</h2>
+                        <h2 className="text-3xl font-bold mb-8 text-left font-poppins">Courses and Learning</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {featuredArticles.map((article, index) => (
-                                <motion.div
+                                <motion.a
                                     key={article.title}
+                                    href={article.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     custom={index}
                                     variants={fadeUpVariants}
                                     initial="hidden"
                                     animate="visible"
-                                    className="p-8 rounded-3xl bg-gradient-to-br from-ink/[0.05] to-transparent border border-ink/[0.08] hover:border-ink/20 transition-all cursor-pointer group"
+                                    className="block p-8 rounded-3xl bg-ink/[0.02] border border-ink/[0.08] hover:border-ink/20 transition-all cursor-pointer group"
                                 >
-                                    <span className="text-xs font-bold uppercase tracking-widest text-ink/30 mb-4 block group-hover:text-ink/60 transition-colors">
-                                        {article.category}
-                                    </span>
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <div className="p-3 rounded-lg bg-ink/[0.05]">
+                                            <article.icon className="h-6 w-6 text-ink/60" />
+                                        </div>
+                                        <span className="text-xs font-bold uppercase tracking-widest text-ink/30 mb-4 block group-hover:text-ink/60 transition-colors">
+                                            {article.category}
+                                        </span>
+                                    </div>
                                     <h3 className="text-xl font-bold text-ink mb-4 leading-tight group-hover:translate-x-1 transition-transform">
                                         {article.title}
                                     </h3>
                                     <p className="text-sm text-ink/40 mb-6 leading-relaxed">
                                         {article.snippet}
                                     </p>
-                                    <div className="flex items-center justify-between text-xs text-ink/20">
-                                        <span>{article.date}</span>
-                                        <span className="flex items-center gap-1 group-hover:text-ink transition-colors">
-                                            Read Article <TrendingUp size={10} />
-                                        </span>
-                                    </div>
-                                </motion.div>
+                                </motion.a>
                             ))}
                         </div>
                     </motion.div>
@@ -163,15 +185,20 @@ function LearningCenterPage() {
                     >
                         <h2 className="text-3xl font-bold mb-8 text-left font-poppins">Learning Courses</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {courses.map((course, index) => (
+                            {courses.map((course) => (
                                 <Card
                                     key={course.title}
                                     className="bg-ink/[0.02] border border-ink/[0.08] hover:bg-ink/[0.04] transition-all duration-300 group"
                                 >
                                     <CardContent className="p-8">
-                                        <h3 className="text-xl font-bold mb-4 font-poppins group-hover:text-ink transition-colors">
-                                            {course.title}
-                                        </h3>
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className="p-3 rounded-lg bg-ink/[0.05]">
+                                                <course.icon className="h-6 w-6 text-ink/60" />
+                                            </div>
+                                            <h3 className="text-xl font-bold mb-4 font-poppins group-hover:text-ink transition-colors">
+                                                {course.title}
+                                            </h3>
+                                        </div>
                                         <p className="text-sm text-ink/60 mb-6 leading-relaxed">
                                             {course.description}
                                         </p>
@@ -193,7 +220,7 @@ function LearningCenterPage() {
                                                 <span className="font-medium">{course.students}</span>
                                             </div>
                                         </div>
-                                        <button className="w-full py-3 px-4 bg-ink/5 border border-ink/[0.08] rounded-xl font-medium text-sm hover:bg-ink/[0.08] hover:border-ink/20 transition-colors">
+                                        <button className="w-full py-3 px-4 bg-fluid-cyan/10 text-fluid-cyan-ink border border-fluid-cyan/25 rounded-xl font-semibold text-sm hover:bg-fluid-cyan/20 hover:border-fluid-cyan/40 transition-colors">
                                             Start Course
                                         </button>
                                     </CardContent>

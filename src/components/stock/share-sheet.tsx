@@ -242,7 +242,7 @@ export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
                             <button
                                 disabled={status !== "ready"}
                                 onClick={nativeShare}
-                                className="col-span-1 flex items-center justify-center gap-2 rounded-xl bg-ink py-3.5 text-sm font-bold text-canvas transition-colors hover:bg-ink/85 disabled:opacity-40"
+                                className="col-span-1 flex items-center justify-center gap-2 rounded-xl bg-fluid-cyan py-3.5 text-sm font-bold text-fluid-action-ink shadow-glow transition-all hover:bg-fluid-cyan-hover hover:shadow-glow-lg disabled:opacity-40 disabled:shadow-none"
                             >
                                 <Share2 size={16} />
                                 Share
