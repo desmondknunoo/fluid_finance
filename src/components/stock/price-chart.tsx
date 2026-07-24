@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/lib/theme";
 import type { PricePoint } from "@/lib/history";
 
 interface PriceChartProps {
@@ -62,7 +63,11 @@ export function PriceChart({ points, positive, height = 300, unit = "₵", class
         return () => observer.disconnect();
     }, []);
 
-    const stroke = positive ? "#34d399" : "#fb7185";
+    const { resolved } = useTheme();
+    const dark = resolved === "dark";
+    // Axis furniture is drawn from the ink colour so it survives a theme flip.
+    const ink = dark ? "255,255,255" : "9,10,14";
+    const stroke = positive ? (dark ? "#34d399" : "#059669") : dark ? "#fb7185" : "#e11d48";
     const gradientId = useMemo(
         () => `ff-chart-${positive ? "up" : "down"}-${Math.round(height)}`,
         [positive, height],
@@ -170,14 +175,14 @@ export function PriceChart({ points, positive, height = 300, unit = "₵", class
                                 x2={PAD.left + geometry.innerW}
                                 y1={tick.y}
                                 y2={tick.y}
-                                stroke="rgba(255,255,255,0.05)"
+                                stroke={`rgba(${ink},${dark ? 0.05 : 0.09})`}
                                 strokeWidth={1}
                             />
                             {tick.clear && (
                                 <text
                                     x={PAD.left + geometry.innerW + 10}
                                     y={tick.y + 4}
-                                    fill="rgba(255,255,255,0.35)"
+                                    fill={`rgba(${ink},${dark ? 0.35 : 0.5})`}
                                     fontSize={11}
                                     fontFamily="monospace"
                                 >
@@ -194,7 +199,7 @@ export function PriceChart({ points, positive, height = 300, unit = "₵", class
                             x2={geometry.recordedX}
                             y1={PAD.top}
                             y2={PAD.top + geometry.innerH}
-                            stroke="rgba(255,255,255,0.18)"
+                            stroke={`rgba(${ink},${dark ? 0.18 : 0.25})`}
                             strokeWidth={1}
                             strokeDasharray="3 4"
                         />
@@ -232,7 +237,7 @@ export function PriceChart({ points, positive, height = 300, unit = "₵", class
                     <text
                         x={PAD.left + geometry.innerW + 4 + (PAD.right - 8) / 2}
                         y={geometry.lastY + 4}
-                        fill="#0a0a0a"
+                        fill={dark ? "#0a0a0a" : "#ffffff"}
                         fontSize={11}
                         fontWeight={700}
                         fontFamily="monospace"
@@ -247,7 +252,7 @@ export function PriceChart({ points, positive, height = 300, unit = "₵", class
                             key={`x-${tick.label}`}
                             x={tick.x}
                             y={height - 6}
-                            fill="rgba(255,255,255,0.35)"
+                            fill={`rgba(${ink},${dark ? 0.35 : 0.5})`}
                             fontSize={11}
                             textAnchor="middle"
                         >
@@ -263,7 +268,7 @@ export function PriceChart({ points, positive, height = 300, unit = "₵", class
                                 x2={geometry.x(hover)}
                                 y1={PAD.top}
                                 y2={PAD.top + geometry.innerH}
-                                stroke="rgba(255,255,255,0.25)"
+                                stroke={`rgba(${ink},${dark ? 0.25 : 0.35})`}
                                 strokeWidth={1}
                             />
                             <circle
@@ -271,7 +276,7 @@ export function PriceChart({ points, positive, height = 300, unit = "₵", class
                                 cy={geometry.y(active.close)}
                                 r={4}
                                 fill={stroke}
-                                stroke="#000"
+                                stroke={dark ? "#000" : "#fff"}
                                 strokeWidth={2}
                             />
                         </g>
@@ -281,17 +286,17 @@ export function PriceChart({ points, positive, height = 300, unit = "₵", class
 
             {active && hover !== null && geometry && (
                 <div
-                    className="pointer-events-none absolute z-10 rounded-lg border border-white/10 bg-black/90 px-3 py-2 backdrop-blur-sm"
+                    className="pointer-events-none absolute z-10 rounded-lg border border-ink/10 bg-canvas/90 px-3 py-2 backdrop-blur-sm"
                     style={{
                         left: Math.min(Math.max(geometry.x(hover) - 60, 0), Math.max(width - 130, 0)),
                         top: 0,
                     }}
                 >
-                    <div className="font-mono text-sm font-semibold text-white">
+                    <div className="font-mono text-sm font-semibold text-ink">
                         {unit}
                         {active.close.toFixed(2)}
                     </div>
-                    <div className="text-[10px] uppercase tracking-wider text-white/40">{fullDate(active.t)}</div>
+                    <div className="text-[10px] uppercase tracking-wider text-ink/40">{fullDate(active.t)}</div>
                     {!active.recorded && (
                         <div className="mt-0.5 text-[10px] text-amber-400/70">backfilled</div>
                     )}
@@ -299,7 +304,7 @@ export function PriceChart({ points, positive, height = 300, unit = "₵", class
             )}
 
             {!geometry && (
-                <div className="flex h-full items-center justify-center text-sm text-white/30">
+                <div className="flex h-full items-center justify-center text-sm text-ink/30">
                     Not enough data to chart
                 </div>
             )}
@@ -316,8 +321,11 @@ interface SparklineProps {
 }
 
 export function Sparkline({ points, positive, width = 88, height = 28, className }: SparklineProps) {
+    const { resolved } = useTheme();
+
     if (points.length < 2) return <div style={{ width, height }} className={className} />;
 
+    const dark = resolved === "dark";
     const min = Math.min(...points);
     const max = Math.max(...points);
     const span = max - min || 1;
@@ -334,7 +342,7 @@ export function Sparkline({ points, positive, width = 88, height = 28, className
             <path
                 d={d}
                 fill="none"
-                stroke={positive ? "#34d399" : "#fb7185"}
+                stroke={positive ? (dark ? "#34d399" : "#059669") : dark ? "#fb7185" : "#e11d48"}
                 strokeWidth={1.5}
                 strokeLinejoin="round"
                 strokeLinecap="round"

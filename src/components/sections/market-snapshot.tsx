@@ -53,9 +53,9 @@ export const MarketSnapshot = () => {
 
     if (loading) {
         return (
-            <section id="market-snapshot" className="pt-4 md:pt-12 pb-24 bg-black relative">
+            <section id="market-snapshot" className="pt-4 md:pt-12 pb-24 bg-canvas relative">
                 <div className="container mx-auto px-4 md:px-6 flex justify-center items-center min-h-[300px]">
-                    <Loader2 className="w-8 h-8 animate-spin text-white/40" />
+                    <Loader2 className="w-8 h-8 animate-spin text-ink/40" />
                 </div>
             </section>
         );
@@ -63,16 +63,16 @@ export const MarketSnapshot = () => {
 
     if (error) {
         return (
-            <section id="market-snapshot" className="pt-4 md:pt-12 pb-24 bg-black relative">
+            <section id="market-snapshot" className="pt-4 md:pt-12 pb-24 bg-canvas relative">
                 <div className="container mx-auto px-4 md:px-6 flex justify-center items-center min-h-[300px]">
-                    <p className="text-white/40">Failed to load market data</p>
+                    <p className="text-ink/40">Failed to load market data</p>
                 </div>
             </section>
         );
     }
 
     return (
-        <section id="market-snapshot" className="pt-4 md:pt-12 pb-24 bg-black relative">
+        <section id="market-snapshot" className="pt-4 md:pt-12 pb-24 bg-canvas relative">
             <div className="container mx-auto px-4 md:px-6 relative z-10">
 
                 {/* Movers Table */}
@@ -81,9 +81,9 @@ export const MarketSnapshot = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="rounded-2xl bg-white/[0.03] border border-white/[0.08] overflow-hidden"
+                    className="rounded-2xl bg-ink/[0.03] border border-ink/[0.08] overflow-hidden"
                 >
-                    <div className="flex border-b border-white/[0.08]">
+                    <div className="flex border-b border-ink/[0.08]">
                         {(
                             [
                                 ["gainers", "Top Gainers"],
@@ -96,7 +96,7 @@ export const MarketSnapshot = () => {
                                 onClick={() => setActiveTab(key)}
                                 className={cn(
                                     "flex-1 py-4 text-sm font-medium transition-colors",
-                                    activeTab === key ? "text-white bg-white/[0.05]" : "text-white/40 hover:text-white"
+                                    activeTab === key ? "text-ink bg-ink/[0.05]" : "text-ink/40 hover:text-ink"
                                 )}
                             >
                                 {label}
@@ -107,18 +107,18 @@ export const MarketSnapshot = () => {
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
                             <thead>
-                                <tr className="border-b border-white/[0.08] bg-white/[0.01]">
-                                    <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider">Symbol</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider">Price</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider">Change</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider hidden md:table-cell">Volume</th>
-                                    <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider text-right">Action</th>
+                                <tr className="border-b border-ink/[0.08] bg-ink/[0.01]">
+                                    <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Symbol</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Price</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Change</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider hidden md:table-cell">Volume</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider text-right">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {movers.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="px-6 py-8 text-center text-white/40">
+                                        <td colSpan={5} className="px-6 py-8 text-center text-ink/40">
                                             No {activeTab === "gainers" ? "gainers" : activeTab === "losers" ? "losers" : "active stocks"} at this time
                                         </td>
                                     </tr>
@@ -127,13 +127,13 @@ export const MarketSnapshot = () => {
                                         <tr
                                             key={stock.symbol}
                                             onClick={() => openStock(stock.symbol)}
-                                            className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors cursor-pointer"
+                                            className="border-b border-ink/[0.04] hover:bg-ink/[0.02] transition-colors cursor-pointer"
                                         >
                                             <td className="px-6 py-4">
-                                                <span className="font-bold text-white uppercase">{stock.symbol}</span>
-                                                <span className="block max-w-[180px] truncate text-xs text-white/40">{stock.company}</span>
+                                                <span className="font-bold text-ink uppercase">{stock.symbol}</span>
+                                                <span className="block max-w-[180px] truncate text-xs text-ink/40">{stock.company}</span>
                                             </td>
-                                            <td className="px-6 py-4 font-mono text-white">{formatCedis(stock.price)}</td>
+                                            <td className="px-6 py-4 font-mono text-ink">{formatCedis(stock.price)}</td>
                                             <td className="px-6 py-4">
                                                 <span className={cn(
                                                     "inline-flex items-center gap-1 font-medium",
@@ -143,11 +143,11 @@ export const MarketSnapshot = () => {
                                                     {stock.change >= 0 ? "+" : ""}{stock.change.toFixed(2)}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 hidden md:table-cell text-white/60">
+                                            <td className="px-6 py-4 hidden md:table-cell text-ink/60">
                                                 {stock.volume.toLocaleString()}
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <span className="inline-flex items-center gap-1 text-sm text-white/60">
+                                                <span className="inline-flex items-center gap-1 text-sm text-ink/60">
                                                     View <ChevronRight size={14} />
                                                 </span>
                                             </td>
@@ -170,7 +170,7 @@ export const MarketSnapshot = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         href="#all-stocks"
-                        className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-white/10 text-white/60 hover:text-white hover:border-white/20 transition-all font-medium"
+                        className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-ink/10 text-ink/60 hover:text-ink hover:border-ink/20 transition-all font-medium"
                     >
                         View All Listed Companies <ChevronRight size={18} />
                     </motion.a>
@@ -178,8 +178,8 @@ export const MarketSnapshot = () => {
             </div>
 
             {/* Background Glows */}
-            <div className="absolute top-1/4 left-0 w-96 h-96 bg-white/[0.02] rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-white/[0.02] rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute top-1/4 left-0 w-96 h-96 bg-ink/[0.02] rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-ink/[0.02] rounded-full blur-[120px] pointer-events-none" />
         </section >
     );
 };

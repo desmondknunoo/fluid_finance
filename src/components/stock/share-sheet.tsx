@@ -196,7 +196,7 @@ export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
                     role="dialog"
                     aria-modal="true"
                     aria-label={`Share ${card.symbol}`}
-                    className="fixed inset-0 z-[60] flex items-end justify-center bg-black/80 backdrop-blur-sm sm:items-center"
+                    className="fixed inset-0 z-[60] flex items-end justify-center bg-canvas/80 backdrop-blur-sm sm:items-center"
                 >
                     <motion.div
                         initial={{ y: 40, opacity: 0 }}
@@ -204,24 +204,24 @@ export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
                         exit={{ y: 24, opacity: 0 }}
                         transition={{ duration: 0.22, ease: "easeOut" }}
                         onClick={(e) => e.stopPropagation()}
-                        className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-3xl border border-white/[0.08] bg-[#0b0c0e] p-5 sm:rounded-3xl"
+                        className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-3xl border border-ink/[0.08] bg-[#0b0c0e] p-5 sm:rounded-3xl"
                     >
                         <div className="mb-4 flex items-center justify-between">
-                            <h2 className="text-base font-bold text-white">Share {card.symbol}</h2>
+                            <h2 className="text-base font-bold text-ink">Share {card.symbol}</h2>
                             <button
                                 onClick={onClose}
                                 aria-label="Close share sheet"
-                                className="rounded-full p-2 text-white/50 transition-colors hover:bg-white/[0.06] hover:text-white"
+                                className="rounded-full p-2 text-ink/50 transition-colors hover:bg-ink/[0.06] hover:text-ink"
                             >
                                 <X size={18} />
                             </button>
                         </div>
 
                         {/* Preview */}
-                        <div className="mb-5 flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl border border-white/[0.08] bg-black">
-                            {status === "rendering" && <Loader2 className="h-7 w-7 animate-spin text-white/40" />}
+                        <div className="mb-5 flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl border border-ink/[0.08] bg-canvas">
+                            {status === "rendering" && <Loader2 className="h-7 w-7 animate-spin text-ink/40" />}
                             {status === "error" && (
-                                <p className="px-6 text-center text-sm text-white/40">
+                                <p className="px-6 text-center text-sm text-ink/40">
                                     Could not generate the share image.
                                 </p>
                             )}
@@ -239,7 +239,7 @@ export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
                             <button
                                 disabled={status !== "ready"}
                                 onClick={nativeShare}
-                                className="col-span-1 flex items-center justify-center gap-2 rounded-xl bg-white py-3.5 text-sm font-bold text-black transition-colors hover:bg-white/85 disabled:opacity-40"
+                                className="col-span-1 flex items-center justify-center gap-2 rounded-xl bg-ink py-3.5 text-sm font-bold text-canvas transition-colors hover:bg-ink/85 disabled:opacity-40"
                             >
                                 <Share2 size={16} />
                                 Share
@@ -249,7 +249,7 @@ export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
                                 onClick={async () =>
                                     flash((await copyImage()) ? "Image copied" : "Clipboard unavailable")
                                 }
-                                className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] py-3.5 text-sm font-medium text-white/70 transition-colors hover:border-white/20 hover:text-white disabled:opacity-40"
+                                className="flex items-center justify-center gap-2 rounded-xl border border-ink/[0.08] bg-ink/[0.03] py-3.5 text-sm font-medium text-ink/70 transition-colors hover:border-ink/20 hover:text-ink disabled:opacity-40"
                             >
                                 <Copy size={16} />
                                 Copy
@@ -257,7 +257,7 @@ export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
                             <button
                                 disabled={status !== "ready"}
                                 onClick={download}
-                                className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] py-3.5 text-sm font-medium text-white/70 transition-colors hover:border-white/20 hover:text-white disabled:opacity-40"
+                                className="flex items-center justify-center gap-2 rounded-xl border border-ink/[0.08] bg-ink/[0.03] py-3.5 text-sm font-medium text-ink/70 transition-colors hover:border-ink/20 hover:text-ink disabled:opacity-40"
                             >
                                 <ImageDown size={16} />
                                 Save
@@ -275,7 +275,7 @@ export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
                                         onClick={() =>
                                             openNetwork(network.href(shareText(card), window.location.href))
                                         }
-                                        className="flex flex-col items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] py-3 text-xs font-medium text-white/60 transition-colors hover:border-white/20 hover:text-white disabled:opacity-40"
+                                        className="flex flex-col items-center gap-2 rounded-xl border border-ink/[0.08] bg-ink/[0.03] py-3 text-xs font-medium text-ink/60 transition-colors hover:border-ink/20 hover:text-ink disabled:opacity-40"
                                     >
                                         <Icon size={18} />
                                         {network.label}
@@ -284,7 +284,7 @@ export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
                             })}
                         </div>
 
-                        <p className="mt-4 text-[11px] leading-relaxed text-white/30">
+                        <p className="mt-4 text-[11px] leading-relaxed text-ink/30">
                             {canNativeShare
                                 ? "Share opens your device's share sheet with the image attached."
                                 : "Save or copy the image, then attach it to your post."}{" "}

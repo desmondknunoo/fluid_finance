@@ -1,18 +1,30 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description"
-    content="Fluid Finance - Trade Ghana Stock Exchange stocks with Mobile Money. Real-time GSE data, portfolio tracking, and AI-powered insights.">
-  <meta name="keywords" content="Ghana Stock Exchange, GSE, stocks, trading, Mobile Money, MoMo, investment, portfolio">
+    content="Fluid Finance GSE Live - real-time Ghana Stock Exchange market data in table, grid and heatmap views. Information display only.">
+  <meta name="keywords" content="Ghana Stock Exchange, GSE, stocks, market data, financial literacy, equities, heatmap">
   <meta name="author" content="Fluid Finance">
-  <title>Fluid Finance | Ghana Stock Exchange Trading</title>
+  <title>Fluid Finance | GSE Live Market Data</title>
+  <!-- Resolve the colour scheme before first paint; a stored choice wins over the device setting. -->
+  <script>
+    (function () {
+      var stored = null;
+      try { stored = localStorage.getItem('fluidfinance_theme'); } catch (e) { }
+      try { stored = stored ? JSON.parse(stored) : null; } catch (e) { }
+      var light = stored === 'light' || (stored !== 'dark' &&
+        window.matchMedia('(prefers-color-scheme: light)').matches);
+      document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark');
+    })();
+  </script>
 
   <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml"
-    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%234F7CFF'/%3E%3Cstop offset='100%25' stop-color='%236B94FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='20' fill='url(%23g)'/%3E%3Ctext x='50' y='65' font-family='Arial' font-size='50' font-weight='bold' fill='white' text-anchor='middle'%3eM%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/png" sizes="32x32" href="/logo/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/logo/mark-512.png">
+  <link rel="apple-touch-icon" href="/logo/favicon-180.png">
 
   <!-- Google Fonts - Poppins -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -136,47 +148,6 @@
       color: var(--text-primary);
     }
 
-    /* Trading Panel */
-    #trading-panel {
-      display: none;
-    }
-
-    #trading-panel.active {
-      display: block;
-    }
-
-    #trading-stock-selector.hidden {
-      display: none;
-    }
-
-    /* Trade Type Tabs */
-    .trade-type-tabs {
-      display: flex;
-      gap: 2px;
-      background-color: var(--bg-tertiary);
-      padding: 4px;
-      border-radius: var(--radius-lg);
-      margin-bottom: var(--space-4);
-    }
-
-    .trade-type-tabs button {
-      flex: 1;
-      padding: var(--space-3);
-      border-radius: var(--radius-md);
-      font-weight: var(--font-semibold);
-      transition: all var(--transition-fast);
-    }
-
-    .trade-type-tabs button[data-trade-type="buy"].active {
-      background-color: var(--success);
-      color: #000;
-    }
-
-    .trade-type-tabs button[data-trade-type="sell"].active {
-      background-color: var(--error);
-      color: #fff;
-    }
-
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .modal-content {
@@ -239,39 +210,14 @@
     <!-- ===== Sidebar Navigation ===== -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
-        <div class="sidebar-logo">
-          <div class="sidebar-logo-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="3">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
-          </div>
-          <div class="sidebar-logo-text">Fluid <span>Finance</span></div>
-        </div>
+        <a class="sidebar-logo" href="/" aria-label="Fluid Finance home">
+          <img class="sidebar-logo-img sidebar-logo-dark" src="/logo/lockup-02.png" alt="Fluid Finance">
+          <img class="sidebar-logo-img sidebar-logo-light" src="/logo/lockup-03.png" alt="Fluid Finance">
+        </a>
       </div>
 
       <nav class="sidebar-nav">
-        <div class="nav-item active" data-screen="dashboard">
-          <i class="fa-solid fa-chart-pie"></i>
-          <span class="nav-item-label">Dashboard</span>
-        </div>
-
-        <div class="nav-item" data-screen="market">
-          <i class="fa-solid fa-chart-line"></i>
-          <span class="nav-item-label">Market</span>
-        </div>
-
-        <div class="nav-item" data-screen="portfolio">
-          <i class="fa-solid fa-wallet"></i>
-          <span class="nav-item-label">Portfolio</span>
-        </div>
-
-        <div class="nav-item" data-screen="trading">
-          <i class="fa-solid fa-arrows-rotate"></i>
-          <span class="nav-item-label">Trading</span>
-        </div>
-
-        <div class="nav-item" data-screen="gse-live">
+        <div class="nav-item active" data-screen="gse-live">
           <i class="fa-solid fa-broadcast-tower"></i>
           <span class="nav-item-label">GSE Live</span>
         </div>
@@ -297,7 +243,7 @@
         <button class="hamburger-btn" id="hamburger-btn" title="Open Menu">
           <i class="fa-solid fa-bars"></i>
         </button>
-        <h1 class="main-header-title" id="header-title">Dashboard</h1>
+        <h1 class="main-header-title" id="header-title">GSE Live</h1>
         <div class="main-header-actions">
           <!-- Mobile Theme Toggle -->
           <button class="btn-icon mobile-theme-toggle" id="mobile-theme-toggle" title="Toggle Theme">
@@ -313,244 +259,8 @@
         </div>
       </header>
 
-      <!-- ===== Dashboard Screen ===== -->
-      <div class="screen active" id="screen-dashboard">
-        <div class="main-content">
-          <!-- Portfolio Summary -->
-          <section class="section">
-            <div class="card card-accent">
-              <div class="flex justify-between items-start mb-4">
-                <div>
-                  <div class="text-sm text-muted mb-1">Total Portfolio Value</div>
-                  <div class="text-4xl font-bold text-mono" id="portfolio-value">GHS 0.00</div>
-                </div>
-                <span class="badge badge-info">TODAY</span>
-              </div>
-              <div class="portfolio-change text-success" id="portfolio-change">
-                +GHS 0.00
-                <span class="badge badge-lg badge-success">+0.00%</span>
-              </div>
-              <canvas id="portfolio-mini-chart" style="width: 100%; height: 80px; margin-top: 16px;"></canvas>
-            </div>
-          </section>
-
-          <!-- Market Indices -->
-          <section class="section">
-            <div class="section-header">
-              <h3 class="section-title">Market Indices</h3>
-              <a href="#" class="section-link" onclick="App.navigateTo('market'); return false;">View All</a>
-            </div>
-            <div class="scroll-x" id="market-indices">
-              <!-- Populated by JS -->
-              <div class="index-card card">
-                <div class="skeleton skeleton-text" style="width: 60px;"></div>
-                <div class="skeleton skeleton-text" style="width: 100px; margin-top: 8px;"></div>
-              </div>
-              <div class="index-card card">
-                <div class="skeleton skeleton-text" style="width: 60px;"></div>
-                <div class="skeleton skeleton-text" style="width: 100px; margin-top: 8px;"></div>
-              </div>
-              <div class="index-card card">
-                <div class="skeleton skeleton-text" style="width: 60px;"></div>
-                <div class="skeleton skeleton-text" style="width: 100px; margin-top: 8px;"></div>
-              </div>
-            </div>
-          </section>
-
-          <!-- Watchlist -->
-          <section class="section">
-            <div class="section-header">
-              <h3 class="section-title">Watchlist</h3>
-              <a href="#" class="section-link" onclick="App.navigateTo('market'); return false;">Add Stocks</a>
-            </div>
-            <div id="watchlist-container">
-              <!-- Populated by JS -->
-            </div>
-          </section>
-
-          <!-- AI Insights -->
-          <section class="section">
-            <div class="section-header">
-              <h3 class="section-title">Top News & Alerts</h3>
-            </div>
-            <div id="ai-insights">
-              <!-- Populated by JS -->
-            </div>
-          </section>
-        </div>
-      </div>
-
-      <!-- ===== Market Screen ===== -->
-      <div class="screen" id="screen-market">
-        <div class="main-content">
-          <!-- Summary Cards -->
-          <div class="dashboard-grid mb-6">
-            <div class="card" id="top-performer-card">
-              <!-- Populated by JS -->
-            </div>
-            <div class="card" id="gse-composite-card">
-              <!-- Populated by JS -->
-            </div>
-          </div>
-
-          <!-- Filter Chips -->
-          <div class="flex gap-2 mb-4 scroll-x" id="market-filters">
-            <button class="chip active" data-filter="all">All</button>
-            <button class="chip" data-filter="gainers">Gainers</button>
-            <button class="chip" data-filter="losers">Losers</button>
-            <button class="chip" data-filter="active">Most Active</button>
-            <button class="chip" data-filter="price-desc">Price ↓</button>
-            <button class="chip" data-filter="price-asc">Price ↑</button>
-          </div>
-
-          <!-- Stock List -->
-          <section class="section">
-            <div class="section-header">
-              <h3 class="section-title">All Stocks</h3>
-            </div>
-            <div class="stock-list" id="stock-list">
-              <!-- Populated by JS -->
-            </div>
-          </section>
-        </div>
-      </div>
-
-      <!-- ===== Portfolio Screen ===== -->
-      <div class="screen" id="screen-portfolio">
-        <div class="main-content">
-          <!-- Portfolio Card -->
-          <div class="card card-accent mb-6" id="portfolio-card">
-            <!-- Populated by JS -->
-          </div>
-
-          <div class="grid grid-2 gap-6">
-            <!-- Holdings -->
-            <section>
-              <div class="section-header">
-                <h3 class="section-title">Holdings</h3>
-              </div>
-              <div class="stock-list" id="holdings-list">
-                <!-- Populated by JS -->
-              </div>
-            </section>
-
-            <!-- Allocation -->
-            <section>
-              <div class="section-header">
-                <h3 class="section-title">Allocation</h3>
-              </div>
-              <div class="card">
-                <canvas id="allocation-chart" style="width: 100%; height: 200px;"></canvas>
-                <div id="allocation-legend" class="mt-4 space-y-2">
-                  <!-- Populated by JS -->
-                </div>
-              </div>
-            </section>
-          </div>
-
-          <!-- Transactions -->
-          <section class="section mt-6">
-            <div class="section-header">
-              <h3 class="section-title">Transaction History</h3>
-            </div>
-            <div class="tabs mb-4" style="max-width: 300px;">
-              <button class="tab active">All</button>
-              <button class="tab">Buys</button>
-              <button class="tab">Sells</button>
-            </div>
-            <div class="card" id="transactions-list">
-              <!-- Populated by JS -->
-            </div>
-          </section>
-        </div>
-      </div>
-
-      <!-- ===== Trading Screen ===== -->
-      <div class="screen" id="screen-trading">
-        <div class="main-content">
-          <!-- Stock Selector -->
-          <div id="trading-stock-selector">
-            <section class="section">
-              <div class="section-header">
-                <h3 class="section-title">Select a Stock to Trade</h3>
-              </div>
-              <div class="stock-list" id="trading-stock-list">
-                <!-- Populated by JS -->
-              </div>
-            </section>
-          </div>
-
-          <!-- Trading Panel -->
-          <div id="trading-panel">
-            <!-- Stock Header -->
-            <div class="card mb-4 flex justify-between items-center" id="trading-stock-header">
-              <!-- Populated by JS -->
-            </div>
-
-            <!-- Trade Type Toggle -->
-            <div class="trade-type-tabs">
-              <button data-trade-type="buy" class="active">Buy</button>
-              <button data-trade-type="sell">Sell</button>
-            </div>
-
-            <!-- Order Form -->
-            <div class="card mb-4">
-              <div class="input-group mb-4">
-                <label class="input-label">Order Type</label>
-                <select class="input select">
-                  <option value="market">Market Order</option>
-                  <option value="limit">Limit Order</option>
-                  <option value="stop-loss">Stop-Loss Order</option>
-                </select>
-              </div>
-
-              <div class="grid grid-2 gap-4 mb-4">
-                <div class="input-group">
-                  <label class="input-label">Quantity</label>
-                  <input type="number" class="input" id="trade-quantity" placeholder="0" min="1">
-                </div>
-                <div class="input-group">
-                  <label class="input-label">Price (GHS)</label>
-                  <input type="number" class="input" id="trade-price" placeholder="0.00" step="0.01">
-                </div>
-              </div>
-
-              <div class="flex justify-between items-center p-3 bg-tertiary rounded-lg"
-                style="background-color: var(--bg-tertiary); border-radius: var(--radius-lg);">
-                <span class="text-muted">Total</span>
-                <span class="text-xl font-bold text-mono" id="trade-total">GHS 0.00</span>
-              </div>
-            </div>
-
-            <!-- Order Book -->
-            <div class="card mb-4">
-              <h4 class="card-title mb-4">Order Book</h4>
-              <canvas id="order-book-chart" style="width: 100%; height: 150px;"></canvas>
-            </div>
-
-            <!-- AI Insight -->
-            <div class="ai-insight mb-4">
-              <div class="ai-insight-header">
-                <svg class="ai-insight-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                </svg>
-                <span class="ai-insight-label">Trading Tip</span>
-              </div>
-              <p class="ai-insight-content">
-                Consider setting a stop-loss order to protect your investment from significant downturns.
-              </p>
-            </div>
-
-            <!-- Submit Button -->
-            <button class="btn btn-lg btn-full btn-success" id="submit-trade">
-              Place Buy Order
-            </button>
-          </div>
-        </div>
-      </div>
-
       <!-- ===== GSE Live Screen ===== -->
-      <div class="screen" id="screen-gse-live">
+      <div class="screen active" id="screen-gse-live">
         <div class="main-content">
           <!-- Market Status Banner -->
           <div id="market-status" class="mb-4">
@@ -767,7 +477,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
             <div style="font-weight: 600;">Notifications</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted);">Push notifications for trades</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Push notifications for market alerts</div>
           </div>
           <div class="toggle active"></div>
         </div>

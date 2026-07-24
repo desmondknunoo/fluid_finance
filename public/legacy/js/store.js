@@ -5,18 +5,15 @@
 // Storage keys
 const STORAGE_KEYS = {
     THEME: 'fluidfinance_theme',
-    PORTFOLIO: 'fluidfinance_portfolio',
     WATCHLIST: 'fluidfinance_watchlist',
-    TRANSACTIONS: 'fluidfinance_transactions',
     ALERTS: 'fluidfinance_alerts'
 };
 
 // Initial state
 const initialState = {
     // UI State
-    theme: 'dark',
-    currentScreen: 'dashboard',
-    marketFilter: 'all', // all, gainers, losers, active, price-desc, price-asc
+    theme: 'system',
+    currentScreen: 'gse-live',
     isLoading: false,
     error: null,
 
@@ -25,18 +22,8 @@ const initialState = {
     stocksLastUpdated: null,
     selectedStock: null,
 
-    // Portfolio
-    portfolio: {
-        holdings: [],
-        totalValue: 0,
-        totalGainLoss: 0
-    },
-
     // Watchlist
     watchlist: [],
-
-    // Transactions
-    transactions: [],
 
     // Alerts
     alerts: []
@@ -81,9 +68,25 @@ const Store = {
         this.setTheme(newTheme);
     },
 
+    // No explicit choice means follow the device setting, and keep following it
+    // for as long as the page is open.
+    systemTheme() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
+            ? 'light'
+            : 'dark';
+    },
+
     loadTheme() {
-        const savedTheme = getFromStorage(STORAGE_KEYS.THEME, 'dark');
-        this.setTheme(savedTheme);
+        const savedTheme = getFromStorage(STORAGE_KEYS.THEME, null);
+        this.setTheme(savedTheme || this.systemTheme());
+
+        if (!savedTheme && window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+                if (!getFromStorage(STORAGE_KEYS.THEME, null)) {
+                    this.setTheme(this.systemTheme());
+                }
+            });
+        }
     },
 
     // ===== Screen Navigation =====
@@ -116,104 +119,8 @@ const Store = {
         this.setState({ selectedStock: stock });
     },
 
-    setMarketFilter(filter) {
-        this.setState({ marketFilter: filter });
-    },
-
     getStockBySymbol(symbol) {
         return this.state.stocks.find(s => s.symbol === symbol);
-    },
-
-    // ===== Portfolio Management =====
-    loadPortfolio() {
-        const holdings = getFromStorage(STORAGE_KEYS.PORTFOLIO, []);
-        this.updatePortfolio(holdings);
-    },
-
-    updatePortfolio(holdings) {
-        // Calculate totals
-        let totalValue = 0;
-        let totalGainLoss = 0;
-
-        holdings.forEach(holding => {
-            const currentStock = this.getStockBySymbol(holding.symbol);
-            const currentPrice = currentStock ? currentStock.price : holding.averagePrice;
-            const value = currentPrice * holding.shares;
-            const cost = holding.averagePrice * holding.shares;
-
-            holding.currentPrice = currentPrice;
-            holding.currentValue = value;
-            holding.gainLoss = value - cost;
-            holding.gainLossPercent = cost > 0 ? ((value - cost) / cost) * 100 : 0;
-
-            totalValue += value;
-            totalGainLoss += holding.gainLoss;
-        });
-
-        this.setState({
-            portfolio: {
-                holdings,
-                totalValue,
-                totalGainLoss,
-                gainLossPercent: totalValue > 0 ? (totalGainLoss / (totalValue - totalGainLoss)) * 100 : 0
-            }
-        });
-
-        saveToStorage(STORAGE_KEYS.PORTFOLIO, holdings);
-    },
-
-    addHolding(symbol, shares, price) {
-        const holdings = [...this.state.portfolio.holdings];
-        const existingIndex = holdings.findIndex(h => h.symbol === symbol);
-
-        if (existingIndex >= 0) {
-            // Update existing holding (average cost)
-            const existing = holdings[existingIndex];
-            const totalShares = existing.shares + shares;
-            const totalCost = (existing.shares * existing.averagePrice) + (shares * price);
-            holdings[existingIndex] = {
-                ...existing,
-                shares: totalShares,
-                averagePrice: totalCost / totalShares
-            };
-        } else {
-            // Add new holding
-            holdings.push({
-                symbol,
-                shares,
-                averagePrice: price,
-                addedAt: new Date().toISOString()
-            });
-        }
-
-        this.updatePortfolio(holdings);
-
-        // Record transaction
-        this.addTransaction('BUY', symbol, shares, price);
-    },
-
-    removeHolding(symbol, shares, price) {
-        const holdings = [...this.state.portfolio.holdings];
-        const existingIndex = holdings.findIndex(h => h.symbol === symbol);
-
-        if (existingIndex >= 0) {
-            const existing = holdings[existingIndex];
-            if (shares >= existing.shares) {
-                // Remove entire holding
-                holdings.splice(existingIndex, 1);
-            } else {
-                // Reduce shares
-                holdings[existingIndex] = {
-                    ...existing,
-                    shares: existing.shares - shares
-                };
-            }
-
-            this.updatePortfolio(holdings);
-
-            // Record transaction
-            this.addTransaction('SELL', symbol, shares, price);
-        }
     },
 
     // ===== Watchlist =====
@@ -242,28 +149,6 @@ const Store = {
 
     getWatchlistStocks() {
         return this.state.stocks.filter(s => this.state.watchlist.includes(s.symbol));
-    },
-
-    // ===== Transactions =====
-    loadTransactions() {
-        const transactions = getFromStorage(STORAGE_KEYS.TRANSACTIONS, []);
-        this.setState({ transactions });
-    },
-
-    addTransaction(type, symbol, quantity, price) {
-        const transaction = {
-            id: Date.now().toString(),
-            type,
-            symbol,
-            quantity,
-            price,
-            total: quantity * price,
-            date: new Date().toISOString()
-        };
-
-        const transactions = [transaction, ...this.state.transactions].slice(0, 100);
-        this.setState({ transactions });
-        saveToStorage(STORAGE_KEYS.TRANSACTIONS, transactions);
     },
 
     // ===== Alerts =====
@@ -296,23 +181,17 @@ const Store = {
     // ===== Initialize =====
     init() {
         this.loadTheme();
-        this.loadPortfolio();
         this.loadWatchlist();
-        this.loadTransactions();
         this.loadAlerts();
     },
 
     // ===== Reset =====
     reset() {
-        removeFromStorage(STORAGE_KEYS.PORTFOLIO);
         removeFromStorage(STORAGE_KEYS.WATCHLIST);
-        removeFromStorage(STORAGE_KEYS.TRANSACTIONS);
         removeFromStorage(STORAGE_KEYS.ALERTS);
 
         this.setState({
-            portfolio: { holdings: [], totalValue: 0, totalGainLoss: 0 },
             watchlist: [],
-            transactions: [],
             alerts: []
         });
     }

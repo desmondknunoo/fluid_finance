@@ -32,7 +32,7 @@ export const SocialProof = () => {
     ];
 
     return (
-        <section className="py-24 bg-black border-t border-white/[0.05]">
+        <section className="py-24 bg-canvas border-t border-ink/[0.05]">
             <div className="container mx-auto px-4 md:px-6">
                 {/* Partner Logos */}
                 <motion.p
@@ -40,7 +40,7 @@ export const SocialProof = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="text-center text-xs font-bold uppercase tracking-[0.3em] text-white/20 mb-12"
+                    className="text-center text-xs font-bold uppercase tracking-[0.3em] text-ink/20 mb-12"
                 >
                     Trusted by Institutions & Data Partners
                 </motion.p>
@@ -61,8 +61,8 @@ export const SocialProof = () => {
                             whileHover={{ scale: 1.1 }}
                             className="flex items-center gap-3"
                         >
-                            <partner.icon size={24} className="text-white" />
-                            <span className="font-bold text-white tracking-widest text-sm">{partner.name}</span>
+                            <partner.icon size={24} className="text-ink" />
+                            <span className="font-bold text-ink tracking-widest text-sm">{partner.name}</span>
                         </motion.div>
                     ))}
                 </motion.div>
@@ -78,8 +78,8 @@ export const SocialProof = () => {
                             transition={{ duration: 0.6, delay: stat.delay }}
                             className="text-center"
                         >
-                            <h4 className="text-3xl md:text-5xl font-bold text-white mb-2">{stat.value}</h4>
-                            <p className="text-xs text-white/40 uppercase tracking-widest">{stat.label}</p>
+                            <h4 className="text-3xl md:text-5xl font-bold text-ink mb-2">{stat.value}</h4>
+                            <p className="text-xs text-ink/40 uppercase tracking-widest">{stat.label}</p>
                         </motion.div>
                     ))}
                 </div>
@@ -94,15 +94,15 @@ export const SocialProof = () => {
                             viewport={{ once: true }}
                             transition={{ duration: 0.6, delay: idx * 0.2 }}
                             whileHover={{ y: -5 }}
-                            className="p-10 rounded-3xl bg-white/[0.03] border border-white/[0.08] hover:border-white/20 transition-all"
+                            className="p-10 rounded-3xl bg-ink/[0.03] border border-ink/[0.08] hover:border-ink/20 transition-all"
                         >
-                            <div className="flex gap-1 text-white/40 mb-6">
+                            <div className="flex gap-1 text-ink/40 mb-6">
                                 {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" stroke="none" />)}
                             </div>
-                            <p className="text-lg text-white/80 italic mb-8">"{t.quote}"</p>
+                            <p className="text-lg text-ink/80 italic mb-8">"{t.quote}"</p>
                             <div>
-                                <h5 className="font-bold text-white">{t.author}</h5>
-                                <p className="text-sm text-white/40">{t.role}</p>
+                                <h5 className="font-bold text-ink">{t.author}</h5>
+                                <p className="text-sm text-ink/40">{t.role}</p>
                             </div>
                         </motion.div>
                     ))}
@@ -114,21 +114,21 @@ export const SocialProof = () => {
 
 export const PricingPlans = () => {
     return (
-        <section id="pricing" className="py-24 bg-black border-t border-white/[0.05]">
+        <section id="pricing" className="py-24 bg-canvas border-t border-ink/[0.05]">
             <div className="container mx-auto px-4 md:px-6">
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
-                    <p className="text-white/40 max-w-2xl mx-auto">
-                        Choose the plan that fits your trading style. From casual tracking to institutional-grade analytics.
+                    <h2 className="text-3xl md:text-5xl font-bold text-ink mb-4">Simple, Transparent Pricing</h2>
+                    <p className="text-ink/40 max-w-2xl mx-auto">
+                        Choose the plan that fits how you follow the market. From casual tracking to institutional-grade analytics.
                     </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                     {/* Free Plan */}
-                    <div className="p-10 rounded-3xl bg-white/[0.03] border border-white/[0.08] flex flex-col">
-                        <h3 className="text-xl font-bold text-white mb-2">Free Tier</h3>
-                        <p className="text-sm text-white/40 mb-6 font-poppins">Delayed data for casual monitoring.</p>
-                        <div className="text-4xl font-bold text-white mb-8">GHS 0<span className="text-lg text-white/30 font-normal">/mo</span></div>
+                    <div className="p-10 rounded-3xl bg-ink/[0.03] border border-ink/[0.08] flex flex-col">
+                        <h3 className="text-xl font-bold text-ink mb-2">Free Tier</h3>
+                        <p className="text-sm text-ink/40 mb-6 font-poppins">Delayed data for casual monitoring.</p>
+                        <div className="text-4xl font-bold text-ink mb-8">GHS 0<span className="text-lg text-ink/30 font-normal">/mo</span></div>
 
                         <div className="flex flex-col gap-4 mb-12 flex-1">
                             {[
@@ -138,7 +138,7 @@ export const PricingPlans = () => {
                                 "Standard email alerts",
                                 "Community support"
                             ].map((feature) => (
-                                <div key={feature} className="flex gap-3 text-sm text-white/60 font-poppins">
+                                <div key={feature} className="flex gap-3 text-sm text-ink/60 font-poppins">
                                     <Check size={18} className="text-gray-500" /> {feature}
                                 </div>
                             ))}
@@ -146,20 +146,20 @@ export const PricingPlans = () => {
 
                         <button
                             onClick={() => window.location.href = "/legacy/index.html"}
-                            className="w-full py-4 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition-colors font-poppins"
+                            className="w-full py-4 rounded-xl bg-ink/5 border border-ink/10 text-ink font-medium hover:bg-ink/10 transition-colors font-poppins"
                         >
                             Get Started
                         </button>
                     </div>
 
                     {/* Pro Plan */}
-                    <div className="p-10 rounded-3xl bg-white/[0.06] border border-white/20 flex flex-col relative overflow-hidden">
-                        <div className="absolute top-6 right-6 px-3 py-1 rounded-full bg-white text-black text-[10px] font-bold uppercase tracking-widest">
+                    <div className="p-10 rounded-3xl bg-ink/[0.06] border border-ink/20 flex flex-col relative overflow-hidden">
+                        <div className="absolute top-6 right-6 px-3 py-1 rounded-full bg-ink text-canvas text-[10px] font-bold uppercase tracking-widest">
                             Most Popular
                         </div>
-                        <h3 className="text-xl font-bold text-white mb-2 font-poppins">Pro Tier</h3>
-                        <p className="text-sm text-white/40 mb-6 font-poppins">Real-time data for serious traders.</p>
-                        <div className="text-4xl font-bold text-white mb-8">GHS 99<span className="text-lg text-white/30 font-normal">/mo</span></div>
+                        <h3 className="text-xl font-bold text-ink mb-2 font-poppins">Pro Tier</h3>
+                        <p className="text-sm text-ink/40 mb-6 font-poppins">Real-time data for serious traders.</p>
+                        <div className="text-4xl font-bold text-ink mb-8">GHS 99<span className="text-lg text-ink/30 font-normal">/mo</span></div>
 
                         <div className="flex flex-col gap-4 mb-12 flex-1">
                             {[
@@ -170,15 +170,15 @@ export const PricingPlans = () => {
                                 "Priority concierge support",
                                 "Export to CSV/Excel"
                             ].map((feature) => (
-                                <div key={feature} className="flex gap-3 text-sm text-white font-poppins">
-                                    <Check size={18} className="text-white" /> {feature}
+                                <div key={feature} className="flex gap-3 text-sm text-ink font-poppins">
+                                    <Check size={18} className="text-ink" /> {feature}
                                 </div>
                             ))}
                         </div>
 
                         <button
                             onClick={() => window.location.href = "/legacy/index.html"}
-                            className="w-full py-4 rounded-xl bg-white text-black font-medium hover:bg-gray-200 transition-colors font-poppins shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                            className="w-full py-4 rounded-xl bg-ink text-canvas font-medium hover:opacity-85 transition-opacity font-poppins shadow-[0_0_20px_rgb(var(--ink)/0.1)]"
                         >
                             Go Pro Now
                         </button>

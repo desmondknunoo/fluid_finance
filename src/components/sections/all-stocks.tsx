@@ -94,7 +94,7 @@ export function AllStocks({ onSelect }: { onSelect: (symbol: string) => void }) 
     };
 
     return (
-        <section id="all-stocks" className="relative bg-black pb-24 pt-4 md:pt-12">
+        <section id="all-stocks" className="relative bg-canvas pb-24 pt-4 md:pt-12">
             <div className="container relative z-10 mx-auto px-4 md:px-6">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -103,8 +103,8 @@ export function AllStocks({ onSelect }: { onSelect: (symbol: string) => void }) 
                     transition={{ duration: 0.5 }}
                     className="mb-8"
                 >
-                    <h2 className="text-2xl font-bold text-white md:text-3xl">Every listed company</h2>
-                    <p className="mt-2 max-w-2xl text-sm text-white/40">
+                    <h2 className="text-2xl font-bold text-ink md:text-3xl">Every listed company</h2>
+                    <p className="mt-2 max-w-2xl text-sm text-ink/40">
                         All {stocks.length || "—"} equities on the Ghana Stock Exchange, live from the exchange
                         feed. Select any ticker for its full price history.
                     </p>
@@ -115,24 +115,24 @@ export function AllStocks({ onSelect }: { onSelect: (symbol: string) => void }) 
                     <div className="relative flex-1">
                         <Search
                             size={16}
-                            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/30"
+                            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/30"
                         />
                         <input
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             placeholder="Search ticker or company"
                             aria-label="Search stocks"
-                            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] py-3 pl-11 pr-4 text-sm text-white placeholder:text-white/30 focus:border-white/20 focus:outline-none"
+                            className="w-full rounded-xl border border-ink/[0.08] bg-ink/[0.03] py-3 pl-11 pr-4 text-sm text-ink placeholder:text-ink/30 focus:border-ink/20 focus:outline-none"
                         />
                     </div>
                     <select
                         value={sector}
                         onChange={(e) => setSector(e.target.value)}
                         aria-label="Filter by sector"
-                        className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white focus:border-white/20 focus:outline-none"
+                        className="rounded-xl border border-ink/[0.08] bg-ink/[0.03] px-4 py-3 text-sm text-ink focus:border-ink/20 focus:outline-none"
                     >
                         {sectors.map((name) => (
-                            <option key={name} value={name} className="bg-black">
+                            <option key={name} value={name} className="bg-canvas">
                                 {name}
                             </option>
                         ))}
@@ -141,12 +141,12 @@ export function AllStocks({ onSelect }: { onSelect: (symbol: string) => void }) 
 
                 {loading && (
                     <div className="flex min-h-[300px] items-center justify-center">
-                        <Loader2 className="h-8 w-8 animate-spin text-white/40" />
+                        <Loader2 className="h-8 w-8 animate-spin text-ink/40" />
                     </div>
                 )}
 
                 {error && !loading && (
-                    <div className="flex min-h-[200px] items-center justify-center text-white/40">{error}</div>
+                    <div className="flex min-h-[200px] items-center justify-center text-ink/40">{error}</div>
                 )}
 
                 {!loading && !error && (
@@ -155,12 +155,12 @@ export function AllStocks({ onSelect }: { onSelect: (symbol: string) => void }) 
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
-                        className="overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03]"
+                        className="overflow-hidden rounded-2xl border border-ink/[0.08] bg-ink/[0.03]"
                     >
                         <div className="overflow-x-auto">
                             <table className="w-full min-w-[640px] text-left">
                                 <thead>
-                                    <tr className="border-b border-white/[0.08] bg-white/[0.01]">
+                                    <tr className="border-b border-ink/[0.08] bg-ink/[0.01]">
                                         {(
                                             [
                                                 ["symbol", "Company", "text-left"],
@@ -172,20 +172,20 @@ export function AllStocks({ onSelect }: { onSelect: (symbol: string) => void }) 
                                             <th
                                                 key={key}
                                                 className={cn(
-                                                    "px-4 py-4 text-xs font-semibold uppercase tracking-wider text-white/40 md:px-6",
+                                                    "px-4 py-4 text-xs font-semibold uppercase tracking-wider text-ink/40 md:px-6",
                                                     align,
                                                 )}
                                             >
                                                 <button
                                                     onClick={() => toggleSort(key)}
-                                                    className="transition-colors hover:text-white"
+                                                    className="transition-colors hover:text-ink"
                                                 >
                                                     {label}
                                                     {sort === key && (descending ? " ↓" : " ↑")}
                                                 </button>
                                             </th>
                                         ))}
-                                        <th className="hidden px-4 py-4 text-xs font-semibold uppercase tracking-wider text-white/40 sm:table-cell md:px-6">
+                                        <th className="hidden px-4 py-4 text-xs font-semibold uppercase tracking-wider text-ink/40 sm:table-cell md:px-6">
                                             3M
                                         </th>
                                         <th className="px-4 py-4 md:px-6" />
@@ -194,7 +194,7 @@ export function AllStocks({ onSelect }: { onSelect: (symbol: string) => void }) 
                                 <tbody>
                                     {visible.length === 0 ? (
                                         <tr>
-                                            <td colSpan={6} className="px-6 py-10 text-center text-white/40">
+                                            <td colSpan={6} className="px-6 py-10 text-center text-ink/40">
                                                 No companies match “{query}”.
                                             </td>
                                         </tr>
@@ -212,22 +212,22 @@ export function AllStocks({ onSelect }: { onSelect: (symbol: string) => void }) 
                                                             onSelect(row.symbol);
                                                         }
                                                     }}
-                                                    className="cursor-pointer border-b border-white/[0.04] transition-colors last:border-0 hover:bg-white/[0.03] focus:bg-white/[0.05] focus:outline-none"
+                                                    className="cursor-pointer border-b border-ink/[0.04] transition-colors last:border-0 hover:bg-ink/[0.03] focus:bg-ink/[0.05] focus:outline-none"
                                                 >
                                                     <td className="px-4 py-3.5 md:px-6">
                                                         <div className="flex items-center gap-3">
                                                             <TickerLogo symbol={row.symbol} size={36} />
                                                             <div className="min-w-0">
-                                                                <div className="font-bold text-white">
+                                                                <div className="font-bold text-ink">
                                                                     {row.symbol}
                                                                 </div>
-                                                                <div className="truncate text-xs text-white/40">
+                                                                <div className="truncate text-xs text-ink/40">
                                                                     {row.company}
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td className="px-4 py-3.5 text-right font-mono text-white md:px-6">
+                                                    <td className="px-4 py-3.5 text-right font-mono text-ink md:px-6">
                                                         {formatCedis(row.price)}
                                                     </td>
                                                     <td className="px-4 py-3.5 text-right md:px-6">
@@ -246,7 +246,7 @@ export function AllStocks({ onSelect }: { onSelect: (symbol: string) => void }) 
                                                             {row.changePercent.toFixed(2)}%
                                                         </span>
                                                     </td>
-                                                    <td className="hidden px-4 py-3.5 text-right font-mono text-white/60 md:table-cell md:px-6">
+                                                    <td className="hidden px-4 py-3.5 text-right font-mono text-ink/60 md:table-cell md:px-6">
                                                         {row.volume.toLocaleString()}
                                                     </td>
                                                     <td className="hidden px-4 py-3.5 sm:table-cell md:px-6">
@@ -255,7 +255,7 @@ export function AllStocks({ onSelect }: { onSelect: (symbol: string) => void }) 
                                                     <td className="px-4 py-3.5 text-right md:px-6">
                                                         <ChevronRight
                                                             size={16}
-                                                            className="ml-auto text-white/30"
+                                                            className="ml-auto text-ink/30"
                                                             aria-hidden="true"
                                                         />
                                                     </td>
@@ -270,15 +270,15 @@ export function AllStocks({ onSelect }: { onSelect: (symbol: string) => void }) 
                 )}
 
                 {!loading && !error && (
-                    <p className="mt-4 text-center text-xs text-white/25">
+                    <p className="mt-4 text-center text-xs text-ink/25">
                         Showing {visible.length} of {stocks.length} listed equities · quotes from the Ghana Stock
                         Exchange, delayed up to 15 minutes
                     </p>
                 )}
             </div>
 
-            <div className="pointer-events-none absolute left-0 top-1/4 h-96 w-96 rounded-full bg-white/[0.02] blur-[120px]" />
-            <div className="pointer-events-none absolute bottom-1/4 right-0 h-96 w-96 rounded-full bg-white/[0.02] blur-[120px]" />
+            <div className="pointer-events-none absolute left-0 top-1/4 h-96 w-96 rounded-full bg-ink/[0.02] blur-[120px]" />
+            <div className="pointer-events-none absolute bottom-1/4 right-0 h-96 w-96 rounded-full bg-ink/[0.02] blur-[120px]" />
         </section>
     );
 }

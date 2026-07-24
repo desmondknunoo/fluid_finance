@@ -3,7 +3,9 @@
 
 <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/logo/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/logo/mark-512.png" />
+    <link rel="apple-touch-icon" href="/logo/favicon-180.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fluid Finance</title>
     <!-- Google Fonts - Poppins -->
@@ -11,6 +13,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <!-- Resolve the colour scheme before first paint so the page never flashes
+         the wrong theme. Mirrors the logic in src/lib/theme.tsx. -->
+    <script>
+        (function () {
+            var stored = null;
+            try { stored = localStorage.getItem('fluidfinance:theme'); } catch (e) { }
+            var dark = stored === 'dark' || (stored !== 'light' &&
+                window.matchMedia('(prefers-color-scheme: dark)').matches);
+            var root = document.documentElement;
+            root.classList.add(dark ? 'dark' : 'light');
+            root.style.colorScheme = dark ? 'dark' : 'light';
+        })();
+    </script>
 </head>
 
 <body>

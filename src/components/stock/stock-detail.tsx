@@ -5,8 +5,6 @@ import {
     Bell,
     BellRing,
     Download,
-    Eye,
-    EyeOff,
     Globe,
     Loader2,
     Mail,
@@ -34,9 +32,9 @@ import { getSeries, periodChange, recordClose, RANGES, sliceRange, type RangeKey
 
 function StatRow({ label, value }: { label: string; value: string }) {
     return (
-        <div className="flex items-baseline justify-between border-b border-white/[0.05] py-3 last:border-0">
-            <span className="text-sm text-white/40">{label}</span>
-            <span className="font-mono text-sm text-white">{value}</span>
+        <div className="flex items-baseline justify-between border-b border-ink/[0.05] py-3 last:border-0">
+            <span className="text-sm text-ink/40">{label}</span>
+            <span className="font-mono text-sm text-ink">{value}</span>
         </div>
     );
 }
@@ -57,8 +55,8 @@ function ActionChip({
             type="button"
             onClick={onClick}
             className={cn(
-                "flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-3.5 text-sm font-medium transition-colors hover:border-white/20 hover:bg-white/[0.06]",
-                tone === "positive" ? "text-emerald-400" : "text-white/70",
+                "flex flex-1 items-center justify-center gap-2 rounded-xl border border-ink/[0.08] bg-ink/[0.03] px-3 py-3.5 text-sm font-medium transition-colors hover:border-ink/20 hover:bg-ink/[0.06]",
+                tone === "positive" ? "text-emerald-400" : "text-ink/70",
             )}
         >
             {icon}
@@ -76,7 +74,6 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
     const [error, setError] = useState<string | null>(null);
     const [range, setRange] = useState<RangeKey>("ALL");
     const [tab, setTab] = useState<Tab>("details");
-    const [holdingsVisible, setHoldingsVisible] = useState(false);
     const [shareOpen, setShareOpen] = useState(false);
 
     useEffect(() => {
@@ -124,11 +121,11 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
 
     if (error) {
         return (
-            <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-black px-6 text-center">
-                <p className="text-white/60">{error}</p>
+            <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-canvas px-6 text-center">
+                <p className="text-ink/60">{error}</p>
                 <button
                     onClick={onBack}
-                    className="rounded-full border border-white/10 px-5 py-2 text-sm text-white/70 transition-colors hover:text-white"
+                    className="rounded-full border border-ink/10 px-5 py-2 text-sm text-ink/70 transition-colors hover:text-ink"
                 >
                     Back to market
                 </button>
@@ -138,8 +135,8 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
 
     if (!stock || !series) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-black">
-                <Loader2 className="h-8 w-8 animate-spin text-white/40" />
+            <div className="flex min-h-screen items-center justify-center bg-canvas">
+                <Loader2 className="h-8 w-8 animate-spin text-ink/40" />
             </div>
         );
     }
@@ -155,14 +152,14 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
     });
 
     return (
-        <div className="min-h-screen bg-black pb-32 text-white selection:bg-white selection:text-black">
+        <div className="min-h-screen bg-canvas pb-16 text-ink selection:bg-ink selection:text-canvas">
             {/* Header */}
-            <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-black/85 backdrop-blur-md">
+            <header className="sticky top-0 z-40 border-b border-ink/[0.08] bg-canvas/85 backdrop-blur-md">
                 <div className="mx-auto flex max-w-3xl items-center px-4 py-4 md:px-6">
                     <button
                         onClick={onBack}
                         aria-label="Back to market"
-                        className="rounded-full p-2 text-white/70 transition-colors hover:bg-white/[0.06] hover:text-white"
+                        className="rounded-full p-2 text-ink/70 transition-colors hover:bg-ink/[0.06] hover:text-ink"
                     >
                         <ArrowLeft size={20} />
                     </button>
@@ -170,7 +167,7 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                     <button
                         onClick={() => setShareOpen(true)}
                         aria-label={`Share ${stock.symbol}`}
-                        className="rounded-full p-2 text-white/70 transition-colors hover:bg-white/[0.06] hover:text-white"
+                        className="rounded-full p-2 text-ink/70 transition-colors hover:bg-ink/[0.06] hover:text-ink"
                     >
                         <Share2 size={19} />
                     </button>
@@ -206,12 +203,12 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                     <div className="min-w-0 flex-1">
                         <h2 className="truncate text-xl font-bold">{stock.company}</h2>
                         <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                            <span className="rounded bg-white/[0.08] px-2 py-0.5 font-mono text-xs text-white/70">
+                            <span className="rounded bg-ink/[0.08] px-2 py-0.5 font-mono text-xs text-ink/70">
                                 {stock.symbol}
                             </span>
-                            <span className="text-xs text-white/40">Equity</span>
-                            <span className="text-white/20">·</span>
-                            <span className="text-xs text-white/40">{meta.sector}</span>
+                            <span className="text-xs text-ink/40">Equity</span>
+                            <span className="text-ink/20">·</span>
+                            <span className="text-xs text-ink/40">{meta.sector}</span>
                         </div>
                     </div>
                     <div className="text-right">
@@ -230,14 +227,14 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                     </div>
                 </motion.section>
 
-                <div className="flex flex-wrap items-center gap-2 pb-4 text-xs text-white/40">
+                <div className="flex flex-wrap items-center gap-2 pb-4 text-xs text-ink/40">
                     <span>As of {asOf} GMT</span>
-                    <span className="text-white/20">·</span>
+                    <span className="text-ink/20">·</span>
                     <span className="flex items-center gap-1.5">
                         <span
                             className={cn(
                                 "h-2 w-2 rounded-full",
-                                marketOpen ? "animate-pulse bg-emerald-400" : "bg-white/30",
+                                marketOpen ? "animate-pulse bg-emerald-400" : "bg-ink/30",
                             )}
                         />
                         {marketOpen ? "Market open" : "Market closed"}
@@ -249,10 +246,10 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.05 }}
-                    className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4"
+                    className="rounded-2xl border border-ink/[0.08] bg-ink/[0.02] p-4"
                 >
                     <div className="mb-2 flex items-baseline justify-between">
-                        <span className="text-xs uppercase tracking-wider text-white/40">Price history</span>
+                        <span className="text-xs uppercase tracking-wider text-ink/40">Price history</span>
                         <span
                             className={cn(
                                 "font-mono text-xs",
@@ -266,7 +263,7 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
 
                     <PriceChart points={visible} positive={windowChange.change >= 0} height={300} />
 
-                    <div className="mt-3 flex items-center justify-between gap-1 border-t border-white/[0.06] pt-3">
+                    <div className="mt-3 flex items-center justify-between gap-1 border-t border-ink/[0.06] pt-3">
                         {RANGES.map((key) => (
                             <button
                                 key={key}
@@ -274,8 +271,8 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                                 className={cn(
                                     "flex-1 rounded-lg py-2 text-xs font-semibold transition-colors",
                                     range === key
-                                        ? "bg-white/[0.1] text-white"
-                                        : "text-white/40 hover:text-white/80",
+                                        ? "bg-ink/[0.1] text-ink"
+                                        : "text-ink/40 hover:text-ink/80",
                                 )}
                             >
                                 {key}
@@ -283,7 +280,7 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                         ))}
                     </div>
 
-                    <p className="mt-3 text-[11px] leading-relaxed text-white/30">
+                    <p className="mt-3 text-[11px] leading-relaxed text-ink/30">
                         {series.recordedFrom
                             ? `Closes recorded live from ${new Date(series.recordedFrom).toLocaleDateString("en-GB", {
                                   day: "numeric",
@@ -316,17 +313,17 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                     ].map((item) => (
                         <div
                             key={item.label}
-                            className="rounded-xl border border-white/[0.08] bg-white/[0.02] px-3 py-3"
+                            className="rounded-xl border border-ink/[0.08] bg-ink/[0.02] px-3 py-3"
                         >
-                            <div className="text-[10px] uppercase tracking-wider text-white/40">{item.label}</div>
-                            <div className="mt-1 font-mono text-sm text-white">{item.value}</div>
+                            <div className="text-[10px] uppercase tracking-wider text-ink/40">{item.label}</div>
+                            <div className="mt-1 font-mono text-sm text-ink">{item.value}</div>
                         </div>
                     ))}
                 </section>
 
                 {/* Tabs */}
-                <section className="mt-6 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02]">
-                    <div className="flex border-b border-white/[0.08]">
+                <section className="mt-6 overflow-hidden rounded-2xl border border-ink/[0.08] bg-ink/[0.02]">
+                    <div className="flex border-b border-ink/[0.08]">
                         {(
                             [
                                 ["details", "Details"],
@@ -339,7 +336,7 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                                 onClick={() => setTab(key)}
                                 className={cn(
                                     "flex-1 py-3.5 text-sm font-medium transition-colors",
-                                    tab === key ? "bg-white/[0.05] text-white" : "text-white/40 hover:text-white",
+                                    tab === key ? "bg-ink/[0.05] text-ink" : "text-ink/40 hover:text-ink",
                                 )}
                             >
                                 {label}
@@ -391,29 +388,29 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                                 {detail?.company ? (
                                     <div className="space-y-4">
                                         <div>
-                                            <div className="text-xs uppercase tracking-wider text-white/40">
+                                            <div className="text-xs uppercase tracking-wider text-ink/40">
                                                 Registered name
                                             </div>
-                                            <div className="mt-1 text-sm text-white">{detail.company.name}</div>
+                                            <div className="mt-1 text-sm text-ink">{detail.company.name}</div>
                                         </div>
                                         {detail.company.address && (
                                             <div className="flex gap-3">
-                                                <MapPin size={16} className="mt-0.5 shrink-0 text-white/30" />
-                                                <span className="text-sm text-white/70">{detail.company.address}</span>
+                                                <MapPin size={16} className="mt-0.5 shrink-0 text-ink/30" />
+                                                <span className="text-sm text-ink/70">{detail.company.address}</span>
                                             </div>
                                         )}
                                         {detail.company.telephone && (
                                             <div className="flex gap-3">
-                                                <Phone size={16} className="mt-0.5 shrink-0 text-white/30" />
-                                                <span className="text-sm text-white/70">{detail.company.telephone}</span>
+                                                <Phone size={16} className="mt-0.5 shrink-0 text-ink/30" />
+                                                <span className="text-sm text-ink/70">{detail.company.telephone}</span>
                                             </div>
                                         )}
                                         {detail.company.email && (
                                             <div className="flex gap-3">
-                                                <Mail size={16} className="mt-0.5 shrink-0 text-white/30" />
+                                                <Mail size={16} className="mt-0.5 shrink-0 text-ink/30" />
                                                 <a
                                                     href={`mailto:${detail.company.email}`}
-                                                    className="text-sm text-white/70 hover:text-white"
+                                                    className="text-sm text-ink/70 hover:text-ink"
                                                 >
                                                     {detail.company.email}
                                                 </a>
@@ -421,12 +418,12 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                                         )}
                                         {detail.company.website && (
                                             <div className="flex gap-3">
-                                                <Globe size={16} className="mt-0.5 shrink-0 text-white/30" />
+                                                <Globe size={16} className="mt-0.5 shrink-0 text-ink/30" />
                                                 <a
                                                     href={`https://${detail.company.website.replace(/^https?:\/\//, "")}`}
                                                     target="_blank"
                                                     rel="noreferrer noopener"
-                                                    className="text-sm text-white/70 hover:text-white"
+                                                    className="text-sm text-ink/70 hover:text-ink"
                                                 >
                                                     {detail.company.website}
                                                 </a>
@@ -434,7 +431,7 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                                         )}
                                     </div>
                                 ) : (
-                                    <p className="py-6 text-center text-sm text-white/40">
+                                    <p className="py-6 text-center text-sm text-ink/40">
                                         No company profile published for {stock.symbol}.
                                     </p>
                                 )}
@@ -448,17 +445,17 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                                         {detail.company.directors.map((director) => (
                                             <li
                                                 key={director.name}
-                                                className="flex items-center justify-between border-b border-white/[0.05] pb-3 last:border-0"
+                                                className="flex items-center justify-between border-b border-ink/[0.05] pb-3 last:border-0"
                                             >
-                                                <span className="text-sm text-white">{director.name}</span>
-                                                <span className="text-xs text-white/40">
+                                                <span className="text-sm text-ink">{director.name}</span>
+                                                <span className="text-xs text-ink/40">
                                                     {director.position ?? "Director"}
                                                 </span>
                                             </li>
                                         ))}
                                     </ul>
                                 ) : (
-                                    <p className="py-6 text-center text-sm text-white/40">
+                                    <p className="py-6 text-center text-sm text-ink/40">
                                         The exchange publishes no board listing for {stock.symbol}.
                                     </p>
                                 )}
@@ -467,48 +464,10 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                     </div>
                 </section>
 
-                {/* Holdings */}
-                <section className="mt-4 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-semibold text-white">My holdings</h3>
-                        <button
-                            onClick={() => setHoldingsVisible((v) => !v)}
-                            aria-label={holdingsVisible ? "Hide holdings" : "Show holdings"}
-                            className="rounded-full p-1.5 text-white/50 transition-colors hover:bg-white/[0.06] hover:text-white"
-                        >
-                            {holdingsVisible ? <EyeOff size={16} /> : <Eye size={16} />}
-                        </button>
-                    </div>
-                    <div className="mt-4 space-y-3">
-                        <div className="flex justify-between">
-                            <span className="text-sm text-white/40">Shares</span>
-                            <span className="font-mono text-sm text-white/70">
-                                {holdingsVisible ? "0" : "••••••"}
-                            </span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-sm text-white/40">Current market value</span>
-                            <span className="font-mono text-sm text-white/70">
-                                {holdingsVisible ? formatCedis(0) : "••••••"}
-                            </span>
-                        </div>
-                    </div>
-                    <p className="mt-4 text-[11px] text-white/30">
-                        Connect a brokerage account to track a live position in {stock.symbol}.
-                    </p>
-                </section>
-            </div>
-
-            {/* Trade bar */}
-            <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/[0.08] bg-black/90 backdrop-blur-md">
-                <div className="mx-auto flex max-w-3xl gap-3 px-4 py-4 md:px-6">
-                    <button className="flex-1 rounded-xl bg-rose-500/90 py-3.5 text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-rose-500">
-                        Sell
-                    </button>
-                    <button className="flex-1 rounded-xl bg-white py-3.5 text-sm font-bold uppercase tracking-widest text-black transition-colors hover:bg-white/85">
-                        Buy
-                    </button>
-                </div>
+                <p className="mt-6 text-center text-[11px] leading-relaxed text-ink/25">
+                    Fluid Finance publishes market information and education only. Nothing here is a trade
+                    facility, an offer, or investment advice.
+                </p>
             </div>
         </div>
     );

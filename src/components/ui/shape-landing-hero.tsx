@@ -10,7 +10,7 @@ function ElegantShape({
     width = 400,
     height = 100,
     rotate = 0,
-    gradient = "from-white/[0.08]",
+    gradient = "from-ink/[0.08]",
 }: {
     className?: string;
     delay?: number;
@@ -59,10 +59,10 @@ function ElegantShape({
                         "absolute inset-0 rounded-full",
                         "bg-gradient-to-r to-transparent",
                         gradient,
-                        "backdrop-blur-[2px] border-2 border-white/[0.15]",
-                        "shadow-[0_8px_32px_0_rgba(255,255,255,0.1)]",
+                        "backdrop-blur-[2px] border-2 border-ink/[0.15]",
+                        "shadow-[0_8px_32px_0_rgb(var(--ink)/0.1)]",
                         "after:absolute after:inset-0 after:rounded-full",
-                        "after:bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.2),transparent_70%)]"
+                        "after:bg-[radial-gradient(circle_at_50%_50%,rgb(var(--ink)/0.2),transparent_70%)]"
                     )}
                 />
             </motion.div>
@@ -72,10 +72,10 @@ function ElegantShape({
 
 function HeroGeometric({
     badge = "Fluid Finance",
-    title1 = "Trade Ghana Stocks",
-    title2 = "With Mobile Money",
-    description = "Real-time GSE data, portfolio tracking, and AI-powered insights. Invest in your future with the most secure platform in Ghana.",
-    primaryActionText = "Go to Dashboard",
+    title1 = "Ghana's Market",
+    title2 = "Information Hub",
+    description = "Live GSE prices, full company histories, and market education in one place. Fluid Finance publishes information and analysis — never trade execution.",
+    primaryActionText = "Open GSE Live",
     primaryActionHref = "/legacy/index.html",
 }: {
     badge?: string;
@@ -99,8 +99,8 @@ function HeroGeometric({
     };
 
     return (
-        <div className="relative min-h-[60vh] md:min-h-[80vh] w-full flex items-center justify-center overflow-hidden bg-black">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] via-transparent to-white/[0.05] blur-3xl" />
+        <div className="relative min-h-[60vh] md:min-h-[80vh] w-full flex items-center justify-center overflow-hidden bg-canvas">
+            <div className="absolute inset-0 bg-gradient-to-br from-ink/[0.05] via-transparent to-ink/[0.05] blur-3xl" />
 
             <div className="absolute inset-0 overflow-hidden">
                 <ElegantShape
@@ -108,7 +108,7 @@ function HeroGeometric({
                     width={600}
                     height={140}
                     rotate={12}
-                    gradient="from-white/[0.1]"
+                    gradient="from-ink/[0.1]"
                     className="left-[-10%] md:left-[-5%] top-[15%] md:top-[20%]"
                 />
 
@@ -117,7 +117,7 @@ function HeroGeometric({
                     width={500}
                     height={120}
                     rotate={-15}
-                    gradient="from-white/[0.1]"
+                    gradient="from-ink/[0.1]"
                     className="right-[-5%] md:right-[0%] top-[70%] md:top-[75%]"
                 />
 
@@ -126,7 +126,7 @@ function HeroGeometric({
                     width={300}
                     height={80}
                     rotate={-8}
-                    gradient="from-white/[0.1]"
+                    gradient="from-ink/[0.1]"
                     className="left-[5%] md:left-[10%] bottom-[5%] md:bottom-[10%]"
                 />
 
@@ -135,7 +135,7 @@ function HeroGeometric({
                     width={200}
                     height={60}
                     rotate={20}
-                    gradient="from-white/[0.1]"
+                    gradient="from-ink/[0.1]"
                     className="right-[15%] md:right-[20%] top-[10%] md:top-[15%]"
                 />
 
@@ -144,7 +144,7 @@ function HeroGeometric({
                     width={150}
                     height={40}
                     rotate={-25}
-                    gradient="from-white/[0.1]"
+                    gradient="from-ink/[0.1]"
                     className="left-[20%] md:left-[25%] top-[5%] md:top-[10%]"
                 />
             </div>
@@ -156,10 +156,10 @@ function HeroGeometric({
                         variants={fadeUpVariants}
                         initial="hidden"
                         animate="visible"
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] mb-8 md:mb-12"
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-ink/[0.03] border border-ink/[0.08] mb-8 md:mb-12"
                     >
-                        <Circle className="h-2 w-2 fill-white/80" />
-                        <span className="text-sm text-white/60 tracking-wide font-poppins">
+                        <Circle className="h-2 w-2 fill-ink/80" />
+                        <span className="text-sm text-ink/60 tracking-wide font-poppins">
                             {badge}
                         </span>
                     </motion.div>
@@ -171,13 +171,13 @@ function HeroGeometric({
                         animate="visible"
                     >
                         <h1 className="text-4xl sm:text-6xl md:text-8xl font-bold mb-6 md:mb-8 tracking-tight font-poppins">
-                            <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/80">
+                            <span className="bg-clip-text text-transparent bg-gradient-to-b from-ink to-ink/80">
                                 {title1}
                             </span>
                             <br />
                             <span
                                 className={cn(
-                                    "bg-clip-text text-transparent bg-gradient-to-r from-gray-400 via-white/90 to-gray-400"
+                                    "bg-clip-text text-transparent bg-gradient-to-r from-ink/50 via-ink to-ink/50"
                                 )}
                             >
                                 {title2}
@@ -191,7 +191,7 @@ function HeroGeometric({
                         initial="hidden"
                         animate="visible"
                     >
-                        <p className="text-base sm:text-lg md:text-xl text-white/40 mb-10 leading-relaxed font-light tracking-wide max-w-xl mx-auto px-4 font-poppins">
+                        <p className="text-base sm:text-lg md:text-xl text-ink/40 mb-10 leading-relaxed font-light tracking-wide max-w-xl mx-auto px-4 font-poppins">
                             {description}
                         </p>
                     </motion.div>
@@ -205,7 +205,7 @@ function HeroGeometric({
                     >
                         <button
                             onClick={() => window.location.href = primaryActionHref}
-                            className="px-8 py-3 rounded-full bg-white text-black font-medium hover:bg-gray-200 transition-colors font-poppins"
+                            className="px-8 py-3 rounded-full bg-ink text-canvas font-medium hover:opacity-85 transition-opacity font-poppins"
                         >
                             {primaryActionText}
                         </button>
@@ -213,7 +213,7 @@ function HeroGeometric({
                 </div>
             </div>
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/80 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-canvas via-transparent to-canvas/80 pointer-events-none" />
         </div>
     );
 }

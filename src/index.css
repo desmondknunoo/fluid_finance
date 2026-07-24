@@ -8,37 +8,67 @@
   .text-foreground { color: hsl(var(--foreground)); }
 }
 
+/**
+ * `canvas` is the page surface and `ink` is everything drawn on it. Swapping the
+ * two channels is what flips the whole app between light and dark, so component
+ * code never needs a `dark:` variant for ordinary surfaces and text.
+ */
 @layer base {
-  :root {
-    --background: 0 0% 0%; /* Black */
-    --foreground: 0 0% 100%; /* White */
+  :root,
+  :root.dark {
+    color-scheme: dark;
 
+    --canvas: 0 0 0;
+    --ink: 255 255 255;
+
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
     --card: 0 0% 3%;
     --card-foreground: 0 0% 100%;
-
     --popover: 0 0% 3%;
     --popover-foreground: 0 0% 100%;
-
     --primary: 0 0% 100%;
     --primary-foreground: 0 0% 0%;
-
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
-
     --muted: 240 3.7% 15.9%;
-    --muted-foreground: 215.4 16.3% 66.9%; /* Gray-400 like */
-
+    --muted-foreground: 215.4 16.3% 66.9%;
     --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
-
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-
-    --border: 240 3.7% 15.9%; /* Gray-800 like */
+    --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
 
     --radius: 0.5rem;
+  }
+
+  :root.light {
+    color-scheme: light;
+
+    --canvas: 255 255 255;
+    --ink: 9 10 14;
+
+    --background: 0 0% 100%;
+    --foreground: 222 24% 5%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 24% 5%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 24% 5%;
+    --primary: 222 24% 5%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 222 24% 5%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 40%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 222 24% 5%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 88%;
+    --input: 220 13% 88%;
+    --ring: 222 24% 5%;
   }
 }
 
@@ -50,3 +80,19 @@
     @apply bg-background text-foreground font-sans;
   }
 }
+
+/*
+ * Light mode needs a touch more contrast than a straight inversion gives: the
+ * low-alpha ink tints that read as subtle on black read as washed out on white.
+ */
+/* Alpha >= 0.55 over white keeps small text at or above the 4.5:1 AA ratio. */
+:root.light .text-ink\/60 { color: rgb(var(--ink) / 0.72); }
+:root.light .text-ink\/40 { color: rgb(var(--ink) / 0.58); }
+:root.light .text-ink\/30 { color: rgb(var(--ink) / 0.58); }
+:root.light .text-ink\/25 { color: rgb(var(--ink) / 0.56); }
+:root.light .text-ink\/20 { color: rgb(var(--ink) / 0.55); }
+:root.light .border-ink\/\[0\.08\] { border-color: rgb(var(--ink) / 0.14); }
+:root.light .border-ink\/\[0\.05\] { border-color: rgb(var(--ink) / 0.1); }
+:root.light .border-ink\/\[0\.04\] { border-color: rgb(var(--ink) / 0.09); }
+:root.light .bg-ink\/\[0\.03\] { background-color: rgb(var(--ink) / 0.035); }
+:root.light .bg-ink\/\[0\.02\] { background-color: rgb(var(--ink) / 0.025); }
