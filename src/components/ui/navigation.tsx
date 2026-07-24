@@ -13,7 +13,7 @@ const NAV_LINK =
 const SECTIONS = [
     { label: "Market", href: "#market-snapshot" },
     { label: "Features", href: "#features" },
-    { label: "GSE Live", href: "/legacy/index.html" },
+    { label: "GSE Live", href: "#gse-live" },
 ] as const;
 
 /**
