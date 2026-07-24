@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import LandingPage from "@/components/ui/saa-s-template"
+import AboutUsPage from "@/components/ui/about-us-page"
 import { StockDetail } from "@/components/stock/stock-detail"
 import { closeStock, parseRoute, type Route } from "@/lib/navigation"
 
@@ -58,6 +59,10 @@ function App() {
 
   if (route.kind === "stock") {
     return <StockDetail symbol={route.symbol} onBack={closeStock} />
+  }
+
+  if (route.kind === "about") {
+    return <AboutUsPage />;
   }
 
   return <LandingPage liveView={route.view} />

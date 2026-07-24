@@ -37,10 +37,10 @@ export const EnhancedFooter = () => {
         {
             title: "Company",
             links: [
-                { label: "About Us", href: "#" },
-                { label: "Contact Support", href: "#" },
-                { label: "Privacy Policy", href: "#" },
-                { label: "Terms of Service", href: "#" }
+                { label: "About Us", href: "#/about" },
+                { label: "Contact Support", href: "#/contact-support" },
+                { label: "Privacy Policy", href: "#/privacy-policy" },
+                { label: "Terms of Service", href: "#/terms-of-service" }
             ],
             delay: 0.4
         }

@@ -459,6 +459,18 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
         ctx.textAlign = "left";
     }
 
+    // globe icon and domain
+    ctx.textAlign = "center";
+    ctx.fillText("finance.fluidterra.com", W / 2, H - M - 30);
+    // simple globe icon (circle with meridian lines)
+    ctx.save();
+    ctx.strokeStyle = ink.faint;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(W / 2, H - M - 50, 20, 14, 0, 0, 2 * Math.PI);
+    ctx.stroke();
+    ctx.restore();
+
     return new Promise((resolve, reject) => {
         canvas.toBlob(
             (blob) => (blob ? resolve(blob) : reject(new Error("Could not encode share image"))),
