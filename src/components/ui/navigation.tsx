@@ -13,6 +13,7 @@ const NAV_LINK =
 const SECTIONS = [
     { label: "Market", href: "#market-snapshot" },
     { label: "Features", href: "#features" },
+    { label: "GSE Live", href: "/legacy/index.html" },
 ] as const;
 
 /**
@@ -27,7 +28,7 @@ export const Navigation = memo(() => {
             <nav className="max-w-7xl mx-auto px-6 py-4">
                 <div className="flex items-center justify-between gap-4">
                     <a href="#" aria-label="Fluid Finance home" className="shrink-0">
-                        <BrandLogo variant="horizontal" className="h-20 sm:h-[7.5rem] lg:h-[8.75rem]" />
+                        <BrandLogo variant="horizontal" className="h-12 sm:h-[6rem] lg:h-[7rem]" />
                     </a>
 
                     <div className="hidden md:flex flex-1 items-center justify-center gap-6 lg:gap-8">

@@ -14,9 +14,15 @@ export const EnhancedFooter = () => {
                 { label: "Market Snapshot", href: "#market-snapshot" },
                 { label: "All Listed Companies", href: "#gse-live" },
                 { label: "Features", href: "#features" },
-                { label: "GSE Live", href: GSE_LIVE_HREF }
             ],
             delay: 0.2
+        },
+        {
+            title: "GSE Live",
+            links: [
+                { label: "Live Exchange", href: GSE_LIVE_HREF },
+            ],
+            delay: 0.25
         },
         {
             title: "Resources",
@@ -52,7 +58,7 @@ export const EnhancedFooter = () => {
                         transition={{ duration: 0.6, delay: 0.1 }}
                         className="md:col-span-1"
                     >
-                        <BrandLogo variant="stacked" className="mb-6 h-[12.5rem]" />
+                        <BrandLogo variant="stacked" className="mb-4 h-[8.33rem]" />
                         <p className="text-sm text-ink/40 leading-relaxed mb-6 font-poppins">
                             The ultimate financial aggregator for the Ghana Stock Exchange.
                             Built for accuracy, speed, and ease of use.
