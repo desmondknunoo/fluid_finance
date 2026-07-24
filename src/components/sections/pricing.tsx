@@ -145,7 +145,7 @@ export const PricingPlans = () => {
                         </div>
 
                         <button
-                            onClick={() => window.location.href = "/legacy/index.html"}
+                            onClick={() => window.location.href = "#gse-live"}
                             className="w-full py-4 rounded-xl bg-ink/5 border border-ink/10 text-ink font-medium hover:bg-ink/10 transition-colors font-poppins"
                         >
                             Get Started
@@ -177,7 +177,7 @@ export const PricingPlans = () => {
                         </div>
 
                         <button
-                            onClick={() => window.location.href = "/legacy/index.html"}
+                            onClick={() => window.location.href = "#gse-live"}
                             className="w-full py-4 rounded-xl bg-ink text-canvas font-medium hover:opacity-85 transition-opacity font-poppins shadow-[0_0_20px_rgb(var(--ink)/0.1)]"
                         >
                             Go Pro Now

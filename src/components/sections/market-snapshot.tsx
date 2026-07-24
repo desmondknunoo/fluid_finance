@@ -159,22 +159,6 @@ export const MarketSnapshot = () => {
                     </div>
                 </motion.div>
 
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                    className="mt-12 text-center"
-                >
-                    <motion.a
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        href="#all-stocks"
-                        className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-ink/10 text-ink/60 hover:text-ink hover:border-ink/20 transition-all font-medium"
-                    >
-                        View All Listed Companies <ChevronRight size={18} />
-                    </motion.a>
-                </motion.div>
             </div>
 
             {/* Background Glows */}

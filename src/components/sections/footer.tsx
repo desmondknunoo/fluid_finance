@@ -1,16 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Grid2X2, LayoutGrid, Mail, Rows3 } from "lucide-react";
-import { GSE_LIVE_HREF, GSE_LIVE_VIEWS, SOCIAL_LINKS } from "@/lib/links";
+import { Mail } from "lucide-react";
+import { GSE_LIVE_HREF, SOCIAL_LINKS } from "@/lib/links";
 import { SOCIAL_ICONS } from "@/components/ui/social-icons";
 import { BrandLogo } from "@/components/ui/brand-logo";
-
-const VIEW_ICONS = {
-    table: Rows3,
-    grid: LayoutGrid,
-    heatmap: Grid2X2,
-} as const;
 
 export const EnhancedFooter = () => {
     const footerLinks = [
@@ -18,7 +12,7 @@ export const EnhancedFooter = () => {
             title: "Explore",
             links: [
                 { label: "Market Snapshot", href: "#market-snapshot" },
-                { label: "All Listed Companies", href: "#all-stocks" },
+                { label: "All Listed Companies", href: "#gse-live" },
                 { label: "Features", href: "#features" },
                 { label: "GSE Live", href: GSE_LIVE_HREF }
             ],
@@ -113,39 +107,6 @@ export const EnhancedFooter = () => {
                         </motion.div>
                     ))}
                 </div>
-
-                {/* GSE Live view shortcuts */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.45 }}
-                    className="mb-16 rounded-2xl border border-ink/[0.08] bg-ink/[0.03] p-6"
-                >
-                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                            <h4 className="text-sm font-bold uppercase tracking-widest text-ink font-poppins">GSE Live</h4>
-                            <p className="mt-1 text-sm text-ink/40 font-poppins">
-                                The full exchange, three ways to read it.
-                            </p>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                            {GSE_LIVE_VIEWS.map((view) => {
-                                const Icon = VIEW_ICONS[view.key];
-                                return (
-                                    <a
-                                        key={view.key}
-                                        href={view.href}
-                                        className="inline-flex items-center gap-2 rounded-full border border-ink/[0.08] px-4 py-2 text-xs font-bold uppercase tracking-widest text-ink/60 transition-colors hover:border-ink/25 hover:text-ink font-poppins"
-                                    >
-                                        <Icon size={14} />
-                                        {view.label}
-                                    </a>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </motion.div>
 
                 {/* Legal Section */}
                 <motion.div

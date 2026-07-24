@@ -74,16 +74,12 @@ function HeroGeometric({
     badge = "Fluid Finance",
     title1 = "Ghana's Market",
     title2 = "Information Hub",
-    description = "Live GSE prices, full company histories, and market education in one place. Fluid Finance publishes information and analysis — never trade execution.",
-    primaryActionText = "Open GSE Live",
-    primaryActionHref = "/legacy/index.html",
+    description = "Live GSE prices, full company histories, and market education in one place.",
 }: {
     badge?: string;
     title1?: string;
     title2?: string;
     description?: string;
-    primaryActionText?: string;
-    primaryActionHref?: string;
 }) {
     const fadeUpVariants = {
         hidden: { opacity: 0, y: 30 },
@@ -196,20 +192,6 @@ function HeroGeometric({
                         </p>
                     </motion.div>
 
-                    <motion.div
-                        custom={3}
-                        variants={fadeUpVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="flex justify-center gap-4"
-                    >
-                        <button
-                            onClick={() => window.location.href = primaryActionHref}
-                            className="px-8 py-3 rounded-full bg-ink text-canvas font-medium hover:opacity-85 transition-opacity font-poppins"
-                        >
-                            {primaryActionText}
-                        </button>
-                    </motion.div>
                 </div>
             </div>
 
