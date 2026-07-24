@@ -122,7 +122,8 @@ export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
         window.setTimeout(() => setToast(null), 2600);
     }, []);
 
-    const fileName = `${card.symbol.toLowerCase()}-fluid-finance.png`;
+    const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    const fileName = `${card.symbol.toLowerCase()}-fluid-finance-${ts}.png`;
 
     const download = useCallback(() => {
         if (!blobRef.current) return;
