@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, ChevronRight, Loader2 } from "lucide-react";
+import { Activity, ChevronRight, Loader2, TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
 import { recordAll } from "@/lib/history";
@@ -8,6 +8,12 @@ import { openStock } from "@/lib/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
 
 type Tab = "gainers" | "losers" | "active";
+
+const MOVER_TABS: { key: Tab; label: string; description: string; icon: typeof TrendingUp }[] = [
+    { key: "gainers", label: "Top Gainers", description: "Leading today", icon: TrendingUp },
+    { key: "losers", label: "Top Losers", description: "Trailing today", icon: TrendingDown },
+    { key: "active", label: "Most Active", description: "Highest volume", icon: Activity },
+];
 
 export const MarketSnapshot = () => {
     const [stocks, setStocks] = useState<Stock[]>([]);
@@ -84,25 +90,31 @@ export const MarketSnapshot = () => {
                     transition={{ duration: 0.6 }}
                     className="rounded-2xl bg-ink/[0.03] border border-ink/[0.08] overflow-hidden"
                 >
-                    <div className="flex border-b border-ink/[0.08]">
-                        {(
-                            [
-                                ["gainers", "Top Gainers"],
-                                ["losers", "Top Losers"],
-                                ["active", "Most Active"],
-                            ] as [Tab, string][]
-                        ).map(([key, label]) => (
-                            <button
-                                key={key}
-                                onClick={() => setActiveTab(key)}
-                                className={cn(
-                                    "flex-1 py-4 text-sm font-medium transition-colors",
-                                    activeTab === key ? "text-ink bg-ink/[0.05]" : "text-ink/40 hover:text-ink"
-                                )}
-                            >
-                                {label}
-                            </button>
-                        ))}
+                    <div className="flex flex-col gap-4 border-b border-ink/[0.08] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                        <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/40">Market movers</p>
+                            <h2 className="mt-1 text-lg font-bold text-ink">Today&apos;s standouts</h2>
+                        </div>
+                        <div className="grid grid-cols-3 rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-1 sm:min-w-[440px]">
+                            {MOVER_TABS.map(({ key, label, description, icon: Icon }) => (
+                                <button
+                                    key={key}
+                                    onClick={() => setActiveTab(key)}
+                                    className={cn(
+                                        "flex min-w-0 items-center justify-center gap-2 rounded-lg px-2 py-2.5 text-left transition-all sm:px-3",
+                                        activeTab === key
+                                            ? "bg-canvas text-ink shadow-sm"
+                                            : "text-ink/40 hover:text-ink/70",
+                                    )}
+                                >
+                                    <Icon size={15} className="shrink-0" />
+                                    <span className="min-w-0">
+                                        <span className="block truncate text-xs font-semibold">{label}</span>
+                                        <span className="hidden truncate text-[10px] text-ink/40 sm:block">{description}</span>
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="overflow-x-auto">
@@ -124,16 +136,21 @@ export const MarketSnapshot = () => {
                                         </td>
                                     </tr>
                                 ) : (
-                                    movers.map((stock) => (
+                                    movers.map((stock, index) => (
                                         <tr
                                             key={stock.symbol}
                                             onClick={() => openStock(stock.symbol)}
                                             className="border-b border-ink/[0.04] hover:bg-ink/[0.02] transition-colors cursor-pointer"
                                         >
                                             <td className="px-6 py-4">
-                                                <TickerLogo symbol={stock.symbol} size={24} />
-                                                <span className="ml-2 font-bold text-ink uppercase">{stock.symbol}</span>
-                                                <span className="block max-w-[180px] truncate text-xs text-ink/40">{stock.company}</span>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="w-4 font-mono text-xs text-ink/30">{index + 1}</span>
+                                                    <TickerLogo symbol={stock.symbol} size={28} />
+                                                    <div className="min-w-0">
+                                                        <span className="font-bold text-ink uppercase">{stock.symbol}</span>
+                                                        <span className="block max-w-[180px] truncate text-xs text-ink/40">{stock.company}</span>
+                                                    </div>
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4 font-mono text-ink">{formatCedis(stock.price)}</td>
                                             <td className="px-6 py-4">

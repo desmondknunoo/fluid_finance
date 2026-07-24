@@ -4,11 +4,12 @@ import { Loader2, RotateCw, Search, TrendingDown, TrendingUp, Grid2X2, LayoutGri
 import { cn } from "@/lib/utils";
 import { TickerLogo } from "@/components/stock/ticker-logo";
 import { Sparkline } from "@/components/stock/price-chart";
-import { Heatmap } from "@/components/stock/heatmap";
+import { heatColor, Heatmap } from "@/components/stock/heatmap";
 import {
     formatCedis,
     formatCompact,
     getAllStocks,
+    getEquityDetail,
     isMarketOpen,
     type Stock,
 } from "@/lib/gse";
@@ -47,6 +48,16 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: "up
     );
 }
 
+function tileSpanClass(marketCap: number | undefined, largestMarketCap: number) {
+    if (!marketCap || !largestMarketCap) return "col-span-1 sm:col-span-2";
+
+    const relativeSize = marketCap / largestMarketCap;
+    if (relativeSize >= 0.45) return "col-span-2 row-span-2 sm:col-span-4 lg:col-span-6 lg:row-span-3";
+    if (relativeSize >= 0.18) return "col-span-2 sm:col-span-3 lg:col-span-4 lg:row-span-2";
+    if (relativeSize >= 0.06) return "col-span-1 sm:col-span-2 lg:col-span-3 lg:row-span-2";
+    return "col-span-1 sm:col-span-2";
+}
+
 /**
  * The market floor of the landing page: every listed company, readable as a
  * table, a grid of cards, or a heatmap, alongside session stats and movers.
@@ -60,6 +71,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
     const [query, setQuery] = useState("");
     const [sort, setSort] = useState<SortKey>("symbol");
     const [descending, setDescending] = useState(false);
+    const [marketCaps, setMarketCaps] = useState<Record<string, number>>({});
 
     // A #gse-live/<view> link sets the initial mode; the toggle drives it after.
     const [mode, setMode] = useState<ViewMode>(view ?? "table");
@@ -67,6 +79,33 @@ export function GseLive({ view }: { view: ViewMode | null }) {
     useEffect(() => {
         if (view) setMode(view);
     }, [view]);
+
+    useEffect(() => {
+        if (mode === "table" || stocks.length === 0) return;
+
+        let cancelled = false;
+        void Promise.allSettled(
+            stocks.map(async (stock) => {
+                const detail = await getEquityDetail(stock.symbol);
+                return [stock.symbol, detail.shares ? detail.shares * stock.price : 0] as const;
+            }),
+        ).then((results) => {
+            if (cancelled) return;
+            setMarketCaps((current) => {
+                const next = { ...current };
+                for (const result of results) {
+                    if (result.status === "fulfilled" && result.value[1] > 0) {
+                        next[result.value[0]] = result.value[1];
+                    }
+                }
+                return next;
+            });
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [mode, stocks]);
 
     const load = useCallback(async (silent = false) => {
         if (silent) setRefreshing(true);
@@ -134,6 +173,16 @@ export function GseLive({ view }: { view: ViewMode | null }) {
         }
         return map;
     }, [stocks]);
+
+    const largestMarketCap = useMemo(
+        () => Math.max(0, ...filtered.map((stock) => marketCaps[stock.symbol] ?? 0)),
+        [filtered, marketCaps],
+    );
+
+    const gridStocks = useMemo(
+        () => [...filtered].sort((a, b) => (marketCaps[b.symbol] ?? 0) - (marketCaps[a.symbol] ?? 0)),
+        [filtered, marketCaps],
+    );
 
     const toggleSort = (key: SortKey) => {
         if (sort === key) setDescending((d) => !d);
@@ -279,8 +328,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                 )}
 
                 {!loading && !error && (
-                    <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-                        {/* Main view */}
+                    <div className="mt-6 min-w-0">
                         <div className="min-w-0">
                             {mode === "table" && (
                                 <div className="overflow-hidden rounded-2xl border border-ink/[0.08] bg-ink/[0.03]">
@@ -412,78 +460,40 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                             )}
 
                             {mode === "grid" && (
-                                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                <div className="grid auto-rows-[88px] grid-flow-dense grid-cols-2 gap-1.5 sm:auto-rows-[96px] sm:grid-cols-6 lg:auto-rows-[108px] lg:grid-cols-12">
                                     {filtered.length === 0 ? (
                                         <p className="col-span-full py-10 text-center text-ink/40">
                                             No stocks match “{query}”.
                                         </p>
                                     ) : (
-                                        filtered.map((stock) => {
-                                            const positive = stock.change >= 0;
+                                        gridStocks.map((stock) => {
+                                            const marketCap = marketCaps[stock.symbol];
                                             return (
                                                 <button
                                                     key={stock.symbol}
                                                     type="button"
                                                     onClick={() => openStock(stock.symbol)}
-                                                    className="rounded-2xl border border-ink/[0.08] bg-ink/[0.03] p-5 text-left transition-colors hover:border-ink/20 hover:bg-ink/[0.05]"
+                                                    title={`${stock.symbol} · ${stock.company} · ${stock.changePercent >= 0 ? "+" : ""}${stock.changePercent.toFixed(2)}%`}
+                                                    className={cn(
+                                                        "group relative flex min-w-0 flex-col justify-between overflow-hidden rounded-lg p-3 text-left text-white transition-transform hover:z-10 hover:scale-[1.015] focus:z-10 focus:outline-none focus:ring-2 focus:ring-ink/40 sm:p-4",
+                                                        tileSpanClass(marketCap, largestMarketCap),
+                                                    )}
+                                                    style={{ backgroundColor: heatColor(stock.changePercent) }}
                                                 >
-                                                    <div className="flex items-start justify-between gap-3">
-                                                        <div className="flex min-w-0 items-center gap-3">
-                                                            <TickerLogo symbol={stock.symbol} size={36} />
-                                                            <div className="min-w-0">
-                                                                <div className="font-bold text-ink">{stock.symbol}</div>
-                                                                <div className="truncate text-[11px] text-ink/40">
-                                                                    {stock.company}
-                                                                </div>
-                                                            </div>
+                                                    <div className="min-w-0">
+                                                        <div className="truncate text-sm font-bold sm:text-lg">{stock.symbol}</div>
+                                                        <div className="hidden truncate text-[10px] font-medium uppercase tracking-wider text-white/70 sm:block">
+                                                            {stock.company}
                                                         </div>
-                                                        <span
-                                                            className={cn(
-                                                                "shrink-0 rounded-full px-2 py-0.5 font-mono text-[11px] font-semibold",
-                                                                stock.change === 0
-                                                                    ? "bg-ink/[0.08] text-ink/50"
-                                                                    : positive
-                                                                      ? "bg-emerald-400/15 text-emerald-400"
-                                                                      : "bg-rose-400/15 text-rose-400",
-                                                            )}
-                                                        >
-                                                            {positive ? "+" : ""}
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-mono text-sm font-bold sm:text-xl">
+                                                            {stock.changePercent >= 0 ? "+" : ""}
                                                             {stock.changePercent.toFixed(2)}%
-                                                        </span>
-                                                    </div>
-
-                                                    <div className="mt-4 flex items-end justify-between gap-3">
-                                                        <div>
-                                                            <div className="font-mono text-2xl font-bold text-ink">
-                                                                {formatCedis(stock.price)}
-                                                            </div>
-                                                            <div
-                                                                className={cn(
-                                                                    "mt-0.5 font-mono text-xs",
-                                                                    stock.change === 0
-                                                                        ? "text-ink/40"
-                                                                        : positive
-                                                                          ? "text-emerald-400"
-                                                                          : "text-rose-400",
-                                                                )}
-                                                            >
-                                                                {positive ? "▲" : "▼"}{" "}
-                                                                {Math.abs(stock.change).toFixed(2)}
-                                                            </div>
                                                         </div>
-                                                        <Sparkline
-                                                            points={sparks.get(stock.symbol) ?? []}
-                                                            positive={positive}
-                                                            width={84}
-                                                            height={30}
-                                                        />
-                                                    </div>
-
-                                                    <div className="mt-4 border-t border-ink/[0.06] pt-3 text-[10px] uppercase tracking-widest text-ink/40">
-                                                        Volume{" "}
-                                                        <span className="font-mono text-ink/60">
-                                                            {formatCompact(stock.volume)}
-                                                        </span>
+                                                        <div className="mt-0.5 hidden font-mono text-[10px] text-white/75 sm:block">
+                                                            {formatCedis(stock.price)}
+                                                        </div>
                                                     </div>
                                                 </button>
                                             );
@@ -493,8 +503,8 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                             )}
 
                             {mode === "heatmap" && (
-                                <div className="rounded-2xl border border-ink/[0.08] bg-ink/[0.03] p-4">
-                                    <Heatmap stocks={filtered} onSelect={openStock} />
+                                <div className="rounded-2xl border border-ink/[0.08] bg-ink/[0.03] p-2 sm:p-4">
+                                    <Heatmap stocks={filtered} onSelect={openStock} marketCaps={marketCaps} />
                                 </div>
                             )}
                         </div>

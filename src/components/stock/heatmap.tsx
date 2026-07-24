@@ -4,9 +4,8 @@ import type { Stock } from "@/lib/gse";
 /**
  * Squarified treemap of the exchange, coloured by the day's percentage change.
  *
- * Tiles are near-equal in area — a small bonus for larger moves — so every
- * listing stays legible. Sizing by volume would collapse most of the market
- * into slivers, since only a handful of GSE symbols trade on a given day.
+ * Tile area follows each company's market capitalization. Colour remains
+ * independent, representing the day's percentage move.
  */
 
 interface Tile {
@@ -104,10 +103,11 @@ function squarify(
 interface HeatmapProps {
     stocks: Stock[];
     onSelect: (symbol: string) => void;
+    marketCaps?: Record<string, number>;
     height?: number;
 }
 
-export function Heatmap({ stocks, onSelect, height = 560 }: HeatmapProps) {
+export function Heatmap({ stocks, onSelect, marketCaps = {}, height = 560 }: HeatmapProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
 
@@ -123,13 +123,14 @@ export function Heatmap({ stocks, onSelect, height = 560 }: HeatmapProps) {
     const tiles = useMemo(() => {
         if (width <= 0 || stocks.length === 0) return [];
         const items = [...stocks]
-            .sort((a, b) => b.changePercent - a.changePercent)
+            .map((stock) => ({ stock, marketCap: marketCaps[stock.symbol] ?? 0 }))
+            .sort((a, b) => b.marketCap - a.marketCap)
             .map((stock) => ({
-                stock,
-                weight: 100 + Math.min(Math.abs(stock.changePercent) * 4, 20),
+                stock: stock.stock,
+                weight: stock.marketCap || 1,
             }));
         return squarify(items, 0, 0, width, height);
-    }, [stocks, width, height]);
+    }, [stocks, marketCaps, width, height]);
 
     return (
         <div>
