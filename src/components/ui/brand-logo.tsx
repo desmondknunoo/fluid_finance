@@ -13,8 +13,8 @@ import { useTheme } from "@/lib/theme";
  *   05      — mark only, no wordmark (favicon and app icon)
  */
 const LOCKUPS = {
-    horizontal: { dark: "/logo/lockup-02.png", light: "/logo/lockup-03.png" },
-    stacked: { dark: "/logo/lockup-07.png", light: "/logo/lockup-08.png" },
+    horizontal: { dark: "/logo/fluidfinance-01.png", light: "/logo/fluidfinance-01.png" },
+    stacked: { dark: "/logo/fluidfinance-04.png", light: "/logo/fluidfinance-04.png" },
 } as const;
 
 const MARK_ONLY = "/logo/mark-512.png";

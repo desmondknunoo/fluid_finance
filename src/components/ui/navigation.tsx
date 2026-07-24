@@ -44,8 +44,6 @@ export const Navigation = memo(({ active = "home" }: NavigationProps) => {
                                 {section.label}
                             </a>
                         ))}
-
-
                     </div>
 
                     <div className="hidden md:flex shrink-0 items-center gap-3">

@@ -21,6 +21,12 @@ import {
     type ViewMode,
 } from "@/lib/navigation";
 
+const VIEW_ICONS = {
+    table: Rows3,
+    grid: LayoutGrid,
+    heatmap: Grid2X2,
+} as const;
+
 const REFRESH_MS = 30_000;
 
 type SortKey = "symbol" | "company" | "price" | "change" | "changePercent" | "volume";

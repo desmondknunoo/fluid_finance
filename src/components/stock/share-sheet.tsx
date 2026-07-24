@@ -25,9 +25,9 @@ interface ShareSheetProps {
 
 function shareText(card: ShareCardInput): string {
     const sign = card.change >= 0 ? "+" : "";
-    return `${card.symbol} · ${card.company} is at ₵${card.price.toFixed(2)} (${sign}${card.changePercent.toFixed(
+    return `LIVE: ${card.symbol} is currently trading at ₵${card.price.toFixed(2)} (${sign}${card.changePercent.toFixed(
         2,
-    )}%) on the Ghana Stock Exchange.`;
+    )}%) on the Ghana Stock Exchange. Via finance.fluidterra.com/#/stock/${card.symbol}`;
 }
 
 /**
