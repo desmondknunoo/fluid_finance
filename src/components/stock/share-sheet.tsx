@@ -205,7 +205,7 @@ export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
                         exit={{ y: 24, opacity: 0 }}
                         transition={{ duration: 0.22, ease: "easeOut" }}
                         onClick={(e) => e.stopPropagation()}
-                        className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-3xl border border-ink/[0.08] bg-[#0b0c0e] p-5 sm:rounded-3xl"
+                        className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-3xl border border-ink/[0.08] bg-canvas p-5 sm:rounded-3xl"
                     >
                         <div className="mb-4 flex items-center justify-between">
                             <h2 className="text-base font-bold text-ink">Share {card.symbol}</h2>

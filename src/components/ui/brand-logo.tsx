@@ -8,13 +8,13 @@ import { useTheme } from "@/lib/theme";
  *
  * The wordmark is baked into the artwork, so each lockup exists as a light-ink
  * and a dark-ink variant and the active theme picks one:
- *   02 / 03 — horizontal, single-line wordmark (fits a nav bar)
- *   07 / 08 — stacked mark over wordmark (fits a footer column)
+ *   04 / 01 — horizontal, single-line wordmark (fits a nav bar)
+ *   04 / 01 — stacked mark over wordmark (fits a footer column)
  *   05      — mark only, no wordmark (favicon and app icon)
  */
 const LOCKUPS = {
-    horizontal: { dark: "/logo/fluidfinance-01.png", light: "/logo/fluidfinance-01.png" },
-    stacked: { dark: "/logo/fluidfinance-04.png", light: "/logo/fluidfinance-04.png" },
+    horizontal: { dark: "/logo/fluidfinance-01.png", light: "/logo/fluidfinance-04.png" },
+    stacked: { dark: "/logo/fluidfinance-01.png", light: "/logo/fluidfinance-04.png" },
 } as const;
 
 const MARK_ONLY = "/logo/mark-512.png";
