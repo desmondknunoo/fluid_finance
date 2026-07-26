@@ -94,7 +94,7 @@ export default function BusinessNewsPage() {
         <div className="relative min-h-screen w-full overflow-hidden bg-canvas">
             <div className="absolute inset-0 bg-gradient-to-br from-ink/[0.05] via-transparent to-ink/[0.05] blur-3xl" />
 
-            <div className="page-container relative z-10 py-20">
+            <div className="page-container relative z-10 py-12 sm:py-16 md:py-20">
                 <div className="max-w-6xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
@@ -102,7 +102,7 @@ export default function BusinessNewsPage() {
                         transition={{ duration: 0.6 }}
                         className="text-center mb-16"
                     >
-                        <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight font-poppins">
+                        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 tracking-tight font-poppins">
                             <span className="bg-clip-text text-transparent bg-gradient-to-b from-ink to-ink/80">
                                 Business & Economy News
                             </span>

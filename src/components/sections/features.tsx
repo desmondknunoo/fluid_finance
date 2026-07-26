@@ -80,7 +80,7 @@ const educationalStories = [
 
 export const FeatureHighlights = () => {
     return (
-        <section id="features" className="py-24 bg-canvas">
+        <section id="features" className="py-14 sm:py-20 md:py-24 bg-canvas">
             <div className="page-container">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -121,7 +121,7 @@ export const FeatureHighlights = () => {
 
 export const EducationalSection = () => {
     return (
-        <section id="education" className="py-24 bg-canvas border-t border-ink/[0.05]">
+        <section id="education" className="py-14 sm:py-20 md:py-24 bg-canvas border-t border-ink/[0.05]">
             <div className="page-container">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}

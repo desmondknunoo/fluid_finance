@@ -60,7 +60,7 @@ export const MarketSnapshot = () => {
 
     if (loading) {
         return (
-            <section id="market-snapshot" className="relative bg-canvas py-24">
+            <section id="market-snapshot" className="relative overflow-hidden bg-canvas py-14 sm:py-20 md:py-24">
                 <div className="page-container flex min-h-[300px] items-center justify-center">
                     <Loader2 className="w-8 h-8 animate-spin text-ink/40" />
                 </div>
@@ -70,7 +70,7 @@ export const MarketSnapshot = () => {
 
     if (error) {
         return (
-            <section id="market-snapshot" className="relative bg-canvas py-24">
+            <section id="market-snapshot" className="relative overflow-hidden bg-canvas py-14 sm:py-20 md:py-24">
                 <div className="page-container flex min-h-[300px] items-center justify-center">
                     <p className="text-ink/40">Failed to load market data</p>
                 </div>
@@ -79,7 +79,7 @@ export const MarketSnapshot = () => {
     }
 
     return (
-        <section id="market-snapshot" className="relative bg-canvas py-24">
+        <section id="market-snapshot" className="relative overflow-hidden bg-canvas py-14 sm:py-20 md:py-24">
             <div className="page-container relative z-10">
 
                 {/* Movers Table */}

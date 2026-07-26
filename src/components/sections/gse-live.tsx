@@ -195,7 +195,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
     const marketOpen = isMarketOpen();
 
     return (
-        <section id={GSE_LIVE_SECTION} className="relative scroll-mt-24 bg-canvas py-24">
+        <section id={GSE_LIVE_SECTION} className="relative scroll-mt-24 bg-canvas py-14 sm:py-20 md:py-24">
             <div className="page-container">
                 <motion.div
                     initial={{ opacity: 0, y: 16 }}
