@@ -6,6 +6,7 @@ import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
 import { recordAll } from "@/lib/history";
 import { openStock } from "@/lib/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
+import { StockCard } from "@/components/stock/stock-card";
 
 type Tab = "gainers" | "losers" | "active";
 
@@ -113,7 +114,20 @@ export const MarketSnapshot = () => {
                         </div>
                     </div>
 
-                    <div className="overflow-x-auto">
+                    {/* Mobile: stacked cards instead of a sideways-scrolling table. */}
+                    <div className="flex flex-col gap-2 p-4 md:hidden">
+                        {movers.length === 0 ? (
+                            <p className="py-6 text-center text-ink/40">
+                                No {activeTab === "gainers" ? "gainers" : activeTab === "losers" ? "losers" : "active stocks"} at this time
+                            </p>
+                        ) : (
+                            movers.map((stock, index) => (
+                                <StockCard key={stock.symbol} stock={stock} onSelect={openStock} rank={index + 1} />
+                            ))
+                        )}
+                    </div>
+
+                    <div className="hidden overflow-x-auto md:block">
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="border-b border-ink/[0.08] bg-ink/[0.01]">

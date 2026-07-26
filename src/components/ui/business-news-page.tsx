@@ -7,6 +7,7 @@ import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
 import { recordAll } from "@/lib/history";
 import { openStock } from "@/lib/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
+import { StockCard } from "@/components/stock/stock-card";
 import { useEffect, useState } from "react";
 
 const newsArticles = [
@@ -120,16 +121,21 @@ export default function BusinessNewsPage() {
                             transition={{ duration: 0.5, delay: 0.1 }}
                         >
                             <div className="rounded-2xl border border-ink/[0.08] bg-ink/[0.03] overflow-hidden">
-                                <div className="px-6 py-4 border-b border-ink/[0.08]">
+                                <div className="px-4 py-4 border-b border-ink/[0.08] sm:px-6">
                                     <h2 className="font-bold font-poppins">Top Gainers</h2>
                                 </div>
-                                <table className="w-full text-left">
+                                <div className="flex flex-col gap-2 p-4 md:hidden">
+                                    {topGainers.map((stock, i) => (
+                                        <StockCard key={stock.symbol} stock={stock} onSelect={openStock} rank={i + 1} />
+                                    ))}
+                                </div>
+                                <table className="hidden w-full text-left md:table">
                                     <thead>
                                         <tr className="border-b border-ink/[0.08]">
                                             <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider">Symbol</th>
                                             <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider">Price</th>
                                             <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider">Change</th>
-                                            <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider hidden md:table-cell">Volume</th>
+                                            <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider hidden lg:table-cell">Volume</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -145,16 +151,21 @@ export default function BusinessNewsPage() {
                             transition={{ duration: 0.5, delay: 0.2 }}
                         >
                             <div className="rounded-2xl border border-ink/[0.08] bg-ink/[0.03] overflow-hidden">
-                                <div className="px-6 py-4 border-b border-ink/[0.08]">
+                                <div className="px-4 py-4 border-b border-ink/[0.08] sm:px-6">
                                     <h2 className="font-bold font-poppins">Top Losers</h2>
                                 </div>
-                                <table className="w-full text-left">
+                                <div className="flex flex-col gap-2 p-4 md:hidden">
+                                    {topLosers.map((stock, i) => (
+                                        <StockCard key={stock.symbol} stock={stock} onSelect={openStock} rank={i + 1} />
+                                    ))}
+                                </div>
+                                <table className="hidden w-full text-left md:table">
                                     <thead>
                                         <tr className="border-b border-ink/[0.08]">
                                             <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider">Symbol</th>
                                             <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider">Price</th>
                                             <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider">Change</th>
-                                            <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider hidden md:table-cell">Volume</th>
+                                            <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider hidden lg:table-cell">Volume</th>
                                         </tr>
                                     </thead>
                                     <tbody>

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Loader2, RotateCw, Search, TrendingDown, TrendingUp, LayoutGrid, Rows3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TickerLogo } from "@/components/stock/ticker-logo";
+import { StockCard } from "@/components/stock/stock-card";
 import { Sparkline } from "@/components/stock/price-chart";
 import { heatColor } from "@/components/stock/heat-squares";
 // import { HeatSquares } from "@/components/stock/heat-squares";
@@ -331,7 +332,46 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                     <div className="mt-6 min-w-0">
                         <div className="min-w-0">
                             {mode === "table" && (
-                                <div className="overflow-hidden rounded-2xl border border-ink/[0.08] bg-ink/[0.03]">
+                                <>
+                                {/* Mobile: stacked cards with a sort control, since a
+                                    six-column table can only scroll sideways here. */}
+                                <div className="md:hidden">
+                                    <div className="mb-3 flex items-center justify-end gap-2">
+                                        <label htmlFor="gse-sort" className="text-[11px] uppercase tracking-widest text-ink/40">
+                                            Sort
+                                        </label>
+                                        <select
+                                            id="gse-sort"
+                                            value={`${sort}:${descending ? "desc" : "asc"}`}
+                                            onChange={(e) => {
+                                                const [key, dir] = e.target.value.split(":") as [SortKey, "asc" | "desc"];
+                                                setSort(key);
+                                                setDescending(dir === "desc");
+                                            }}
+                                            className="rounded-lg border border-ink/[0.08] bg-ink/[0.03] px-3 py-1.5 text-xs text-ink focus:border-fluid-cyan/60 focus:outline-none"
+                                        >
+                                            <option value="symbol:asc">Symbol A–Z</option>
+                                            <option value="symbol:desc">Symbol Z–A</option>
+                                            <option value="changePercent:desc">% Change ▼</option>
+                                            <option value="changePercent:asc">% Change ▲</option>
+                                            <option value="price:desc">Price ▼</option>
+                                            <option value="price:asc">Price ▲</option>
+                                            <option value="volume:desc">Volume ▼</option>
+                                        </select>
+                                    </div>
+                                    {filtered.length === 0 ? (
+                                        <p className="py-10 text-center text-ink/40">No stocks match “{query}”.</p>
+                                    ) : (
+                                        <div className="flex flex-col gap-2">
+                                            {filtered.map((stock) => (
+                                                <StockCard key={stock.symbol} stock={stock} onSelect={openStock} />
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Desktop / tablet: the full sortable table. */}
+                                <div className="hidden overflow-hidden rounded-2xl border border-ink/[0.08] bg-ink/[0.03] md:block">
                                     <div className="overflow-x-auto">
                                         <table className="w-full min-w-[720px] text-left">
                                             <thead>
@@ -457,6 +497,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                         </table>
                                     </div>
                                 </div>
+                                </>
                             )}
 
                             {mode === "heatmap" && (
