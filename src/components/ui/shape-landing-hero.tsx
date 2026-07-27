@@ -189,6 +189,20 @@ function HeroGeometric({
                         </p>
                     </motion.div>
 
+                    <motion.div
+                        custom={3}
+                        variants={fadeUpVariants}
+                        initial="hidden"
+                        animate="visible"
+                    >
+                        <button
+                            onClick={() => window.location.hash = "#/gse-live"}
+                            className="inline-flex items-center gap-2 px-8 py-4 bg-fluid-cyan text-fluid-action-ink font-semibold rounded-xl shadow-glow hover:bg-fluid-cyan-hover hover:shadow-glow-lg transition-all text-lg font-poppins"
+                        >
+                            GSE Live
+                        </button>
+                    </motion.div>
+
                 </div>
             </div>
 

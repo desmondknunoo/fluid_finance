@@ -3,7 +3,7 @@
  *
  *   #                      landing page
  *   #<section-id>          landing page, scrolled to a section
- *   #gse-live/<view>       landing page, GSE Live section on a given view
+ *   #gse-live/<view>       GSE Live page, with a given view
  *   #/stock/MTNGH          a single ticker
  *   #/about-us             about page
  *   #/contact-support      contact support page
@@ -11,6 +11,7 @@
  *   #/learning-center      learning center page
  *   #/help-center          help center page
  *   #/market-education     market education page
+ *   #/gse-live             GSE Live page
  */
 
 export type ViewMode = "table" | "heatmap";
@@ -31,13 +32,15 @@ const PAGE_ROUTES = [
     { kind: "market-education", pattern: /^#\/market-education$/ },
     { kind: "business-news", pattern: /^#\/business-news$/ },
     { kind: "terms-of-service", pattern: /^#\/terms-of-service$/ },
+    { kind: "gse-live", pattern: /^#\/gse-live$/ },
 ] as const;
 
-type PageKind = (typeof PAGE_ROUTES)[number]["kind"];
+type PageKind = Exclude<(typeof PAGE_ROUTES)[number]["kind"], "gse-live">;
 
 export type Route =
     | { kind: "home"; section: string | null; view: ViewMode | null }
     | { kind: "stock"; symbol: string }
+    | { kind: "gse-live"; view: ViewMode | null }
     | { kind: PageKind };
 
 export function parseRoute(hash = window.location.hash): Route {
@@ -46,6 +49,9 @@ export function parseRoute(hash = window.location.hash): Route {
 
     for (const route of PAGE_ROUTES) {
         if (hash.match(route.pattern)) {
+            if (route.kind === "gse-live") {
+                return { kind: "gse-live", view: null };
+            }
             return { kind: route.kind } as Route;
         }
     }
@@ -54,8 +60,7 @@ export function parseRoute(hash = window.location.hash): Route {
     if (live) {
         const requested = live[1].toLowerCase() as ViewMode;
         return {
-            kind: "home",
-            section: GSE_LIVE_SECTION,
+            kind: "gse-live",
             view: VIEW_MODES.includes(requested) ? requested : null,
         };
     }
@@ -104,10 +109,10 @@ export function openMarketEducation(): void {
 }
 
 export function openGseLive(view?: ViewMode): void {
-    window.location.hash = view ? `#gse-live/${view}` : `#${GSE_LIVE_SECTION}`;
+    window.location.hash = view ? `#gse-live/${view}` : "#/gse-live";
 }
 
-/** Leaving a ticker returns to the live market section it was opened from. */
+/** Leaving a ticker returns to the GSE Live page. */
 export function closeStock(): void {
-    window.location.hash = `#${GSE_LIVE_SECTION}`;
+    window.location.hash = "#/gse-live";
 }

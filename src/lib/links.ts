@@ -1,15 +1,10 @@
 /**
  * Fluid Finance - shared links
- *
- * GSE Live is a section of the landing page, so its entries are in-page hashes.
- * The `/<view>` suffixes are read by src/lib/navigation.ts.
  */
 
-export const GSE_LIVE_HREF = "#gse-live";
-
 export const GSE_LIVE_VIEWS = [
-    { key: "table", label: "Table", href: "#gse-live/table" },
-    { key: "heatmap", label: "Heatmap", href: "#gse-live/heatmap" },
+    { key: "table", label: "Table", href: "#/gse-live/table" },
+    { key: "heatmap", label: "Heatmap", href: "#/gse-live/heatmap" },
 ] as const;
 
 export const SOCIAL_LINKS = [

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Mail } from "lucide-react";
-import { GSE_LIVE_HREF, SOCIAL_LINKS } from "@/lib/links";
+import { SOCIAL_LINKS } from "@/lib/links";
 import { SOCIAL_ICONS } from "@/components/ui/social-icons";
 import { BrandLogo } from "@/components/ui/brand-logo";
 
@@ -20,7 +20,7 @@ export const EnhancedFooter = () => {
         {
             title: "GSE Live",
             links: [
-                { label: "Live Exchange", href: GSE_LIVE_HREF },
+                { label: "Live Exchange", href: "#/gse-live" },
             ],
             delay: 0.25
         },

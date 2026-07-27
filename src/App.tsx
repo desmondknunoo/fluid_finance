@@ -11,6 +11,7 @@ import HelpCenterPage from "@/components/ui/help-center-page"
 import MarketEducationPage from "@/components/ui/market-education-page"
 import BusinessNewsPage from "@/components/ui/business-news-page"
 import TermsOfServicePage from "@/components/ui/terms-of-service-page"
+import GseLivePage from "@/components/ui/gse-live-page"
 import { StockDetail } from "@/components/stock/stock-detail"
 import { closeStock, parseRoute, type Route } from "@/lib/navigation"
 
@@ -79,7 +80,8 @@ function App() {
       {route.kind === "market-education" && <MarketEducationPage />}
       {route.kind === "business-news" && <BusinessNewsPage />}
       {route.kind === "terms-of-service" && <TermsOfServicePage />}
-      {route.kind === "home" && <LandingPage liveView={route.view} />}
+      {route.kind === "gse-live" && <GseLivePage view={route.view} />}
+      {route.kind === "home" && <LandingPage />}
       <EnhancedFooter />
       <ScrollToTop />
     </div>

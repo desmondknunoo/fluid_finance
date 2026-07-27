@@ -35,46 +35,40 @@ const features = [
 
 const educationalStories = [
     {
-        category: "Press Release",
-        title: "GSE Press Releases",
-        snippet: "Official announcements and press releases from the Ghana Stock Exchange.",
-        date: "2026",
-        link: "https://gse.com.gh/press-release/"
+        category: "Business & Financial Times",
+        title: "B&FT",
+        snippet: "Ghana's leading financial newspaper covering business, finance, and economic news.",
+        link: "https://thebftonline.com"
     },
     {
-        category: "Media",
-        title: "GSE Testimonials",
-        snippet: "Watch testimonial videos from market participants and stakeholders.",
-        date: "2026",
-        link: "https://gse.com.gh/gse-testimonial-video/"
+        category: "Business News",
+        title: "Ghana Business News",
+        snippet: "Comprehensive coverage of Ghana's business landscape and economic developments.",
+        link: "https://ghanabusinessnews.com"
     },
     {
-        category: "Financial Reports",
-        title: "Financial Statements",
-        snippet: "Browse published financial statements and filings from listed companies.",
-        date: "2026",
-        link: "https://gse.com.gh/financial-statements/"
+        category: "Business News",
+        title: "Business Day Ghana",
+        snippet: "In-depth business journalism and market analysis for the Ghanaian market.",
+        link: "https://businessdayghana.com"
     },
     {
-        category: "Market Notices",
-        title: "GSE Market Notices",
-        snippet: "Official market notices, circulars, and regulatory updates from the GSE.",
-        date: "2026",
-        link: "https://gse.com.gh/gse-market-notice/"
+        category: "Business News",
+        title: "Graphic Online Business News",
+        snippet: "Business and financial news from Ghana's most established media house.",
+        link: "https://graphic.com.gh"
     },
     {
-        category: "Articles",
-        title: "GSE Educational Articles",
-        snippet: "Educational content and articles covering market fundamentals and investing.",
-        date: "2026",
-        link: "http://gse.com.gh/gse-articles/"
+        category: "News",
+        title: "Citinewsroom",
+        snippet: "Breaking news and comprehensive coverage of Ghana's business and economic affairs.",
+        link: "https://citinewsroom.com"
     },
     {
-        category: "Resources",
-        title: "GSE Brochures & Guides",
-        snippet: "Downloadable guides, brochures, and resources for market participants.",
-        date: "2026",
-        link: "https://gse.com.gh/gse-brochures/"
+        category: "Business News",
+        title: "BusinessGhana",
+        snippet: "Business news, company profiles, and economic analysis for Ghana.",
+        link: "https://businessghana.com"
     }
 ];
 
@@ -133,17 +127,16 @@ export const EducationalSection = () => {
                     <div className="text-left">
                         <h2 className="text-3xl md:text-5xl font-bold text-ink mb-4">Market Insights</h2>
                         <p className="text-ink/40 max-w-xl">
-                            Stay ahead of the curve with expert analysis and educational content tailored for
-                            both beginners and pro traders.
+                            Stay ahead of the curve with curated financial news from Ghana's top business publications.
                         </p>
                     </div>
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => window.location.hash = "#/learning-center"}
+                        onClick={() => window.location.hash = "#/market-education"}
                         className="flex items-center gap-2 text-ink font-medium hover:text-ink/60 transition-colors"
                     >
-                        Explore Learning Center <TrendingUp size={18} />
+                        Learn More <TrendingUp size={18} />
                     </motion.button>
                 </motion.div>
 
@@ -170,7 +163,6 @@ export const EducationalSection = () => {
                                 {story.snippet}
                             </p>
                             <div className="flex items-center justify-between text-xs text-ink/20">
-                                <span>{story.date}</span>
                                 <span className="flex items-center gap-1 group-hover:text-ink transition-colors">
                                     Visit <Zap size={10} />
                                 </span>

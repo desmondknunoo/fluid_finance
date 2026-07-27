@@ -177,10 +177,10 @@ export const Navigation = memo(() => {
                         ))}
 
                         <a
-                            href="#gse-live"
+                            href="#/gse-live"
                             onClick={(e) => {
                                 e.preventDefault();
-                                window.location.hash = "#gse-live";
+                                window.location.hash = "#/gse-live";
                                 window.scrollTo({ top: 0, behavior: 'smooth' });
                             }}
                             className={cn(NAV_LINK, "text-ink/40 hover:text-ink")}
@@ -236,12 +236,12 @@ export const Navigation = memo(() => {
                         ))}
 
                     <a
-                        href="#gse-live"
+                        href="#/gse-live"
                         onClick={(e) => {
                             e.preventDefault();
                             setMobileMenuOpen(false);
                             window.scrollTo({ top: 0, behavior: 'smooth' });
-                            window.location.hash = "#gse-live";
+                            window.location.hash = "#/gse-live";
                         }}
                         className="text-sm font-bold uppercase tracking-widest text-ink/60 font-poppins"
                     >
