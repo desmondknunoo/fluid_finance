@@ -232,10 +232,12 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                         <span
                             className={cn(
                                 "h-2 w-2 rounded-full",
-                                marketOpen ? "animate-pulse bg-emerald-400" : "bg-ink/30",
+                                marketOpen ? "animate-pulse bg-emerald-400" : "bg-red-500",
                             )}
                         />
-                        {marketOpen ? "Market open" : "Market closed"}
+                        <span className={marketOpen ? "" : "text-red-500"}>
+                            {marketOpen ? "Market open" : "Market closed"}
+                        </span>
                     </span>
                 </div>
 

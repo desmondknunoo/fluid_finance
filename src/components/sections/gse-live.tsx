@@ -111,7 +111,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
     const load = useCallback(async (silent = false) => {
         if (silent) setRefreshing(true);
         try {
-            const data = await getAllStocks();
+            const data = await getAllStocks(silent);
             recordAll(data.map((s) => ({ symbol: s.symbol, price: s.price })));
             setStocks(data);
             setUpdatedAt(new Date());

@@ -102,9 +102,11 @@ export const COMPANY_META: Record<string, { company: string; sector: string; ind
 
 const cache = new Map<string, { expiry: number; data: unknown }>();
 
-async function request<T>(endpoint: string): Promise<T> {
-    const hit = cache.get(endpoint);
-    if (hit && Date.now() < hit.expiry) return hit.data as T;
+async function request<T>(endpoint: string, force = false): Promise<T> {
+    if (!force) {
+        const hit = cache.get(endpoint);
+        if (hit && Date.now() < hit.expiry) return hit.data as T;
+    }
 
     const response = await fetch(`${API_BASE}${endpoint}`, {
         headers: { Accept: "application/json" },
@@ -147,8 +149,8 @@ function toStock(quote: LiveQuote): Stock {
 }
 
 /** Every symbol trading on the GSE, with today's price action. */
-export async function getAllStocks(): Promise<Stock[]> {
-    const quotes = await request<LiveQuote[]>("/live");
+export async function getAllStocks(force = false): Promise<Stock[]> {
+    const quotes = await request<LiveQuote[]>("/live", force);
     return quotes.map(toStock).sort((a, b) => a.symbol.localeCompare(b.symbol));
 }
 
