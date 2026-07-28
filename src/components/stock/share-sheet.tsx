@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type ComponentType, useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
     Check,
@@ -7,14 +7,15 @@ import {
     ImageDown,
     Linkedin,
     Loader2,
-    MessageCircle,
     Share2,
-    Twitter,
     X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/theme";
 import { renderShareCard, type ShareCardInput } from "@/lib/share-card";
+import { InstagramIcon, XIcon } from "@/components/ui/social-icons";
+
+type IconType = ComponentType<{ size?: number }>;
 
 type Status = "rendering" | "ready" | "error";
 
@@ -28,43 +29,54 @@ function shareText(card: ShareCardInput): string {
     const sign = card.change >= 0 ? "+" : "";
     return `LIVE: ${card.symbol} is currently trading at ₵${card.price.toFixed(2)} (${sign}${card.changePercent.toFixed(
         2,
-    )}%) on the Ghana Stock Exchange. Via finance.fluidterra.com/#/stock/${card.symbol}`;
+    )}%) on the Ghana Stock Exchange.`;
 }
 
 /**
- * Each destination opens a pre-filled composer — nothing is ever posted without
- * the person pressing publish in that network's own UI.
+ * Where a stock can be shared. Every button attaches the actual card image via
+ * the native share sheet where the browser supports it (`canShare({files})` —
+ * mobile and installed PWAs); the user then routes it to the app they picked.
+ *
+ * `composer` is only the desktop fallback: web intent URLs can carry text and a
+ * link but cannot attach an uploaded image, so on desktop we copy the image to
+ * the clipboard and open the composer to paste it. Instagram has no web
+ * composer at all (`composer: null`) — there the image is downloaded instead.
  */
-const NETWORKS = [
+interface Network {
+    key: string;
+    label: string;
+    Icon: IconType;
+    composer: ((text: string, url: string) => string) | null;
+}
+
+const NETWORKS: Network[] = [
     {
         key: "x",
         label: "X",
-        icon: Twitter,
-        href: (text: string, url: string) =>
+        Icon: XIcon,
+        composer: (text, url) =>
             `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
-    },
-    {
-        key: "whatsapp",
-        label: "WhatsApp",
-        icon: MessageCircle,
-        href: (text: string, url: string) =>
-            `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`,
-    },
-    {
-        key: "linkedin",
-        label: "LinkedIn",
-        icon: Linkedin,
-        href: (_text: string, url: string) =>
-            `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
     },
     {
         key: "facebook",
         label: "Facebook",
-        icon: Facebook,
-        href: (_text: string, url: string) =>
-            `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+        Icon: Facebook,
+        composer: (_text, url) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
     },
-] as const;
+    {
+        key: "instagram",
+        label: "Instagram",
+        Icon: InstagramIcon,
+        composer: null,
+    },
+    {
+        key: "linkedin",
+        label: "LinkedIn",
+        Icon: Linkedin,
+        composer: (_text, url) =>
+            `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+    },
+];
 
 export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
     const { resolved } = useTheme();
@@ -171,18 +183,35 @@ export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
         download();
     }, [card, download, fileName]);
 
-    const openNetwork = useCallback(
-        async (href: string) => {
+    const shareToNetwork = useCallback(
+        async (network: Network) => {
+            const blob = blobRef.current;
+            const file = blob ? new File([blob], fileName, { type: "image/png" }) : null;
+
+            // Preferred path: the OS share sheet carries the actual image, and the
+            // user picks X / Facebook / Instagram / LinkedIn to receive it.
+            if (file && navigator.canShare?.({ files: [file] })) {
+                try {
+                    await navigator.share({ files: [file], text: shareText(card), title: card.symbol });
+                } catch {
+                    /* dismissed by the user */
+                }
+                return;
+            }
+
+            // Desktop fallback: an intent URL can't take an uploaded image, so copy
+            // the image for pasting and open the composer where one exists.
             const copied = await copyImage();
-            window.open(href, "_blank", "noopener,noreferrer");
-            flash(
-                copied
-                    ? "Image copied — paste it into the post"
-                    : "Post opened — attach the downloaded image",
-            );
-            if (!copied) download();
+            if (network.composer) {
+                window.open(network.composer(shareText(card), window.location.href), "_blank", "noopener,noreferrer");
+                flash(copied ? "Image copied — paste it into your post" : "Image saved — attach it to your post");
+                if (!copied) download();
+            } else {
+                download();
+                flash("Image saved — open Instagram to share it");
+            }
         },
-        [copyImage, download, flash],
+        [card, copyImage, download, fileName, flash],
     );
 
     const canNativeShare = typeof navigator !== "undefined" && !!navigator.share;
@@ -270,14 +299,12 @@ export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
                         {/* Networks */}
                         <div className="mt-3 grid grid-cols-4 gap-2">
                             {NETWORKS.map((network) => {
-                                const Icon = network.icon;
+                                const Icon = network.Icon;
                                 return (
                                     <button
                                         key={network.key}
                                         disabled={status !== "ready"}
-                                        onClick={() =>
-                                            openNetwork(network.href(shareText(card), window.location.href))
-                                        }
+                                        onClick={() => shareToNetwork(network)}
                                         className="flex flex-col items-center gap-2 rounded-xl border border-ink/[0.08] bg-ink/[0.03] py-3 text-xs font-medium text-ink/60 transition-colors hover:border-ink/20 hover:text-ink disabled:opacity-40"
                                     >
                                         <Icon size={18} />
@@ -289,10 +316,8 @@ export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
 
                         <p className="mt-4 text-[11px] leading-relaxed text-ink/30">
                             {canNativeShare
-                                ? "Share opens your device's share sheet with the image attached."
-                                : "Save or copy the image, then attach it to your post."}{" "}
-                            Network buttons open a pre-filled composer — nothing is posted until you publish it
-                            yourself.
+                                ? "Sharing to a network opens your device's share sheet with the image attached — pick the app to post to."
+                                : "The image is copied for you to paste (or saved) when you open a network. Nothing is posted until you publish it yourself."}
                         </p>
 
                         <AnimatePresence>

@@ -456,12 +456,7 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
         ctx.textAlign = "right";
         ctx.fillStyle = ink.muted;
         ctx.font = font(500, 18);
-        ctx.fillText("Chart includes backfilled history", W - M, H - M - 30);
-        ctx.fillText("🔗 finance.fluidterra.com", W - M, H - M - 1);
-    } else {
-        ctx.textAlign = "center";
-        ctx.font = font(500, 18);
-        ctx.fillText("🔗 finance.fluidterra.com", W / 2, H - M - 1);
+        ctx.fillText("Chart includes backfilled history", W - M, H - M - 12);
     }
 
     return new Promise((resolve, reject) => {
