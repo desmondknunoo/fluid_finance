@@ -7,6 +7,10 @@ export const GSE_LIVE_VIEWS = [
     { key: "heatmap", label: "Heatmap", href: "#/gse-live/heatmap" },
 ] as const;
 
+// Where a "Buy" action sends the user — Fluid Finance itself has no trade
+// facility; execution happens entirely in the Fluid Terra app.
+export const APP_FT_URL = "https://app.fluidterra.com";
+
 export const SOCIAL_LINKS = [
     { key: "x", label: "X", href: "https://x.com/FluidFinanceX" },
     { key: "instagram", label: "Instagram", href: "https://www.instagram.com/fluidfinanceonline" },
