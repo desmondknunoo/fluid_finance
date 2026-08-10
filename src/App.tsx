@@ -29,6 +29,10 @@ function App() {
   }, [])
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" })
+  }, [route])
+
+  useEffect(() => {
     if (route.kind !== "home" || !route.section) return
 
     const section = route.section
