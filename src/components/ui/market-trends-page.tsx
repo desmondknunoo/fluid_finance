@@ -11,6 +11,7 @@ import { exportStockPricesToExcel, getDefaultDateRange } from "@/lib/export-exce
 import { openStock } from "@/lib/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
 import { StockCard } from "@/components/stock/stock-card";
+import { HistoricalPrices } from "@/components/stock/historical-prices";
 import { WeeklyTrendsShareSheet } from "@/components/stock/weekly-trends-share-sheet";
 import type { WeeklyTrendCardInput } from "@/lib/weekly-trends-share-card";
 
@@ -492,6 +493,21 @@ export default function MarketTrendsPage() {
                             </div>
                         </motion.div>
                     )} */}
+
+                    {/* Historical Prices */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="mb-12"
+                    >
+                        <div className="mb-6">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/40">Database</p>
+                            <h2 className="mt-1 text-xl font-bold text-ink">Closing Price History</h2>
+                            <p className="text-sm text-ink/50 mt-1">Daily closing prices recorded from the GSE</p>
+                        </div>
+                        <HistoricalPrices />
+                    </motion.div>
 
                     {/* Market movers Today's standouts */}
                     {loading ? (
