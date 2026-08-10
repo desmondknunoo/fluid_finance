@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import { getStockPriceHistory, type StockPrice } from "./supabase";
+import { getStockPriceHistory } from "./supabase";
 
 export async function exportStockPricesToExcel(
   startDate: string,
