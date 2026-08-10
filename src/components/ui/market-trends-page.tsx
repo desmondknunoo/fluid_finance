@@ -262,8 +262,24 @@ export default function MarketTrendsPage() {
                         className="mb-8"
                     >
                         <div className="rounded-2xl bg-ink/[0.03] border border-ink/[0.08] p-4 sm:p-5">
-                            <div className="flex flex-col sm:flex-row items-center gap-3">
-                                <h3 className="text-sm font-semibold text-ink mr-auto">Export to Excel</h3>
+                            {/* Top row: Title + Export button */}
+                            <div className="flex items-center justify-between gap-3 mb-3 sm:mb-0">
+                                <h3 className="text-sm font-semibold text-ink">Export to Excel</h3>
+                                <button
+                                    onClick={handleExport}
+                                    disabled={exporting}
+                                    className="flex items-center justify-center gap-2 rounded-xl bg-ink/5 border border-ink/10 px-4 py-2 text-sm font-semibold text-ink transition-all hover:bg-ink/10 hover:border-ink/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {exporting ? (
+                                        <Loader2 size={14} className="animate-spin" />
+                                    ) : (
+                                        <Download size={14} />
+                                    )}
+                                    {exporting ? "Exporting..." : "Export"}
+                                </button>
+                            </div>
+                            {/* Bottom row: Date pickers + dropdown */}
+                            <div className="flex flex-wrap items-center gap-2">
                                 <input
                                     type="date"
                                     value={exportStartDate}
@@ -289,18 +305,6 @@ export default function MarketTrendsPage() {
                                     <option value="fridays">Fridays only</option>
                                     <option value="comparison">Weekly comparison</option>
                                 </select>
-                                <button
-                                    onClick={handleExport}
-                                    disabled={exporting}
-                                    className="flex items-center justify-center gap-2 rounded-xl bg-ink/5 border border-ink/10 px-4 py-2 text-sm font-semibold text-ink transition-all hover:bg-ink/10 hover:border-ink/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {exporting ? (
-                                        <Loader2 size={14} className="animate-spin" />
-                                    ) : (
-                                        <Download size={14} />
-                                    )}
-                                    {exporting ? "Exporting..." : "Export"}
-                                </button>
                             </div>
                             {exportError && (
                                 <p className="mt-3 text-xs text-rose-500">{exportError}</p>
