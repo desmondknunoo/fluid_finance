@@ -262,7 +262,6 @@ export default function MarketTrendsPage() {
                             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                                 <div className="flex-1">
                                     <h3 className="text-sm font-semibold text-ink">Export to Excel</h3>
-                                    <p className="text-xs text-ink/50 mt-0.5">Download historical stock prices from Supabase</p>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-3">
                                     <div className="flex items-center gap-2">
