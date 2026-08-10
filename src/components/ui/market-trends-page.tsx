@@ -302,30 +302,6 @@ export default function MarketTrendsPage() {
                         </div>
                     </motion.div>
 
-                    {/* Weekly Share Buttons */}
-                    {!loading && !error && topGainers.length > 0 && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
-                            className="flex flex-col sm:flex-row gap-4 mb-8 justify-center"
-                        >
-                            <button
-                                onClick={() => openShareSheet("gainers")}
-                                className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-6 py-3 text-sm font-semibold text-emerald-500 transition-all hover:bg-emerald-500/20 hover:border-emerald-500/30"
-                            >
-                                <Share2 size={16} />
-                                Share Top Gainers
-                            </button>
-                            <button
-                                onClick={() => openShareSheet("losers")}
-                                className="flex items-center justify-center gap-2 rounded-xl bg-rose-500/10 border border-rose-500/20 px-6 py-3 text-sm font-semibold text-rose-500 transition-all hover:bg-rose-500/20 hover:border-rose-500/30"
-                            >
-                                <Share2 size={16} />
-                                Share Top Losers
-                            </button>
-                        </motion.div>
-                    )}
 
                     {/* Week in Review - Top Gainers */}
                     {!loading && !error && topGainers.length > 0 && (
