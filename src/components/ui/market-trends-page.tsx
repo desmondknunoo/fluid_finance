@@ -105,6 +105,7 @@ export default function MarketTrendsPage() {
     const [exportStartDate, setExportStartDate] = useState(getDefaultDateRange().start);
     const [exportEndDate, setExportEndDate] = useState(getDefaultDateRange().end);
     const [exportFridaysOnly, setExportFridaysOnly] = useState(false);
+    const [exportWeeklyComparison, setExportWeeklyComparison] = useState(false);
     const [exporting, setExporting] = useState(false);
     const [exportError, setExportError] = useState<string | null>(null);
 
@@ -208,7 +209,7 @@ export default function MarketTrendsPage() {
         setExporting(true);
         setExportError(null);
         try {
-            await exportStockPricesToExcel(exportStartDate, exportEndDate, exportFridaysOnly);
+            await exportStockPricesToExcel(exportStartDate, exportEndDate, exportFridaysOnly, exportWeeklyComparison);
         } catch (err) {
             setExportError(err instanceof Error ? err.message : "Export failed");
         } finally {
@@ -261,51 +262,45 @@ export default function MarketTrendsPage() {
                         className="mb-8"
                     >
                         <div className="rounded-2xl bg-ink/[0.03] border border-ink/[0.08] p-4 sm:p-5">
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                                <div className="flex-1">
-                                    <h3 className="text-sm font-semibold text-ink">Export to Excel</h3>
-                                </div>
-                                <div className="flex flex-wrap items-center gap-3">
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-xs text-ink/60">From:</label>
-                                        <input
-                                            type="date"
-                                            value={exportStartDate}
-                                            onChange={(e) => setExportStartDate(e.target.value)}
-                                            className="rounded-lg border border-ink/10 bg-canvas px-3 py-1.5 text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
-                                        />
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-xs text-ink/60">To:</label>
-                                        <input
-                                            type="date"
-                                            value={exportEndDate}
-                                            onChange={(e) => setExportEndDate(e.target.value)}
-                                            className="rounded-lg border border-ink/10 bg-canvas px-3 py-1.5 text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
-                                        />
-                                    </div>
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={exportFridaysOnly}
-                                            onChange={(e) => setExportFridaysOnly(e.target.checked)}
-                                            className="rounded border-ink/20 text-ink focus:ring-ink/20"
-                                        />
-                                        <span className="text-xs text-ink/60">Fridays only</span>
-                                    </label>
-                                    <button
-                                        onClick={handleExport}
-                                        disabled={exporting}
-                                        className="flex items-center justify-center gap-2 rounded-xl bg-ink/5 border border-ink/10 px-4 py-2 text-sm font-semibold text-ink transition-all hover:bg-ink/10 hover:border-ink/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {exporting ? (
-                                            <Loader2 size={14} className="animate-spin" />
-                                        ) : (
-                                            <Download size={14} />
-                                        )}
-                                        {exporting ? "Exporting..." : "Export"}
-                                    </button>
-                                </div>
+                            <div className="flex flex-col sm:flex-row items-center gap-3">
+                                <h3 className="text-sm font-semibold text-ink mr-auto">Export to Excel</h3>
+                                <input
+                                    type="date"
+                                    value={exportStartDate}
+                                    onChange={(e) => setExportStartDate(e.target.value)}
+                                    className="rounded-lg border border-ink/10 bg-canvas px-3 py-2 text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
+                                />
+                                <span className="text-xs text-ink/40">to</span>
+                                <input
+                                    type="date"
+                                    value={exportEndDate}
+                                    onChange={(e) => setExportEndDate(e.target.value)}
+                                    className="rounded-lg border border-ink/10 bg-canvas px-3 py-2 text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
+                                />
+                                <select
+                                    value={exportWeeklyComparison ? "comparison" : exportFridaysOnly ? "fridays" : "all"}
+                                    onChange={(e) => {
+                                        setExportWeeklyComparison(e.target.value === "comparison");
+                                        setExportFridaysOnly(e.target.value === "fridays");
+                                    }}
+                                    className="rounded-lg border border-ink/10 bg-canvas px-3 py-2 text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
+                                >
+                                    <option value="all">All prices</option>
+                                    <option value="fridays">Fridays only</option>
+                                    <option value="comparison">Weekly comparison</option>
+                                </select>
+                                <button
+                                    onClick={handleExport}
+                                    disabled={exporting}
+                                    className="flex items-center justify-center gap-2 rounded-xl bg-ink/5 border border-ink/10 px-4 py-2 text-sm font-semibold text-ink transition-all hover:bg-ink/10 hover:border-ink/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {exporting ? (
+                                        <Loader2 size={14} className="animate-spin" />
+                                    ) : (
+                                        <Download size={14} />
+                                    )}
+                                    {exporting ? "Exporting..." : "Export"}
+                                </button>
                             </div>
                             {exportError && (
                                 <p className="mt-3 text-xs text-rose-500">{exportError}</p>
