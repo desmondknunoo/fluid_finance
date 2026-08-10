@@ -510,7 +510,7 @@ export default function MarketTrendsPage() {
                     </motion.div>
 
                     {/* Market movers Today's standouts */}
-                    {loading ? (
+                    {/* {loading ? (
                         <div className="flex min-h-[300px] items-center justify-center">
                             <Loader2 className="w-8 h-8 animate-spin text-ink/40" />
                         </div>
@@ -587,7 +587,7 @@ export default function MarketTrendsPage() {
                                 </table>
                             </div>
                         </motion.div>
-                    )}
+                    )} */}
                 </div>
             </div>
 
