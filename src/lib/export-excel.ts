@@ -69,7 +69,7 @@ export async function exportStockPricesToExcel(
       columnHeaders.push(`Close of ${formatDateShort(d)} Price`);
       columnInfo.push({ type: "date", date: d });
     }
-    columnHeaders.push("Weekly Average");
+    columnHeaders.push("Friday Close");
     columnInfo.push({ type: "avg", weekDates: week.dates });
 
     columnHeaders.push("");
@@ -88,16 +88,10 @@ export async function exportStockPricesToExcel(
       const info = columnInfo[col];
 
       if (info.type === "avg") {
-        let sum = 0;
-        let count = 0;
-        for (const d of info.weekDates!) {
-          const val = symbolData?.get(d);
-          if (val !== undefined) {
-            sum += val;
-            count++;
-          }
-        }
-        row[header] = count > 0 ? Math.round((sum / count) * 100) / 100 : "";
+        // Use Friday close price (last day of the week)
+        const fridayDate = info.weekDates![info.weekDates!.length - 1];
+        const fridayPrice = symbolData?.get(fridayDate);
+        row[header] = fridayPrice ?? "";
       } else if (info.type === "date") {
         row[header] = symbolData?.get(info.date!) ?? "";
       }
