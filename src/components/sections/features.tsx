@@ -56,13 +56,13 @@ const educationalStories = [
         category: "Business News",
         title: "Graphic Online Business News",
         snippet: "Business and financial news from Ghana's most established media house.",
-        link: "https://graphic.com.gh"
+        link: "https://www.graphic.com.gh/business/business-news.html"
     },
     {
         category: "News",
         title: "Citinewsroom",
         snippet: "Breaking news and comprehensive coverage of Ghana's business and economic affairs.",
-        link: "https://citinewsroom.com"
+        link: "https://www.citinewsroom.com/category/business/"
     },
     {
         category: "Business News",
