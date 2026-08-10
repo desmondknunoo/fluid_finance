@@ -226,6 +226,197 @@ export default function MarketTrendsPage() {
                         </motion.div>
                     )}
 
+                    {/* Week in Review - Top Gainers */}
+                    {!loading && !error && topGainers.length > 0 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6 }}
+                            className="mb-8"
+                        >
+                            <div className="rounded-2xl bg-ink/[0.03] border border-ink/[0.08] overflow-hidden">
+                                <div className="flex flex-col gap-4 border-b border-ink/[0.08] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                                    <div>
+                                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-500">Week in Review</p>
+                                        <h2 className="mt-1 text-lg font-bold text-ink">Top Gainers</h2>
+                                        <p className="text-xs text-ink/40 mt-1">{getDateRange().start} to {getDateRange().end}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => openShareSheet("gainers")}
+                                        className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-2.5 text-sm font-semibold text-emerald-500 transition-all hover:bg-emerald-500/20 hover:border-emerald-500/30"
+                                    >
+                                        <Share2 size={14} />
+                                        Share
+                                    </button>
+                                </div>
+
+                                {/* Mobile cards */}
+                                <div className="flex flex-col gap-2 p-4 md:hidden">
+                                    {topGainers.map((item, index) => (
+                                        <button
+                                            key={item.stock.symbol}
+                                            onClick={() => openStock(item.stock.symbol)}
+                                            className="flex w-full items-center gap-3 rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-3 text-left transition-colors hover:border-ink/20 hover:bg-ink/[0.05]"
+                                        >
+                                            <span className="w-4 shrink-0 text-center font-mono text-xs text-ink/30">{index + 1}</span>
+                                            <TickerLogo symbol={item.stock.symbol} size={38} />
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-baseline justify-between gap-2">
+                                                    <span className="truncate font-bold uppercase text-ink">{item.stock.symbol}</span>
+                                                    <span className="shrink-0 font-mono text-ink">{formatCedis(item.stock.price)}</span>
+                                                </div>
+                                                <div className="mt-0.5 flex items-center justify-between gap-2">
+                                                    <span className="truncate text-xs text-ink/40">{item.stock.company}</span>
+                                                    <span className="flex shrink-0 items-center gap-1 font-mono text-xs font-medium text-emerald-400">
+                                                        <TrendingUp size={12} />
+                                                        +{item.weeklyChangePercent.toFixed(2)}%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Desktop table */}
+                                <div className="hidden overflow-x-auto md:block">
+                                    <table className="w-full text-left">
+                                        <thead>
+                                            <tr className="border-b border-ink/[0.08] bg-ink/[0.01]">
+                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">#</th>
+                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Symbol</th>
+                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Price</th>
+                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Weekly Change</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {topGainers.map((item, index) => (
+                                                <tr
+                                                    key={item.stock.symbol}
+                                                    onClick={() => openStock(item.stock.symbol)}
+                                                    className="border-b border-ink/[0.04] hover:bg-ink/[0.02] transition-colors cursor-pointer"
+                                                >
+                                                    <td className="px-6 py-4 font-mono text-xs text-ink/30">{index + 1}</td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <TickerLogo symbol={item.stock.symbol} size={28} />
+                                                            <div className="min-w-0">
+                                                                <span className="font-bold text-ink uppercase">{item.stock.symbol}</span>
+                                                                <span className="block max-w-[180px] truncate text-xs text-ink/40">{item.stock.company}</span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 font-mono text-ink">{formatCedis(item.stock.price)}</td>
+                                                    <td className="px-6 py-4">
+                                                        <span className="inline-flex items-center gap-1 font-medium text-emerald-400">
+                                                            <TrendingUp size={14} />
+                                                            +{item.weeklyChangePercent.toFixed(2)}%
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* Week in Review - Top Losers */}
+                    {!loading && !error && topLosers.length > 0 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6 }}
+                            className="mb-8"
+                        >
+                            <div className="rounded-2xl bg-ink/[0.03] border border-ink/[0.08] overflow-hidden">
+                                <div className="flex flex-col gap-4 border-b border-ink/[0.08] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                                    <div>
+                                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-500">Week in Review</p>
+                                        <h2 className="mt-1 text-lg font-bold text-ink">Top Losers</h2>
+                                        <p className="text-xs text-ink/40 mt-1">{getDateRange().start} to {getDateRange().end}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => openShareSheet("losers")}
+                                        className="flex items-center justify-center gap-2 rounded-xl bg-rose-500/10 border border-rose-500/20 px-4 py-2.5 text-sm font-semibold text-rose-500 transition-all hover:bg-rose-500/20 hover:border-rose-500/30"
+                                    >
+                                        <Share2 size={14} />
+                                        Share
+                                    </button>
+                                </div>
+
+                                {/* Mobile cards */}
+                                <div className="flex flex-col gap-2 p-4 md:hidden">
+                                    {topLosers.map((item, index) => (
+                                        <button
+                                            key={item.stock.symbol}
+                                            onClick={() => openStock(item.stock.symbol)}
+                                            className="flex w-full items-center gap-3 rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-3 text-left transition-colors hover:border-ink/20 hover:bg-ink/[0.05]"
+                                        >
+                                            <span className="w-4 shrink-0 text-center font-mono text-xs text-ink/30">{index + 1}</span>
+                                            <TickerLogo symbol={item.stock.symbol} size={38} />
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-baseline justify-between gap-2">
+                                                    <span className="truncate font-bold uppercase text-ink">{item.stock.symbol}</span>
+                                                    <span className="shrink-0 font-mono text-ink">{formatCedis(item.stock.price)}</span>
+                                                </div>
+                                                <div className="mt-0.5 flex items-center justify-between gap-2">
+                                                    <span className="truncate text-xs text-ink/40">{item.stock.company}</span>
+                                                    <span className="flex shrink-0 items-center gap-1 font-mono text-xs font-medium text-rose-400">
+                                                        <TrendingDown size={12} />
+                                                        {item.weeklyChangePercent.toFixed(2)}%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Desktop table */}
+                                <div className="hidden overflow-x-auto md:block">
+                                    <table className="w-full text-left">
+                                        <thead>
+                                            <tr className="border-b border-ink/[0.08] bg-ink/[0.01]">
+                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">#</th>
+                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Symbol</th>
+                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Price</th>
+                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Weekly Change</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {topLosers.map((item, index) => (
+                                                <tr
+                                                    key={item.stock.symbol}
+                                                    onClick={() => openStock(item.stock.symbol)}
+                                                    className="border-b border-ink/[0.04] hover:bg-ink/[0.02] transition-colors cursor-pointer"
+                                                >
+                                                    <td className="px-6 py-4 font-mono text-xs text-ink/30">{index + 1}</td>
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <TickerLogo symbol={item.stock.symbol} size={28} />
+                                                            <div className="min-w-0">
+                                                                <span className="font-bold text-ink uppercase">{item.stock.symbol}</span>
+                                                                <span className="block max-w-[180px] truncate text-xs text-ink/40">{item.stock.company}</span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 font-mono text-ink">{formatCedis(item.stock.price)}</td>
+                                                    <td className="px-6 py-4">
+                                                        <span className="inline-flex items-center gap-1 font-medium text-rose-400">
+                                                            <TrendingDown size={14} />
+                                                            {item.weeklyChangePercent.toFixed(2)}%
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* Market movers Today's standouts */}
                     {loading ? (
                         <div className="flex min-h-[300px] items-center justify-center">
                             <Loader2 className="w-8 h-8 animate-spin text-ink/40" />
