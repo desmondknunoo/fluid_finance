@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Calendar, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Calendar, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { supabase, type StockPrice } from "@/lib/supabase";
 
 interface DateGroup {
@@ -14,6 +14,7 @@ export function HistoricalPrices() {
   const [groups, setGroups] = useState<DateGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pageIndex, setPageIndex] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -28,7 +29,6 @@ export function HistoricalPrices() {
         if (fetchError) throw fetchError;
         if (cancelled) return;
 
-        // Group by trading_date
         const map = new Map<string, StockPrice[]>();
         for (const row of data || []) {
           const existing = map.get(row.trading_date) || [];
@@ -72,21 +72,49 @@ export function HistoricalPrices() {
     );
   }
 
+  const current = groups[pageIndex];
+  const hasPrev = pageIndex < groups.length - 1;
+  const hasNext = pageIndex > 0;
+
   return (
-    <div className="space-y-6">
-      {groups.map((group, groupIndex) => (
+    <div className="rounded-2xl bg-ink/[0.03] border border-ink/[0.08] overflow-hidden">
+      {/* Header with pagination */}
+      <div className="flex items-center justify-between border-b border-ink/[0.08] px-5 py-4">
+        <div className="flex items-center gap-3">
+          <Calendar size={14} className="text-ink/40" />
+          <h3 className="text-sm font-bold text-ink">{formatDisplayDate(current.date)}</h3>
+          <span className="text-xs text-ink/40">{current.prices.length} stocks</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-ink/40 mr-2">
+            {pageIndex + 1} / {groups.length}
+          </span>
+          <button
+            onClick={() => hasPrev && setPageIndex(pageIndex + 1)}
+            disabled={!hasPrev}
+            className="rounded-lg border border-ink/10 p-1.5 text-ink/40 transition-colors hover:bg-ink/[0.05] hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <button
+            onClick={() => hasNext && setPageIndex(pageIndex - 1)}
+            disabled={!hasNext}
+            className="rounded-lg border border-ink/10 p-1.5 text-ink/40 transition-colors hover:bg-ink/[0.05] hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Table */}
+      <AnimatePresence mode="wait">
         <motion.div
-          key={group.date}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: groupIndex * 0.1 }}
-          className="rounded-2xl bg-ink/[0.03] border border-ink/[0.08] overflow-hidden"
+          key={current.date}
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -10 }}
+          transition={{ duration: 0.2 }}
         >
-          <div className="flex items-center gap-3 border-b border-ink/[0.08] px-5 py-4">
-            <Calendar size={14} className="text-ink/40" />
-            <h3 className="text-sm font-bold text-ink">{formatDisplayDate(group.date)}</h3>
-            <span className="text-xs text-ink/40">{group.prices.length} stocks</span>
-          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
@@ -96,7 +124,7 @@ export function HistoricalPrices() {
                 </tr>
               </thead>
               <tbody>
-                {group.prices.map((row) => (
+                {current.prices.map((row) => (
                   <tr key={row.id} className="border-b border-ink/[0.04] last:border-0 hover:bg-ink/[0.02] transition-colors">
                     <td className="px-5 py-2.5 font-bold text-ink uppercase text-sm">{row.symbol}</td>
                     <td className="px-5 py-2.5 text-right font-mono text-sm text-ink">
@@ -108,7 +136,7 @@ export function HistoricalPrices() {
             </table>
           </div>
         </motion.div>
-      ))}
+      </AnimatePresence>
     </div>
   );
 }
