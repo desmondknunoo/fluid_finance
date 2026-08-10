@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { ChevronRight, Loader2, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
-import { recordAll, getSeries, sliceRange } from "@/lib/history";
+import { recordAll, getSeries, type PricePoint } from "@/lib/history";
 import { openStock } from "@/lib/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
 import { StockCard } from "@/components/stock/stock-card";
@@ -63,6 +63,27 @@ function getLastFriday(date: Date): Date {
     return d;
 }
 
+function getFridayBefore(date: Date): Date {
+    const d = new Date(date);
+    d.setUTCDate(d.getUTCDate() - 7);
+    d.setUTCHours(0, 0, 0, 0);
+    return d;
+}
+
+function findClosestPoint(points: PricePoint[], targetMs: number): PricePoint | null {
+    if (points.length === 0) return null;
+    let closest = points[0];
+    let minDiff = Math.abs(points[0].t - targetMs);
+    for (const p of points) {
+        const diff = Math.abs(p.t - targetMs);
+        if (diff < minDiff) {
+            closest = p;
+            minDiff = diff;
+        }
+    }
+    return closest;
+}
+
 function formatDateShort(date: Date): string {
     return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
 }
@@ -118,19 +139,18 @@ export default function MarketTrendsPage() {
         if (stocks.length === 0) return [];
 
         const now = new Date();
-        const thisFriday = getLastFriday(now);
-        const lastFriday = new Date(thisFriday);
-        lastFriday.setUTCDate(lastFriday.getUTCDate() - 7);
+        const lastFriday = getLastFriday(now);
+        const fridayBefore = getFridayBefore(lastFriday);
 
         return stocks.map((stock) => {
             const series = getSeries(stock.symbol, stock.price, now);
-            const thisWeekPoints = sliceRange(series, "1W");
-            const lastWeekPoints = sliceRange(series, "1M").filter(
-                (p) => p.t < thisFriday.getTime() - 7 * 86400000
-            );
+            const allPoints = series.points;
 
-            const thisWeekClose = thisWeekPoints.length > 0 ? thisWeekPoints[thisWeekPoints.length - 1].close : stock.price;
-            const lastWeekClose = lastWeekPoints.length > 0 ? lastWeekPoints[lastWeekPoints.length - 1].close : thisWeekClose;
+            const lastFridayPoint = findClosestPoint(allPoints, lastFriday.getTime());
+            const fridayBeforePoint = findClosestPoint(allPoints, fridayBefore.getTime());
+
+            const thisWeekClose = lastFridayPoint ? lastFridayPoint.close : stock.price;
+            const lastWeekClose = fridayBeforePoint ? fridayBeforePoint.close : thisWeekClose;
 
             const weeklyChange = thisWeekClose - lastWeekClose;
             const weeklyChangePercent = lastWeekClose > 0 ? (weeklyChange / lastWeekClose) * 100 : 0;
@@ -155,12 +175,11 @@ export default function MarketTrendsPage() {
 
     const getDateRange = () => {
         const now = new Date();
-        const thisFriday = getLastFriday(now);
-        const lastFriday = new Date(thisFriday);
-        lastFriday.setUTCDate(lastFriday.getUTCDate() - 7);
+        const lastFriday = getLastFriday(now);
+        const fridayBefore = getFridayBefore(lastFriday);
         return {
-            start: formatDateShort(lastFriday),
-            end: formatDateShort(thisFriday),
+            start: formatDateShort(fridayBefore),
+            end: formatDateShort(lastFriday),
         };
     };
 
@@ -201,28 +220,29 @@ export default function MarketTrendsPage() {
                         </p>
                     </motion.div>
 
-                    {/* Weekly Share Buttons */}
-                    {!loading && !error && topGainers.length > 0 && (
+                    {/* How It Works */}
+                    {!loading && !error && (
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
-                            className="flex flex-col sm:flex-row gap-4 mb-8 justify-center"
+                            transition={{ duration: 0.5, delay: 0.1 }}
+                            className="mb-12 rounded-2xl border border-ink/[0.08] bg-ink/[0.02] p-6 sm:p-8"
                         >
-                            <button
-                                onClick={() => openShareSheet("gainers")}
-                                className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-6 py-3 text-sm font-semibold text-emerald-500 transition-all hover:bg-emerald-500/20 hover:border-emerald-500/30"
-                            >
-                                <Share2 size={16} />
-                                Share Top Gainers
-                            </button>
-                            <button
-                                onClick={() => openShareSheet("losers")}
-                                className="flex items-center justify-center gap-2 rounded-xl bg-rose-500/10 border border-rose-500/20 px-6 py-3 text-sm font-semibold text-rose-500 transition-all hover:bg-rose-500/20 hover:border-rose-500/30"
-                            >
-                                <Share2 size={16} />
-                                Share Top Losers
-                            </button>
+                            <h2 className="text-sm font-bold uppercase tracking-widest text-ink/40 mb-4">How Market Trends Are Determined</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-ink/60 leading-relaxed">
+                                <div>
+                                    <h3 className="font-semibold text-ink mb-2">Week in Review</h3>
+                                    <p>
+                                        Weekly gainers and losers are determined by comparing each stock&apos;s closing price on the most recent Friday to the closing price on the Friday before. The percentage change over this 5-trading-day window determines the ranking. Top 5 gainers have the highest positive weekly change, while top 5 losers have the largest negative weekly change.
+                                    </p>
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-ink mb-2">Today&apos;s Standouts</h3>
+                                    <p>
+                                        The daily market movers show each stock&apos;s intraday price change and percentage movement from the previous close. Top gainers are sorted by highest positive change, top losers by largest negative change, and most active by trading volume.
+                                    </p>
+                                </div>
+                            </div>
                         </motion.div>
                     )}
 
@@ -243,9 +263,9 @@ export default function MarketTrendsPage() {
                                     </div>
                                     <button
                                         onClick={() => openShareSheet("gainers")}
-                                        className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-2.5 text-sm font-semibold text-emerald-500 transition-all hover:bg-emerald-500/20 hover:border-emerald-500/30"
+                                        className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 text-xs font-semibold text-emerald-500 transition-all hover:bg-emerald-500/20 hover:border-emerald-500/30 self-start sm:self-auto"
                                     >
-                                        <Share2 size={14} />
+                                        <Share2 size={12} />
                                         Share
                                     </button>
                                 </div>
@@ -338,9 +358,9 @@ export default function MarketTrendsPage() {
                                     </div>
                                     <button
                                         onClick={() => openShareSheet("losers")}
-                                        className="flex items-center justify-center gap-2 rounded-xl bg-rose-500/10 border border-rose-500/20 px-4 py-2.5 text-sm font-semibold text-rose-500 transition-all hover:bg-rose-500/20 hover:border-rose-500/30"
+                                        className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-500 transition-all hover:bg-rose-500/20 hover:border-rose-500/30 self-start sm:self-auto"
                                     >
-                                        <Share2 size={14} />
+                                        <Share2 size={12} />
                                         Share
                                     </button>
                                 </div>
