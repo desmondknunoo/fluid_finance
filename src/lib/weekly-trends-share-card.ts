@@ -32,8 +32,6 @@ const PALETTES = {
         chip: "rgba(255,255,255,0.09)",
         chipText: "rgba(255,255,255,0.75)",
         rowHover: "rgba(255,255,255,0.03)",
-        footerBg: "#15171a",
-        footerText: "rgba(255,255,255,0.42)",
     },
     light: {
         canvas: "#ffffff",
@@ -47,10 +45,10 @@ const PALETTES = {
         chip: "rgba(9,10,14,0.08)",
         chipText: "rgba(9,10,14,0.72)",
         rowHover: "rgba(9,10,14,0.03)",
-        footerBg: "#f0f1f3",
-        footerText: "rgba(9,10,14,0.50)",
     },
 } as const;
+
+type Palette = (typeof PALETTES)["dark" | "light"];
 
 function font(weight: number, size: number, mono = false): string {
     const family = mono
@@ -100,12 +98,13 @@ function tickerHue(symbol: string): number {
     return h;
 }
 
-async function drawStockLogo(
+async function drawLogo(
     ctx: CanvasRenderingContext2D,
     symbol: string,
     x: number,
     y: number,
     size: number,
+    ink: Palette,
 ): Promise<void> {
     const src = logoUrl(symbol);
     const img = src ? await loadImage(src) : null;
@@ -116,9 +115,9 @@ async function drawStockLogo(
         gradient.addColorStop(0, `hsl(${hue} 62% 42%)`);
         gradient.addColorStop(1, `hsl(${(hue + 40) % 360} 58% 26%)`);
         ctx.fillStyle = gradient;
-        roundRect(ctx, x, y, size, size, 10);
+        roundRect(ctx, x, y, size, size, 12);
         ctx.fill();
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle = ink.text;
         ctx.font = font(700, size * 0.32);
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -130,7 +129,7 @@ async function drawStockLogo(
 
     ctx.save();
     ctx.fillStyle = "#ffffff";
-    roundRect(ctx, x, y, size, size, 10);
+    roundRect(ctx, x, y, size, size, 12);
     ctx.fill();
     ctx.clip();
 
@@ -143,30 +142,6 @@ async function drawStockLogo(
     const dh = naturalH * scale;
     ctx.drawImage(img, x + (size - dw) / 2, y + (size - dh) / 2, dw, dh);
     ctx.restore();
-}
-
-async function drawBrandLogo(
-    ctx: CanvasRenderingContext2D,
-    theme: "light" | "dark",
-    x: number,
-    y: number,
-    height: number,
-): Promise<void> {
-    const src = theme === "dark" ? "/logo/fluidfinance-01.png" : "/logo/fluidfinance-04.png";
-    const img = await loadImage(src);
-
-    if (!img) {
-        ctx.fillStyle = "rgba(255,255,255,0.8)";
-        ctx.font = font(700, 24);
-        ctx.fillText("FLUID FINANCE", x, y + height * 0.7);
-        return;
-    }
-
-    const naturalW = img.naturalWidth || 200;
-    const naturalH = img.naturalHeight || 40;
-    const scale = height / naturalH;
-    const dw = naturalW * scale;
-    ctx.drawImage(img, x, y, dw, height);
 }
 
 export async function renderWeeklyTrendCard(input: WeeklyTrendCardInput): Promise<Blob> {
@@ -193,26 +168,25 @@ export async function renderWeeklyTrendCard(input: WeeklyTrendCardInput): Promis
     ctx.fillStyle = ink.canvas;
     ctx.fillRect(0, 0, W, H);
 
-    // Subtle gradient glow (reduce light mode red gradient by 70%)
-    const glowOpacity = input.theme === "light" ? 0.024 : 0.08;
-    const glow = ctx.createRadialGradient(W * 0.5, H * 0.12, 0, W * 0.5, H * 0.12, W * 0.8);
-    glow.addColorStop(0, isGainers
-        ? `rgba(52,211,153,${glowOpacity})`
-        : `rgba(251,113,133,${glowOpacity})`);
+    // Subtle gradient glow
+    const glow = ctx.createRadialGradient(W * 0.5, H * 0.15, 0, W * 0.5, H * 0.15, W * 0.8);
+    glow.addColorStop(0, isGainers ? "rgba(52,211,153,0.08)" : "rgba(251,113,133,0.08)");
     glow.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, W, H);
 
     const M = 64;
 
-    // Brand logo (top left)
-    await drawBrandLogo(ctx, input.theme ?? "dark", M, M - 10, 40);
-
-    // GSE label (top right)
+    // Brand strip
+    ctx.fillStyle = ink.text;
+    ctx.font = font(700, 26);
+    ctx.letterSpacing = "4px";
+    ctx.fillText("FLUID FINANCE", M, M + 22);
+    ctx.letterSpacing = "0px";
     ctx.fillStyle = ink.muted;
-    ctx.font = font(500, 20);
+    ctx.font = font(500, 22);
     ctx.textAlign = "right";
-    ctx.fillText("Ghana Stock Exchange", W - M, M + 20);
+    ctx.fillText("Ghana Stock Exchange", W - M, M + 22);
     ctx.textAlign = "left";
 
     // Header section
@@ -245,20 +219,18 @@ export async function renderWeeklyTrendCard(input: WeeklyTrendCardInput): Promis
     ctx.stroke();
 
     // Column headers
-    const tableStartY = dividerY + 45;
+    const tableStartY = dividerY + 50;
     ctx.fillStyle = ink.faint;
-    ctx.font = font(600, 18);
+    ctx.font = font(600, 20);
     ctx.textAlign = "left";
-    ctx.fillText("#", M + 8, tableStartY);
-    ctx.fillText("COMPANY", M + 50, tableStartY);
+    ctx.fillText("SYMBOL", M + 80, tableStartY);
     ctx.textAlign = "right";
-    ctx.fillText("PRICE", W - 200, tableStartY);
-    ctx.fillText("WEEKLY", W - 80, tableStartY);
-    ctx.textAlign = "left";
+    ctx.fillText("PRICE (GHS)", W - 220, tableStartY);
+    ctx.fillText("WEEKLY CHANGE", W - M, tableStartY);
 
     // Stock rows
-    const rowHeight = 105;
-    const startY = tableStartY + 35;
+    const rowHeight = 110;
+    const startY = tableStartY + 40;
 
     for (let i = 0; i < input.weeklyChanges.length; i++) {
         const item = input.weeklyChanges[i];
@@ -267,81 +239,71 @@ export async function renderWeeklyTrendCard(input: WeeklyTrendCardInput): Promis
         // Alternating row background
         if (i % 2 === 0) {
             ctx.fillStyle = ink.rowHover;
-            roundRect(ctx, M, y - 10, W - M * 2, rowHeight - 5, 10);
+            roundRect(ctx, M, y - 15, W - M * 2, rowHeight - 10, 12);
             ctx.fill();
         }
 
         // Rank number
         ctx.fillStyle = ink.faint;
-        ctx.font = font(700, 24, true);
+        ctx.font = font(700, 28, true);
         ctx.textAlign = "left";
-        ctx.fillText(`${i + 1}`, M + 12, y + 40);
+        ctx.fillText(`${i + 1}.`, M + 16, y + 40);
 
         // Logo
-        await drawStockLogo(ctx, item.stock.symbol, M + 45, y, 50);
+        await drawLogo(ctx, item.stock.symbol, M + 60, y - 5, 56, ink);
 
-        // Company name
-        const textX = M + 110;
+        // Company name and symbol
+        const textX = M + 130;
         ctx.fillStyle = ink.text;
-        ctx.font = font(700, 24);
-        const maxNameWidth = W - textX - 320;
-        ctx.fillText(truncate(ctx, item.stock.company, maxNameWidth), textX, y + 18);
+        ctx.font = font(700, 26);
+        const maxNameWidth = W - textX - 350;
+        ctx.fillText(truncate(ctx, item.stock.company, maxNameWidth), textX, y + 20);
 
         // Symbol chip
-        ctx.font = font(600, 16, true);
-        const chipW = ctx.measureText(item.stock.symbol).width + 16;
+        ctx.font = font(600, 18, true);
+        const chipW = ctx.measureText(item.stock.symbol).width + 20;
         ctx.fillStyle = ink.chip;
-        roundRect(ctx, textX, y + 30, chipW, 26, 6);
+        roundRect(ctx, textX, y + 35, chipW, 30, 6);
         ctx.fill();
         ctx.fillStyle = ink.chipText;
         ctx.textBaseline = "middle";
-        ctx.fillText(item.stock.symbol, textX + 8, y + 43);
+        ctx.fillText(item.stock.symbol, textX + 10, y + 50);
         ctx.textBaseline = "alphabetic";
 
         // Price
         ctx.textAlign = "right";
-        ctx.fillStyle = ink.muted;
-        ctx.font = font(500, 18);
-        ctx.fillText("₵" + item.stock.price.toFixed(2), W - 160, y + 30);
+        ctx.fillStyle = ink.text;
+        ctx.font = font(600, 26, true);
+        ctx.fillText(`₵${item.stock.price.toFixed(2)}`, W - 220, y + 35);
 
         // Weekly change percentage
         const changePositive = item.weeklyChangePercent >= 0;
         ctx.fillStyle = changePositive ? ink.up : ink.down;
-        ctx.font = font(700, 22);
+        ctx.font = font(700, 28);
         const changeText = `${changePositive ? "+" : ""}${item.weeklyChangePercent.toFixed(2)}%`;
-        ctx.fillText(changeText, W - M, y + 30);
+        ctx.fillText(changeText, W - M, y + 35);
 
         ctx.textAlign = "left";
     }
 
-    // Footer bar
-    const footerH = 80;
-    const footerY = H - footerH;
-    ctx.fillStyle = ink.footerBg;
-    ctx.fillRect(0, footerY, W, footerH);
-
-    // Footer border
-    ctx.strokeStyle = ink.border;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(0, footerY);
-    ctx.lineTo(W, footerY);
-    ctx.stroke();
-
-    // Footer text
-    ctx.fillStyle = ink.footerText;
-    ctx.font = font(500, 18);
-    ctx.textAlign = "left";
+    // Footer
+    const footerY = H - M;
+    ctx.fillStyle = ink.muted;
+    ctx.font = font(500, 20);
     const asOf = new Date().toLocaleString("en-GB", {
         day: "numeric",
         month: "short",
         year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
         timeZone: "UTC",
     });
-    ctx.fillText(`As of ${asOf} GMT`, M + 20, footerY + footerH / 2 + 6);
+    ctx.fillText(`As of ${asOf} GMT`, M, footerY);
 
     ctx.textAlign = "right";
-    ctx.fillText("fluidfinance.app", W - M - 20, footerY + footerH / 2 + 6);
+    ctx.fillStyle = ink.faint;
+    ctx.font = font(500, 18);
+    ctx.fillText("fluidfinance.app", W - M, footerY);
 
     return new Promise((resolve, reject) => {
         canvas.toBlob(
