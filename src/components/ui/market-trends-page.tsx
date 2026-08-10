@@ -2,13 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronRight, Loader2, TrendingDown, TrendingUp } from "lucide-react";
+import { ChevronRight, Loader2, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
-import { recordAll } from "@/lib/history";
+import { recordAll, getSeries, sliceRange } from "@/lib/history";
 import { openStock } from "@/lib/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
 import { StockCard } from "@/components/stock/stock-card";
+import { WeeklyTrendsShareSheet } from "@/components/stock/weekly-trends-share-sheet";
+import type { WeeklyTrendCardInput } from "@/lib/weekly-trends-share-card";
 
 type Tab = "gainers" | "losers" | "active";
 
@@ -52,11 +54,28 @@ function MoverRow({ stock, index }: { stock: Stock; index: number }) {
     );
 }
 
+function getLastFriday(date: Date): Date {
+    const d = new Date(date);
+    const day = d.getUTCDay();
+    const diff = day === 5 ? 7 : day === 6 ? 1 : (day + 2) % 7 + 1;
+    d.setUTCDate(d.getUTCDate() - diff);
+    d.setUTCHours(0, 0, 0, 0);
+    return d;
+}
+
+function formatDateShort(date: Date): string {
+    return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+}
+
 export default function MarketTrendsPage() {
     const [stocks, setStocks] = useState<Stock[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<Tab>("gainers");
+    const [shareSheet, setShareSheet] = useState<{ open: boolean; input: WeeklyTrendCardInput | null }>({
+        open: false,
+        input: null,
+    });
 
     useEffect(() => {
         let cancelled = false;
@@ -95,6 +114,71 @@ export default function MarketTrendsPage() {
         }
     }, [stocks, activeTab]);
 
+    const weeklyChanges = useMemo(() => {
+        if (stocks.length === 0) return [];
+
+        const now = new Date();
+        const thisFriday = getLastFriday(now);
+        const lastFriday = new Date(thisFriday);
+        lastFriday.setUTCDate(lastFriday.getUTCDate() - 7);
+
+        return stocks.map((stock) => {
+            const series = getSeries(stock.symbol, stock.price, now);
+            const thisWeekPoints = sliceRange(series, "1W");
+            const lastWeekPoints = sliceRange(series, "1M").filter(
+                (p) => p.t < thisFriday.getTime() - 7 * 86400000
+            );
+
+            const thisWeekClose = thisWeekPoints.length > 0 ? thisWeekPoints[thisWeekPoints.length - 1].close : stock.price;
+            const lastWeekClose = lastWeekPoints.length > 0 ? lastWeekPoints[lastWeekPoints.length - 1].close : thisWeekClose;
+
+            const weeklyChange = thisWeekClose - lastWeekClose;
+            const weeklyChangePercent = lastWeekClose > 0 ? (weeklyChange / lastWeekClose) * 100 : 0;
+
+            return {
+                stock,
+                weeklyChange,
+                weeklyChangePercent,
+            };
+        });
+    }, [stocks]);
+
+    const topGainers = useMemo(
+        () => weeklyChanges.filter((w) => w.weeklyChangePercent > 0).sort((a, b) => b.weeklyChangePercent - a.weeklyChangePercent).slice(0, 5),
+        [weeklyChanges]
+    );
+
+    const topLosers = useMemo(
+        () => weeklyChanges.filter((w) => w.weeklyChangePercent < 0).sort((a, b) => a.weeklyChangePercent - b.weeklyChangePercent).slice(0, 5),
+        [weeklyChanges]
+    );
+
+    const getDateRange = () => {
+        const now = new Date();
+        const thisFriday = getLastFriday(now);
+        const lastFriday = new Date(thisFriday);
+        lastFriday.setUTCDate(lastFriday.getUTCDate() - 7);
+        return {
+            start: formatDateShort(lastFriday),
+            end: formatDateShort(thisFriday),
+        };
+    };
+
+    const openShareSheet = (type: "gainers" | "losers") => {
+        const dateRange = getDateRange();
+        const items = type === "gainers" ? topGainers : topLosers;
+        setShareSheet({
+            open: true,
+            input: {
+                type,
+                stocks: items.map((w) => w.stock),
+                weeklyChanges: items,
+                startDate: dateRange.start,
+                endDate: dateRange.end,
+            },
+        });
+    };
+
     return (
         <div className="relative min-h-screen w-full overflow-hidden bg-canvas">
             <div className="absolute inset-0 bg-gradient-to-br from-ink/[0.05] via-transparent to-ink/[0.05] blur-3xl" />
@@ -116,6 +200,31 @@ export default function MarketTrendsPage() {
                             Real-time market movers, top gainers, losers, and most active stocks on the Ghana Stock Exchange.
                         </p>
                     </motion.div>
+
+                    {/* Weekly Share Buttons */}
+                    {!loading && !error && topGainers.length > 0 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            className="flex flex-col sm:flex-row gap-4 mb-8 justify-center"
+                        >
+                            <button
+                                onClick={() => openShareSheet("gainers")}
+                                className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-6 py-3 text-sm font-semibold text-emerald-500 transition-all hover:bg-emerald-500/20 hover:border-emerald-500/30"
+                            >
+                                <Share2 size={16} />
+                                Share Top Gainers
+                            </button>
+                            <button
+                                onClick={() => openShareSheet("losers")}
+                                className="flex items-center justify-center gap-2 rounded-xl bg-rose-500/10 border border-rose-500/20 px-6 py-3 text-sm font-semibold text-rose-500 transition-all hover:bg-rose-500/20 hover:border-rose-500/30"
+                            >
+                                <Share2 size={16} />
+                                Share Top Losers
+                            </button>
+                        </motion.div>
+                    )}
 
                     {loading ? (
                         <div className="flex min-h-[300px] items-center justify-center">
@@ -197,6 +306,15 @@ export default function MarketTrendsPage() {
                     )}
                 </div>
             </div>
+
+            {/* Weekly Trends Share Sheet */}
+            {shareSheet.input && (
+                <WeeklyTrendsShareSheet
+                    open={shareSheet.open}
+                    onClose={() => setShareSheet({ open: false, input: null })}
+                    card={shareSheet.input}
+                />
+            )}
         </div>
     );
 }
