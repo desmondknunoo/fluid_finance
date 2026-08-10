@@ -23,13 +23,58 @@ export async function exportStockPricesToExcel(
     lookup.get(row.symbol)!.set(row.trading_date, row.price);
   }
 
+  // Build column headers with weekly avg and blank separators
+  const columnHeaders: string[] = [];
+  const columnDates: (string | null)[] = []; // null = avg column, "blank" = separator
+
+  for (let i = 0; i < dates.length; i++) {
+    columnHeaders.push(`Close of ${formatDateShort(dates[i])} Price`);
+    columnDates.push(dates[i]);
+
+    // After every 5th day, add weekly avg + blank column
+    if ((i + 1) % 5 === 0) {
+      columnHeaders.push("Weekly Average");
+      columnDates.push(null); // marks avg column
+
+      columnHeaders.push("");
+      columnDates.push("blank" as any); // marks blank separator
+    }
+  }
+
   // Build pivoted rows
   const rows = symbols.map((symbol) => {
     const row: Record<string, string | number> = { Symbol: symbol };
-    for (const date of dates) {
-      const label = `Close of ${formatDateShort(date)} Price`;
-      row[label] = lookup.get(symbol)?.get(date) ?? "";
+    const symbolData = lookup.get(symbol);
+
+    for (let col = 0; col < columnHeaders.length; col++) {
+      const header = columnHeaders[col];
+      if (!header) continue; // blank separator column
+
+      const dateKey = columnDates[col];
+
+      if (dateKey === null) {
+        // Weekly average column
+        const weekStart = col - 5;
+        let sum = 0;
+        let count = 0;
+        for (let j = weekStart; j < col; j++) {
+          const d = columnDates[j] as string;
+          const val = symbolData?.get(d);
+          if (val !== undefined) {
+            sum += val;
+            count++;
+          }
+        }
+        row[header] = count > 0 ? Math.round((sum / count) * 100) / 100 : "";
+      } else if (dateKey === "blank") {
+        // Skip blank separator
+        continue;
+      } else {
+        // Regular date column
+        row[header] = symbolData?.get(dateKey) ?? "";
+      }
     }
+
     return row;
   });
 
@@ -38,7 +83,7 @@ export async function exportStockPricesToExcel(
   const ws = XLSX.utils.json_to_sheet(rows);
 
   // Set column widths
-  const cols = [{ wch: 12 }, ...dates.map(() => ({ wch: 20 }))];
+  const cols = [{ wch: 12 }, ...columnHeaders.map((h) => ({ wch: h === "" ? 3 : 22 }))];
   ws["!cols"] = cols;
 
   XLSX.utils.book_append_sheet(wb, ws, "Stock Prices");
