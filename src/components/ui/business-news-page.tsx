@@ -1,14 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Clock, TrendingUp, TrendingDown } from "lucide-react";
+import { ChevronRight, Clock, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
 import { recordAll } from "@/lib/history";
 import { openStock } from "@/lib/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
 import { StockCard } from "@/components/stock/stock-card";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const newsArticles = [
     {
@@ -49,6 +49,14 @@ const newsArticles = [
     },
 ];
 
+type Tab = "gainers" | "losers" | "active";
+
+const MOVER_TABS: { key: Tab; label: string }[] = [
+    { key: "gainers", label: "Top Gainers" },
+    { key: "losers", label: "Top Losers" },
+    { key: "active", label: "Most Active" },
+];
+
 function MoverRow({ stock, index }: { stock: Stock; index: number }) {
     const positive = stock.change >= 0;
     return (
@@ -74,12 +82,18 @@ function MoverRow({ stock, index }: { stock: Stock; index: number }) {
                 </span>
             </td>
             <td className="px-6 py-4 hidden md:table-cell text-ink/60">{stock.volume.toLocaleString()}</td>
+            <td className="px-6 py-4 text-right">
+                <span className="inline-flex items-center gap-1 text-sm text-ink/60">
+                    View <ChevronRight size={14} />
+                </span>
+            </td>
         </tr>
     );
 }
 
 export default function BusinessNewsPage() {
     const [stocks, setStocks] = useState<Stock[]>([]);
+    const [activeTab, setActiveTab] = useState<Tab>("gainers");
 
     useEffect(() => {
         getAllStocks().then((data) => {
@@ -88,8 +102,23 @@ export default function BusinessNewsPage() {
         }).catch(() => {});
     }, []);
 
-    const topGainers = [...stocks].filter((s) => s.change > 0).sort((a, b) => b.changePercent - a.changePercent).slice(0, 5);
-    const topLosers = [...stocks].filter((s) => s.change < 0).sort((a, b) => a.changePercent - b.changePercent).slice(0, 5);
+    const movers = useMemo(() => {
+        if (stocks.length === 0) return [];
+        switch (activeTab) {
+            case "gainers":
+                return stocks
+                    .filter((s) => s.change > 0)
+                    .sort((a, b) => b.changePercent - a.changePercent)
+                    .slice(0, 5);
+            case "losers":
+                return stocks
+                    .filter((s) => s.change < 0)
+                    .sort((a, b) => a.changePercent - b.changePercent)
+                    .slice(0, 5);
+            case "active":
+                return [...stocks].sort((a, b) => b.volume - a.volume).slice(0, 5);
+        }
+    }, [stocks, activeTab]);
 
     return (
         <div className="relative min-h-screen w-full overflow-hidden bg-canvas">
@@ -114,67 +143,74 @@ export default function BusinessNewsPage() {
                     </motion.div>
 
                     {/* Market Movers */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.1 }}
-                        >
-                            <div className="rounded-2xl border border-ink/[0.08] bg-ink/[0.03] overflow-hidden">
-                                <div className="px-4 py-4 border-b border-ink/[0.08] sm:px-6">
-                                    <h2 className="font-bold font-poppins">Top Gainers</h2>
-                                </div>
-                                <div className="flex flex-col gap-2 p-4 md:hidden">
-                                    {topGainers.map((stock, i) => (
-                                        <StockCard key={stock.symbol} stock={stock} onSelect={openStock} rank={i + 1} />
-                                    ))}
-                                </div>
-                                <table className="hidden w-full text-left md:table">
-                                    <thead>
-                                        <tr className="border-b border-ink/[0.08]">
-                                            <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider">Symbol</th>
-                                            <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider">Price</th>
-                                            <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider">Change</th>
-                                            <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider hidden lg:table-cell">Volume</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {topGainers.map((stock, i) => <MoverRow key={stock.symbol} stock={stock} index={i} />)}
-                                    </tbody>
-                                </table>
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="rounded-2xl bg-ink/[0.03] border border-ink/[0.08] overflow-hidden mb-16"
+                    >
+                        <div className="flex flex-col gap-4 border-b border-ink/[0.08] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                            <div>
+                                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/40">Market movers</p>
+                                <h2 className="mt-1 text-lg font-bold text-ink">Today&apos;s standouts</h2>
                             </div>
-                        </motion.div>
+                            <div className="grid grid-cols-3 rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-1 sm:min-w-[440px]">
+                                {MOVER_TABS.map(({ key, label }) => (
+                                    <button
+                                        key={key}
+                                        onClick={() => setActiveTab(key)}
+                                        className={cn(
+                                            "min-w-0 rounded-lg px-2 py-2.5 text-xs font-semibold transition-all sm:px-3",
+                                            activeTab === key
+                                                ? "bg-canvas text-ink shadow-sm"
+                                                : "text-ink/40 hover:text-ink/70",
+                                        )}
+                                    >
+                                        <span className="block truncate">{label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
 
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
-                        >
-                            <div className="rounded-2xl border border-ink/[0.08] bg-ink/[0.03] overflow-hidden">
-                                <div className="px-4 py-4 border-b border-ink/[0.08] sm:px-6">
-                                    <h2 className="font-bold font-poppins">Top Losers</h2>
-                                </div>
-                                <div className="flex flex-col gap-2 p-4 md:hidden">
-                                    {topLosers.map((stock, i) => (
-                                        <StockCard key={stock.symbol} stock={stock} onSelect={openStock} rank={i + 1} />
-                                    ))}
-                                </div>
-                                <table className="hidden w-full text-left md:table">
-                                    <thead>
-                                        <tr className="border-b border-ink/[0.08]">
-                                            <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider">Symbol</th>
-                                            <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider">Price</th>
-                                            <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider">Change</th>
-                                            <th className="px-6 py-3 text-xs font-semibold text-ink/40 uppercase tracking-wider hidden lg:table-cell">Volume</th>
+                        <div className="flex flex-col gap-2 p-4 md:hidden">
+                            {movers.length === 0 ? (
+                                <p className="py-6 text-center text-ink/40">
+                                    No {activeTab === "gainers" ? "gainers" : activeTab === "losers" ? "losers" : "active stocks"} at this time
+                                </p>
+                            ) : (
+                                movers.map((stock, index) => (
+                                    <StockCard key={stock.symbol} stock={stock} onSelect={openStock} rank={index + 1} />
+                                ))
+                            )}
+                        </div>
+
+                        <div className="hidden overflow-x-auto md:block">
+                            <table className="w-full text-left">
+                                <thead>
+                                    <tr className="border-b border-ink/[0.08] bg-ink/[0.01]">
+                                        <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Symbol</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Price</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Change</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider hidden md:table-cell">Volume</th>
+                                        <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {movers.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={5} className="px-6 py-8 text-center text-ink/40">
+                                                No {activeTab === "gainers" ? "gainers" : activeTab === "losers" ? "losers" : "active stocks"} at this time
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        {topLosers.map((stock, i) => <MoverRow key={stock.symbol} stock={stock} index={i} />)}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </motion.div>
-                    </div>
+                                    ) : (
+                                        movers.map((stock, index) => (
+                                            <MoverRow key={stock.symbol} stock={stock} index={index} />
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </motion.div>
 
                     {/* News Articles */}
                     <motion.div
