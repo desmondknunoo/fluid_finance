@@ -6,7 +6,7 @@ import { ChevronRight, Download, Loader2, Share2, TrendingDown, TrendingUp } fro
 import { cn } from "@/lib/utils";
 import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
 import { recordAll, getSeries, type PricePoint } from "@/lib/history";
-import { saveStockPrices } from "@/lib/supabase";
+import { saveStockPrices, supabase } from "@/lib/supabase";
 import { exportStockPricesToExcel, getDefaultDateRange } from "@/lib/export-excel";
 import { openStock } from "@/lib/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
@@ -102,12 +102,38 @@ export default function MarketTrendsPage() {
         input: null,
     });
 
-    const [exportStartDate, setExportStartDate] = useState(getDefaultDateRange().start);
-    const [exportEndDate, setExportEndDate] = useState(getDefaultDateRange().end);
+    const [exportStartDate, setExportStartDate] = useState("");
+    const [exportEndDate, setExportEndDate] = useState("");
+    const [availableDates, setAvailableDates] = useState<string[]>([]);
     const [exportFridaysOnly, setExportFridaysOnly] = useState(false);
     const [exportWeeklyComparison, setExportWeeklyComparison] = useState(false);
     const [exporting, setExporting] = useState(false);
     const [exportError, setExportError] = useState<string | null>(null);
+
+    // Fetch available dates from Supabase
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const { data } = await supabase
+                    .from("stock_prices")
+                    .select("trading_date")
+                    .order("trading_date", { ascending: true });
+
+                if (cancelled || !data) return;
+
+                const dates = [...new Set(data.map((r) => r.trading_date))].sort();
+                setAvailableDates(dates);
+                if (dates.length > 0) {
+                    setExportStartDate(dates[0]);
+                    setExportEndDate(dates[dates.length - 1]);
+                }
+            } catch {
+                // Ignore errors
+            }
+        })();
+        return () => { cancelled = true; };
+    }, []);
 
     useEffect(() => {
         let cancelled = false;
@@ -283,6 +309,8 @@ export default function MarketTrendsPage() {
                                 <input
                                     type="date"
                                     value={exportStartDate}
+                                    min={availableDates[0] || ""}
+                                    max={exportEndDate || availableDates[availableDates.length - 1] || ""}
                                     onChange={(e) => setExportStartDate(e.target.value)}
                                     className="rounded-lg border border-ink/10 bg-canvas px-3 py-2 text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
                                 />
@@ -290,6 +318,8 @@ export default function MarketTrendsPage() {
                                 <input
                                     type="date"
                                     value={exportEndDate}
+                                    min={exportStartDate || availableDates[0] || ""}
+                                    max={availableDates[availableDates.length - 1] || ""}
                                     onChange={(e) => setExportEndDate(e.target.value)}
                                     className="rounded-lg border border-ink/10 bg-canvas px-3 py-2 text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
                                 />
