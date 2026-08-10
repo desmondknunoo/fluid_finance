@@ -104,6 +104,7 @@ export default function MarketTrendsPage() {
 
     const [exportStartDate, setExportStartDate] = useState(getDefaultDateRange().start);
     const [exportEndDate, setExportEndDate] = useState(getDefaultDateRange().end);
+    const [exportFridaysOnly, setExportFridaysOnly] = useState(false);
     const [exporting, setExporting] = useState(false);
     const [exportError, setExportError] = useState<string | null>(null);
 
@@ -207,7 +208,7 @@ export default function MarketTrendsPage() {
         setExporting(true);
         setExportError(null);
         try {
-            await exportStockPricesToExcel(exportStartDate, exportEndDate);
+            await exportStockPricesToExcel(exportStartDate, exportEndDate, exportFridaysOnly);
         } catch (err) {
             setExportError(err instanceof Error ? err.message : "Export failed");
         } finally {
@@ -283,6 +284,15 @@ export default function MarketTrendsPage() {
                                             className="rounded-lg border border-ink/10 bg-canvas px-3 py-1.5 text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
                                         />
                                     </div>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={exportFridaysOnly}
+                                            onChange={(e) => setExportFridaysOnly(e.target.checked)}
+                                            className="rounded border-ink/20 text-ink focus:ring-ink/20"
+                                        />
+                                        <span className="text-xs text-ink/60">Fridays only</span>
+                                    </label>
                                     <button
                                         onClick={handleExport}
                                         disabled={exporting}

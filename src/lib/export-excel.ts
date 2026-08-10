@@ -39,6 +39,7 @@ function formatWeekLabel(dates: string[]): string {
 export async function exportStockPricesToExcel(
   startDate: string,
   endDate: string,
+  fridaysOnly: boolean = false,
   filename?: string
 ): Promise<void> {
   const data = await getStockPriceHistory(startDate, endDate);
@@ -65,12 +66,19 @@ export async function exportStockPricesToExcel(
   const columnInfo: { type: "date" | "avg" | "blank"; date?: string; weekDates?: string[] }[] = [];
 
   for (const week of weeks) {
-    for (const d of week.dates) {
-      columnHeaders.push(`Close of ${formatDateShort(d)} Price`);
-      columnInfo.push({ type: "date", date: d });
+    if (fridaysOnly) {
+      // Only show Friday Close column
+      columnHeaders.push(`Close of ${formatDateShort(week.dates[week.dates.length - 1])} Price`);
+      columnInfo.push({ type: "avg", weekDates: week.dates });
+    } else {
+      // Show all daily columns + Friday Close
+      for (const d of week.dates) {
+        columnHeaders.push(`Close of ${formatDateShort(d)} Price`);
+        columnInfo.push({ type: "date", date: d });
+      }
+      columnHeaders.push("Friday Close");
+      columnInfo.push({ type: "avg", weekDates: week.dates });
     }
-    columnHeaders.push("Friday Close");
-    columnInfo.push({ type: "avg", weekDates: week.dates });
 
     columnHeaders.push("");
     columnInfo.push({ type: "blank" });
