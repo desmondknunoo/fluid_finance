@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { ChevronRight, Loader2, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
-import { recordAll, getSeries, sliceRange } from "@/lib/history";
+import { recordAll, getSeries, type PricePoint } from "@/lib/history";
 import { openStock } from "@/lib/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
 import { StockCard } from "@/components/stock/stock-card";
@@ -63,6 +63,28 @@ function getLastFriday(date: Date): Date {
     return d;
 }
 
+function getFridayBefore(date: Date): Date {
+    const d = new Date(date);
+    d.setUTCDate(d.getUTCDate() - 7);
+    d.setUTCHours(0, 0, 0, 0);
+    return d;
+}
+
+function findClosestRecordedPoint(points: PricePoint[], targetMs: number): PricePoint | null {
+    const recorded = points.filter((p) => p.recorded);
+    if (recorded.length === 0) return null;
+    let closest = recorded[0];
+    let minDiff = Math.abs(recorded[0].t - targetMs);
+    for (const p of recorded) {
+        const diff = Math.abs(p.t - targetMs);
+        if (diff < minDiff) {
+            closest = p;
+            minDiff = diff;
+        }
+    }
+    return closest;
+}
+
 function formatDateShort(date: Date): string {
     return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
 }
@@ -118,29 +140,38 @@ export default function MarketTrendsPage() {
         if (stocks.length === 0) return [];
 
         const now = new Date();
-        const thisFriday = getLastFriday(now);
-        const lastFriday = new Date(thisFriday);
-        lastFriday.setUTCDate(lastFriday.getUTCDate() - 7);
+        const lastFriday = getLastFriday(now);
+        const fridayBefore = getFridayBefore(lastFriday);
 
-        return stocks.map((stock) => {
-            const series = getSeries(stock.symbol, stock.price, now);
-            const thisWeekPoints = sliceRange(series, "1W");
-            const lastWeekPoints = sliceRange(series, "1M").filter(
-                (p) => p.t < thisFriday.getTime() - 7 * 86400000
-            );
+        return stocks
+            .map((stock) => {
+                const series = getSeries(stock.symbol, stock.price, now);
+                const allPoints = series.points;
 
-            const thisWeekClose = thisWeekPoints.length > 0 ? thisWeekPoints[thisWeekPoints.length - 1].close : stock.price;
-            const lastWeekClose = lastWeekPoints.length > 0 ? lastWeekPoints[lastWeekPoints.length - 1].close : thisWeekClose;
+                const lastFridayPoint = findClosestRecordedPoint(allPoints, lastFriday.getTime());
+                const fridayBeforePoint = findClosestRecordedPoint(allPoints, fridayBefore.getTime());
 
-            const weeklyChange = thisWeekClose - lastWeekClose;
-            const weeklyChangePercent = lastWeekClose > 0 ? (weeklyChange / lastWeekClose) * 100 : 0;
+                if (!lastFridayPoint || !fridayBeforePoint) {
+                    return null;
+                }
 
-            return {
-                stock,
-                weeklyChange,
-                weeklyChangePercent,
-            };
-        });
+                if (lastFridayPoint.t === fridayBeforePoint.t) {
+                    return null;
+                }
+
+                const thisWeekClose = lastFridayPoint.close;
+                const lastWeekClose = fridayBeforePoint.close;
+
+                const weeklyChange = thisWeekClose - lastWeekClose;
+                const weeklyChangePercent = lastWeekClose > 0 ? (weeklyChange / lastWeekClose) * 100 : 0;
+
+                return {
+                    stock,
+                    weeklyChange,
+                    weeklyChangePercent,
+                };
+            })
+            .filter((item): item is NonNullable<typeof item> => item !== null);
     }, [stocks]);
 
     const topGainers = useMemo(
@@ -155,12 +186,11 @@ export default function MarketTrendsPage() {
 
     const getDateRange = () => {
         const now = new Date();
-        const thisFriday = getLastFriday(now);
-        const lastFriday = new Date(thisFriday);
-        lastFriday.setUTCDate(lastFriday.getUTCDate() - 7);
+        const lastFriday = getLastFriday(now);
+        const fridayBefore = getFridayBefore(lastFriday);
         return {
-            start: formatDateShort(lastFriday),
-            end: formatDateShort(thisFriday),
+            start: formatDateShort(fridayBefore),
+            end: formatDateShort(lastFriday),
         };
     };
 
