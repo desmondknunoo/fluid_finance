@@ -2,10 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronRight, Loader2, Share2, TrendingDown, TrendingUp } from "lucide-react";
+import { ChevronRight, Download, Loader2, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
 import { recordAll, getSeries, type PricePoint } from "@/lib/history";
+import { saveStockPrices } from "@/lib/supabase";
+import { exportStockPricesToExcel, getDefaultDateRange } from "@/lib/export-excel";
 import { openStock } from "@/lib/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
 import { StockCard } from "@/components/stock/stock-card";
@@ -99,6 +101,11 @@ export default function MarketTrendsPage() {
         input: null,
     });
 
+    const [exportStartDate, setExportStartDate] = useState(getDefaultDateRange().start);
+    const [exportEndDate, setExportEndDate] = useState(getDefaultDateRange().end);
+    const [exporting, setExporting] = useState(false);
+    const [exportError, setExportError] = useState<string | null>(null);
+
     useEffect(() => {
         let cancelled = false;
         (async () => {
@@ -106,6 +113,7 @@ export default function MarketTrendsPage() {
                 const data = await getAllStocks();
                 if (cancelled) return;
                 recordAll(data.map((s) => ({ symbol: s.symbol, price: s.price })));
+                saveStockPrices(data.map((s) => ({ symbol: s.symbol, price: s.price }))).catch(() => {});
                 setStocks(data);
             } catch (err) {
                 if (!cancelled) setError(err instanceof Error ? err.message : "An error occurred");
@@ -194,6 +202,18 @@ export default function MarketTrendsPage() {
         };
     };
 
+    const handleExport = async () => {
+        setExporting(true);
+        setExportError(null);
+        try {
+            await exportStockPricesToExcel(exportStartDate, exportEndDate);
+        } catch (err) {
+            setExportError(err instanceof Error ? err.message : "Export failed");
+        } finally {
+            setExporting(false);
+        }
+    };
+
     const openShareSheet = (type: "gainers" | "losers") => {
         const dateRange = getDateRange();
         const items = type === "gainers" ? topGainers : topLosers;
@@ -229,6 +249,58 @@ export default function MarketTrendsPage() {
                         <p className="text-xl text-ink/60 max-w-2xl mx-auto leading-relaxed">
                             Real-time market movers, top gainers, losers, and most active stocks on the Ghana Stock Exchange.
                         </p>
+                    </motion.div>
+
+                    {/* Export Section */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.15 }}
+                        className="mb-8"
+                    >
+                        <div className="rounded-2xl bg-ink/[0.03] border border-ink/[0.08] p-4 sm:p-5">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                                <div className="flex-1">
+                                    <h3 className="text-sm font-semibold text-ink">Export to Excel</h3>
+                                    <p className="text-xs text-ink/50 mt-0.5">Download historical stock prices from Supabase</p>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <div className="flex items-center gap-2">
+                                        <label className="text-xs text-ink/60">From:</label>
+                                        <input
+                                            type="date"
+                                            value={exportStartDate}
+                                            onChange={(e) => setExportStartDate(e.target.value)}
+                                            className="rounded-lg border border-ink/10 bg-canvas px-3 py-1.5 text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <label className="text-xs text-ink/60">To:</label>
+                                        <input
+                                            type="date"
+                                            value={exportEndDate}
+                                            onChange={(e) => setExportEndDate(e.target.value)}
+                                            className="rounded-lg border border-ink/10 bg-canvas px-3 py-1.5 text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={handleExport}
+                                        disabled={exporting}
+                                        className="flex items-center justify-center gap-2 rounded-xl bg-ink/5 border border-ink/10 px-4 py-2 text-sm font-semibold text-ink transition-all hover:bg-ink/10 hover:border-ink/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {exporting ? (
+                                            <Loader2 size={14} className="animate-spin" />
+                                        ) : (
+                                            <Download size={14} />
+                                        )}
+                                        {exporting ? "Exporting..." : "Export"}
+                                    </button>
+                                </div>
+                            </div>
+                            {exportError && (
+                                <p className="mt-3 text-xs text-rose-500">{exportError}</p>
+                            )}
+                        </div>
                     </motion.div>
 
                     {/* Weekly Share Buttons */}
