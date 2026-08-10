@@ -30,6 +30,7 @@ const PAGE_ROUTES = [
     { kind: "learning-center", pattern: /^#\/learning-center$/ },
     { kind: "help-center", pattern: /^#\/help-center$/ },
     { kind: "market-education", pattern: /^#\/market-education$/ },
+    { kind: "market-trends", pattern: /^#\/market-trends$/ },
     { kind: "business-news", pattern: /^#\/business-news$/ },
     { kind: "terms-of-service", pattern: /^#\/terms-of-service$/ },
     { kind: "gse-live", pattern: /^#\/gse-live$/ },
@@ -106,6 +107,10 @@ export function openBusinessNews(): void {
 
 export function openMarketEducation(): void {
     window.location.hash = "#/market-education";
+}
+
+export function openMarketTrends(): void {
+    window.location.hash = "#/market-trends";
 }
 
 export function openGseLive(view?: ViewMode): void {

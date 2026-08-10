@@ -9,6 +9,7 @@ import PrivacyPolicyPage from "@/components/ui/privacy-policy-page"
 import LearningCenterPage from "@/components/ui/learning-center-page"
 import HelpCenterPage from "@/components/ui/help-center-page"
 import MarketEducationPage from "@/components/ui/market-education-page"
+import MarketTrendsPage from "@/components/ui/market-trends-page"
 import BusinessNewsPage from "@/components/ui/business-news-page"
 import TermsOfServicePage from "@/components/ui/terms-of-service-page"
 import GseLivePage from "@/components/ui/gse-live-page"
@@ -82,6 +83,7 @@ function App() {
       {route.kind === "learning-center" && <LearningCenterPage />}
       {route.kind === "help-center" && <HelpCenterPage />}
       {route.kind === "market-education" && <MarketEducationPage />}
+      {route.kind === "market-trends" && <MarketTrendsPage />}
       {route.kind === "business-news" && <BusinessNewsPage />}
       {route.kind === "terms-of-service" && <TermsOfServicePage />}
       {route.kind === "gse-live" && <GseLivePage view={route.view} />}

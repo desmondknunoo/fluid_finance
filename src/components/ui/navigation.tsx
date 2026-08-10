@@ -30,7 +30,7 @@ const DROPDOWN_GROUPS: DropdownGroup[] = [
     {
         label: "Market Data",
         items: [
-            { label: "Market Snapshot", href: "#market-snapshot" },
+            { label: "Market Trends", href: "#/market-trends" },
             { label: "Business & News", href: "#/business-news" },
         ],
     },
@@ -44,7 +44,6 @@ const DROPDOWN_GROUPS: DropdownGroup[] = [
 ];
 
 const SECTIONS = [
-    { label: "Features", href: "#features" },
     { label: "About", href: "#/about-us" },
 ] as const;
 
