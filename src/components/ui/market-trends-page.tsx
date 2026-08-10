@@ -304,7 +304,7 @@ export default function MarketTrendsPage() {
 
 
                     {/* Week in Review - Top Gainers */}
-                    {!loading && !error && topGainers.length > 0 && (
+                    {/* {!loading && !error && topGainers.length > 0 && (
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -327,7 +327,7 @@ export default function MarketTrendsPage() {
                                     </button>
                                 </div>
 
-                                {/* Mobile cards */}
+                                {/* Mobile cards *}
                                 <div className="flex flex-col gap-2 p-4 md:hidden">
                                     {topGainers.map((item, index) => (
                                         <button
@@ -354,7 +354,7 @@ export default function MarketTrendsPage() {
                                     ))}
                                 </div>
 
-                                {/* Desktop table */}
+                                {/* Desktop table *}
                                 <div className="hidden overflow-x-auto md:block">
                                     <table className="w-full text-left">
                                         <thead>
@@ -396,10 +396,10 @@ export default function MarketTrendsPage() {
                                 </div>
                             </div>
                         </motion.div>
-                    )}
+                    )} */}
 
                     {/* Week in Review - Top Losers */}
-                    {!loading && !error && topLosers.length > 0 && (
+                    {/* {!loading && !error && topLosers.length > 0 && (
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -422,7 +422,7 @@ export default function MarketTrendsPage() {
                                     </button>
                                 </div>
 
-                                {/* Mobile cards */}
+                                {/* Mobile cards *}
                                 <div className="flex flex-col gap-2 p-4 md:hidden">
                                     {topLosers.map((item, index) => (
                                         <button
@@ -449,7 +449,7 @@ export default function MarketTrendsPage() {
                                     ))}
                                 </div>
 
-                                {/* Desktop table */}
+                                {/* Desktop table *}
                                 <div className="hidden overflow-x-auto md:block">
                                     <table className="w-full text-left">
                                         <thead>
@@ -491,7 +491,7 @@ export default function MarketTrendsPage() {
                                 </div>
                             </div>
                         </motion.div>
-                    )}
+                    )} */}
 
                     {/* Market movers Today's standouts */}
                     {loading ? (
