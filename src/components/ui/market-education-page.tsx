@@ -4,14 +4,6 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, Percent, LineChart, Landmark, FileText, Video, Table2, Bell, BookOpen, GraduationCap } from "lucide-react";
 
-function GhsIcon({ className }: { className?: string }) {
-    return (
-        <span className={`inline-flex items-center justify-center font-bold ${className ?? "h-5 w-5 text-sm"}`}>
-            GHS
-        </span>
-    );
-}
-
 function MarketEducationPage() {
     const fadeUpVariants = {
         hidden: { opacity: 0, y: 30 },

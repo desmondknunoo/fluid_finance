@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ChevronRight, Clock, TrendingUp, TrendingDown } from "lucide-react";
+import { ChevronRight, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
 import { recordAll } from "@/lib/history";
@@ -10,43 +10,82 @@ import { TickerLogo } from "@/components/stock/ticker-logo";
 import { StockCard } from "@/components/stock/stock-card";
 import { useEffect, useMemo, useState } from "react";
 
-const newsArticles = [
+const marketInsights = [
     {
-        category: "Market",
-        title: "GSE Composite Index Posts Weekly Gain of 2.4%",
-        summary: "Financial stocks lead the rally as inflation fears subside and local investor participation hits record highs.",
-        time: "2h ago",
+        category: "Business & Financial Times",
+        title: "B&FT",
+        snippet: "Ghana's leading financial newspaper covering business, finance, and economic news.",
+        link: "https://thebftonline.com"
     },
     {
-        category: "Economy",
-        title: "Bank of Ghana Holds Policy Rate Steady at 27%",
-        summary: "Central bank signals cautious approach as inflation moderates but remains above target range.",
-        time: "4h ago",
+        category: "Business News",
+        title: "Ghana Business News",
+        snippet: "Comprehensive coverage of Ghana's business landscape and economic developments.",
+        link: "https://ghanabusinessnews.com"
     },
     {
-        category: "Company",
-        title: "MTN Ghana Reports Strong Mobile Money Growth in Q4",
-        summary: "Telecom giant exceeds expectations with mobile money ecosystem expansion driving revenue.",
-        time: "6h ago",
+        category: "Business News",
+        title: "Business Day Ghana",
+        snippet: "In-depth business journalism and market analysis for the Ghanaian market.",
+        link: "https://businessdayghana.com"
     },
     {
-        category: "Economy",
-        title: "Inflation Moderates to 32.1% in Latest CPI Data",
-        summary: "Recent government policies show initial signs of easing price pressures across key sectors.",
-        time: "8h ago",
+        category: "Business News",
+        title: "Graphic Online Business",
+        snippet: "Business and financial news from Ghana's most established media house.",
+        link: "https://www.graphic.com.gh/business/business-news.html"
     },
     {
-        category: "Market",
-        title: "Foreign Investment Inflows Surge 15% Year-over-Year",
-        summary: "Global investors show renewed interest in GSE as emerging market fundamentals strengthen.",
-        time: "10h ago",
+        category: "News",
+        title: "Citi Business News",
+        snippet: "Breaking news and comprehensive coverage of Ghana's business and economic affairs.",
+        link: "https://www.citinewsroom.com/category/business/"
     },
     {
-        category: "Company",
-        title: "GCB Bank PLC Announces Dividend Update",
-        summary: "Banking sector leader reports stable earnings and outlines digital transformation roadmap.",
-        time: "12h ago",
+        category: "Business News",
+        title: "BusinessGhana",
+        snippet: "Business news, company profiles, and economic analysis for Ghana.",
+        link: "https://businessghana.com"
+    }
+];
+
+const educationalArticles = [
+    {
+        category: "Press Release",
+        title: "GSE Press Releases & Announcements",
+        author: "Ghana Stock Exchange",
+        link: "https://gse.com.gh/press-release/"
     },
+    {
+        category: "Media",
+        title: "GSE Testimonial Video",
+        author: "Ghana Stock Exchange",
+        link: "https://gse.com.gh/gse-testimonial-video/"
+    },
+    {
+        category: "Financial Reports",
+        title: "Financial Statements & Filings",
+        author: "Ghana Stock Exchange",
+        link: "https://gse.com.gh/financial-statements/"
+    },
+    {
+        category: "Market Notices",
+        title: "GSE Market Notices & Circulars",
+        author: "Ghana Stock Exchange",
+        link: "https://gse.com.gh/gse-market-notice/"
+    },
+    {
+        category: "Articles",
+        title: "GSE Educational Articles",
+        author: "Ghana Stock Exchange",
+        link: "http://gse.com.gh/gse-articles/"
+    },
+    {
+        category: "Resources",
+        title: "GSE Brochures & Guides",
+        author: "Ghana Stock Exchange",
+        link: "https://gse.com.gh/gse-brochures/"
+    }
 ];
 
 type Tab = "gainers" | "losers" | "active";
@@ -212,34 +251,35 @@ export default function BusinessNewsPage() {
                         </div>
                     </motion.div>
 
-                    {/* News Articles */}
+                    {/* Latest News */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.3 }}
                     >
                         <h2 className="text-2xl font-bold mb-8 font-poppins">Latest News</h2>
-                        <div className="space-y-6">
-                            {newsArticles.map((article) => (
-                                <div
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {[...marketInsights, ...educationalArticles].map((article) => (
+                                <a
                                     key={article.title}
-                                    className="p-6 rounded-2xl bg-ink/[0.02] border border-ink/[0.08] hover:border-ink/20 transition-colors cursor-pointer group"
+                                    href={article.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block p-6 rounded-2xl bg-ink/[0.02] border border-ink/[0.08] hover:border-ink/20 transition-colors group"
                                 >
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <span className="text-xs font-bold uppercase tracking-widest text-ink/30">
-                                            {article.category}
-                                        </span>
-                                        <span className="text-xs text-ink/20 flex items-center gap-1">
-                                            <Clock size={10} /> {article.time}
-                                        </span>
-                                    </div>
-                                    <h3 className="text-lg font-bold text-ink mb-2 group-hover:translate-x-1 transition-transform font-poppins">
+                                    <span className="text-xs font-bold uppercase tracking-widest text-ink/30 mb-4 block group-hover:text-ink/60 transition-colors">
+                                        {article.category}
+                                    </span>
+                                    <h3 className="text-lg font-bold text-ink mb-3 group-hover:translate-x-1 transition-transform font-poppins">
                                         {article.title}
                                     </h3>
-                                    <p className="text-sm text-ink/40 leading-relaxed">
-                                        {article.summary}
+                                    <p className="text-sm text-ink/40 leading-relaxed mb-4">
+                                        {"snippet" in article ? article.snippet : `By ${article.author}`}
                                     </p>
-                                </div>
+                                    <span className="inline-flex items-center gap-1 text-xs text-ink/30 group-hover:text-ink/60 transition-colors">
+                                        Visit <ChevronRight size={12} />
+                                    </span>
+                                </a>
                             ))}
                         </div>
                     </motion.div>
