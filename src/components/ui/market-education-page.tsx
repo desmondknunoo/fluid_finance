@@ -2,7 +2,15 @@
 
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, DollarSign, Banknote, Building2, BookOpen, GraduationCap } from "lucide-react";
+import { TrendingUp, Percent, LineChart, Landmark, FileText, Video, Table2, Bell, BookOpen, GraduationCap } from "lucide-react";
+
+function GhsIcon({ className }: { className?: string }) {
+    return (
+        <span className={`inline-flex items-center justify-center font-bold ${className ?? "h-5 w-5 text-sm"}`}>
+            GHS
+        </span>
+    );
+}
 
 function MarketEducationPage() {
     const fadeUpVariants = {
@@ -20,9 +28,9 @@ function MarketEducationPage() {
 
     const economicIndicators = [
         { label: "GSE All-Share Index", value: "12,456.78", change: "+1.2%", tone: "up", icon: TrendingUp },
-        { label: "Inflation Rate", value: "32.1%", change: "-0.5%", tone: "down", icon: DollarSign },
-        { label: "GDP Growth", value: "3.8%", change: "+0.2%", tone: "up", icon: Banknote },
-        { label: "Interest Rate", value: "27.0%", change: "+0.25%", tone: "up", icon: Building2 }
+        { label: "Inflation Rate", value: "32.1%", change: "-0.5%", tone: "down", icon: Percent },
+        { label: "GDP Growth", value: "3.8%", change: "+0.2%", tone: "up", icon: LineChart },
+        { label: "Interest Rate", value: "27.0%", change: "+0.25%", tone: "up", icon: Landmark }
     ];
 
     const educationalArticles = [
@@ -32,7 +40,7 @@ function MarketEducationPage() {
             author: "Ghana Stock Exchange",
             date: "2026",
             readTime: "5 min read",
-            icon: TrendingUp,
+            icon: FileText,
             link: "https://gse.com.gh/press-release/"
         },
         {
@@ -41,7 +49,7 @@ function MarketEducationPage() {
             author: "Ghana Stock Exchange",
             date: "2026",
             readTime: "3 min watch",
-            icon: DollarSign,
+            icon: Video,
             link: "https://gse.com.gh/gse-testimonial-video/"
         },
         {
@@ -50,7 +58,7 @@ function MarketEducationPage() {
             author: "Ghana Stock Exchange",
             date: "2026",
             readTime: "10 min read",
-            icon: Banknote,
+            icon: Table2,
             link: "https://gse.com.gh/financial-statements/"
         },
         {
@@ -59,7 +67,7 @@ function MarketEducationPage() {
             author: "Ghana Stock Exchange",
             date: "2026",
             readTime: "5 min read",
-            icon: Building2,
+            icon: Bell,
             link: "https://gse.com.gh/gse-market-notice/"
         },
         {
