@@ -18,7 +18,6 @@ import {
 import { getSeries, recordAll, sliceRange } from "@/lib/history";
 import {
     GSE_LIVE_SECTION,
-    openGseLive,
     openStock,
     VIEW_MODES,
     type ViewMode,
@@ -282,7 +281,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                 <button
                                     key={key}
                                     type="button"
-                                    onClick={() => { setMode(key); openGseLive(key); }}
+                                    onClick={() => { setMode(key); }}
                                     aria-pressed={mode === key}
                                     className={cn(
                                         "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold uppercase tracking-widest transition-colors",
