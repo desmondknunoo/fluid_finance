@@ -57,7 +57,7 @@ export async function exportStockPricesToExcel(
   const weeks = getWeekGroups(dates);
 
   if (weeklyComparison) {
-    exportWeeklyComparison(symbols, weeks, lookup, startDate, endDate, filename);
+    exportWeeklyComparison(symbols, weeks, lookup, filename);
     return;
   }
 
@@ -126,8 +126,6 @@ function exportWeeklyComparison(
   symbols: string[],
   weeks: WeekGroup[],
   lookup: Map<string, Map<string, number>>,
-  _startDate: string,
-  _endDate: string,
   filename?: string
 ) {
   if (weeks.length < 2) {
