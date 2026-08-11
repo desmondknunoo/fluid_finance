@@ -126,8 +126,8 @@ function exportWeeklyComparison(
   symbols: string[],
   weeks: WeekGroup[],
   lookup: Map<string, Map<string, number>>,
-  startDate: string,
-  endDate: string,
+  _startDate: string,
+  _endDate: string,
   filename?: string
 ) {
   if (weeks.length < 2) {
