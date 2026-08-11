@@ -44,6 +44,7 @@ const DROPDOWN_GROUPS: DropdownGroup[] = [
 ];
 
 const SECTIONS = [
+    { label: "Home", href: "#/" },
     { label: "About", href: "#/about-us" },
 ] as const;
 
