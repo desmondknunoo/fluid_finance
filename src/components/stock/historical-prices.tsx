@@ -260,7 +260,7 @@ export function HistoricalPrices({ onLastUpdated }: { onLastUpdated?: (date: str
                     <YAxis tick={{ fontSize: 10, fill: "currentColor", opacity: 0.4 }} width={50} />
                     <Tooltip
                       contentStyle={{ background: "var(--color-canvas)", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "8px", fontSize: "12px" }}
-                      formatter={(value: number) => [`GHS ${value.toFixed(2)}`, "Price"]}
+                      formatter={(value) => [`GHS ${Number(value).toFixed(2)}`, "Price"]}
                     />
                     <Line type="monotone" dataKey="price" stroke="currentColor" strokeWidth={2} dot={{ r: 3 }} className="text-ink" />
                   </RechartLine>

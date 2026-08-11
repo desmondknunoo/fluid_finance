@@ -3,12 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Download, Loader2, RefreshCw } from "lucide-react";
-import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
+import { getAllStocks, type Stock } from "@/lib/gse";
 import { recordAll, getSeries, type PricePoint } from "@/lib/history";
 import { saveStockPrices, supabase } from "@/lib/supabase";
 import { exportStockPricesToExcel } from "@/lib/export-excel";
-import { openStock } from "@/lib/navigation";
-import { TickerLogo } from "@/components/stock/ticker-logo";
 import { HistoricalPrices } from "@/components/stock/historical-prices";
 import { WeeklyTrendsShareSheet } from "@/components/stock/weekly-trends-share-sheet";
 import type { WeeklyTrendCardInput } from "@/lib/weekly-trends-share-card";
@@ -51,7 +49,6 @@ function formatDateShort(date: Date): string {
 export default function MarketTrendsPage() {
     const [stocks, setStocks] = useState<Stock[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [shareSheet, setShareSheet] = useState<{ open: boolean; input: WeeklyTrendCardInput | null }>({
         open: false,
         input: null,
@@ -93,9 +90,7 @@ export default function MarketTrendsPage() {
             recordAll(data.map((s) => ({ symbol: s.symbol, price: s.price })));
             saveStockPrices(data.map((s) => ({ symbol: s.symbol, price: s.price }))).catch(() => {});
             setStocks(data);
-            setError(null);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "An error occurred");
+        } catch {
         } finally {
             setLoading(false);
         }
@@ -160,21 +155,6 @@ export default function MarketTrendsPage() {
         } finally {
             setExporting(false);
         }
-    };
-
-    const openShareSheet = (type: "gainers" | "losers") => {
-        const dateRange = getDateRange();
-        const items = type === "gainers" ? topGainers : topLosers;
-        setShareSheet({
-            open: true,
-            input: {
-                type,
-                stocks: items.map((w) => w.stock),
-                weeklyChanges: items,
-                startDate: dateRange.start,
-                endDate: dateRange.end,
-            },
-        });
     };
 
     return (
