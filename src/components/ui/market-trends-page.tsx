@@ -138,15 +138,22 @@ export default function MarketTrendsPage() {
         (async () => {
             const lastFriday = getLastFriday(new Date());
             const fridayBefore = getFridayBefore(lastFriday);
-            const endDate = closestOnOrBefore(availableDates, toISODate(lastFriday));
-            const startDate = closestOnOrBefore(availableDates, toISODate(fridayBefore));
+            let endDate = closestOnOrBefore(availableDates, toISODate(lastFriday));
+            let startDate = closestOnOrBefore(availableDates, toISODate(fridayBefore));
 
+            // Until two Fridays of data exist, fall back to the two most recent
+            // recorded trading days so the section still shows real movement.
             if (!endDate || !startDate || endDate === startDate) {
-                if (!cancelled) {
-                    setWeeklyChanges([]);
-                    setWeekRange(null);
+                if (availableDates.length >= 2) {
+                    endDate = availableDates[availableDates.length - 1];
+                    startDate = availableDates[availableDates.length - 2];
+                } else {
+                    if (!cancelled) {
+                        setWeeklyChanges([]);
+                        setWeekRange(null);
+                    }
+                    return;
                 }
-                return;
             }
 
             try {
@@ -375,7 +382,7 @@ export default function MarketTrendsPage() {
                                             <tr className="border-b border-ink/[0.08] bg-ink/[0.01]">
                                                 <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">#</th>
                                                 <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Symbol</th>
-                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Friday Close</th>
+                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Closing Price</th>
                                                 <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider text-right">Weekly Change</th>
                                             </tr>
                                         </thead>
@@ -470,7 +477,7 @@ export default function MarketTrendsPage() {
                                             <tr className="border-b border-ink/[0.08] bg-ink/[0.01]">
                                                 <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">#</th>
                                                 <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Symbol</th>
-                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Friday Close</th>
+                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Closing Price</th>
                                                 <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider text-right">Weekly Change</th>
                                             </tr>
                                         </thead>

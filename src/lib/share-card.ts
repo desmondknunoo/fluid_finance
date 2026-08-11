@@ -44,6 +44,10 @@ dark: {
     chip: "rgba(255,255,255,0.09)",
     chipText: "rgba(255,255,255,0.75)",
     selected: "rgba(255,255,255,0.12)",
+    logo: "/logo/lockup-01.png", // light wordmark, for dark background
+    footerBg: "#111318",
+    footerText: "#ffffff",
+    footerMuted: "rgba(255,255,255,0.6)",
 },
 light: {
     canvas: "#ffffff",
@@ -58,8 +62,37 @@ light: {
     chip: "rgba(9,10,14,0.08)",
     chipText: "rgba(9,10,14,0.72)",
     selected: "rgba(9,10,14,0.10)",
+    logo: "/logo/lockup-04.png", // dark wordmark, for light background
+    footerBg: "#e7e9ee",
+    footerText: "#0b0d10",
+    footerMuted: "rgba(9,10,14,0.6)",
 },
 } as const;
+
+/** 24×24 brand glyph paths (from components/ui/social-icons). */
+const ICONS = {
+    instagram:
+        "M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z",
+    tiktok:
+        "M16.6 5.82a4.28 4.28 0 0 1-1.05-2.82h-3.2v12.86a2.59 2.59 0 0 1-2.59 2.5 2.59 2.59 0 0 1 0-5.18c.27 0 .53.04.77.12v-3.3a5.9 5.9 0 0 0-.77-.05 5.84 5.84 0 1 0 5.84 5.84V9.4a7.5 7.5 0 0 0 4.4 1.41V7.62a4.3 4.3 0 0 1-3.4-1.8z",
+    x: "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z",
+} as const;
+
+const SOCIALS = [
+    { icon: ICONS.instagram, handle: "@fluidfinanceonline" },
+    { icon: ICONS.tiktok, handle: "@fluid_finance" },
+    { icon: ICONS.x, handle: "@FluidFinanceX" },
+] as const;
+
+/** Draws a 24-unit SVG glyph at (x,y) scaled to `size`, filled with `color`. */
+function drawGlyph(ctx: CanvasRenderingContext2D, path: string, x: number, y: number, size: number, color: string): void {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(size / 24, size / 24);
+    ctx.fillStyle = color;
+    ctx.fill(new Path2D(path));
+    ctx.restore();
+}
 
 type ShareCardPalette = (typeof PALETTES)[ShareCardTheme];
 
@@ -326,17 +359,26 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
 
     const M = 64;
 
-    // brand strip
-    ctx.fillStyle = ink.text;
-    ctx.font = font(700, 26);
-    ctx.letterSpacing = "4px";
-    ctx.fillText("FLUID FINANCE", M, M + 22);
-    ctx.letterSpacing = "0px";
+    // brand strip — logo on the left, exchange note on the right
+    const logoImg = await loadImage(ink.logo);
+    const brandH = 46;
+    if (logoImg) {
+        const scale = brandH / (logoImg.naturalHeight || brandH);
+        ctx.drawImage(logoImg, M, M - 6, (logoImg.naturalWidth || brandH) * scale, brandH);
+    } else {
+        ctx.fillStyle = ink.text;
+        ctx.font = font(700, 26);
+        ctx.letterSpacing = "4px";
+        ctx.fillText("FLUID FINANCE", M, M + 24);
+        ctx.letterSpacing = "0px";
+    }
     ctx.fillStyle = ink.muted;
     ctx.font = font(500, 22);
     ctx.textAlign = "right";
-    ctx.fillText("Ghana Stock Exchange", W - M, M + 22);
+    ctx.textBaseline = "middle";
+    ctx.fillText("Ghana Stock Exchange", W - M, M + brandH / 2 - 6);
     ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
 
     // identity
     const logoTop = M + 76;
@@ -439,7 +481,9 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
     ctx.textBaseline = "alphabetic";
     ctx.textAlign = "left";
 
-    // footer
+    // timestamp + backfill note, just above the footer strip
+    const barH = 132;
+    const barY = H - barH;
     const asOf = new Date().toLocaleString("en-GB", {
         day: "numeric",
         month: "short",
@@ -449,15 +493,55 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
         timeZone: "UTC",
     });
     ctx.fillStyle = ink.muted;
-    ctx.font = font(500, 21);
-    ctx.fillText(`As of ${asOf} GMT`, M, H - M - 12);
-
+    ctx.font = font(500, 20);
+    ctx.textAlign = "left";
+    ctx.fillText(`As of ${asOf} GMT`, M, barY - 22);
     if (input.hasBackfill) {
         ctx.textAlign = "right";
-        ctx.fillStyle = ink.muted;
         ctx.font = font(500, 18);
-        ctx.fillText("Chart includes backfilled history", W - M, H - M - 12);
+        ctx.fillText("Chart includes backfilled history", W - M, barY - 22);
+        ctx.textAlign = "left";
     }
+
+    // ---- Footer strip ----
+    ctx.fillStyle = ink.footerBg;
+    ctx.fillRect(0, barY, W, barH);
+
+    // Tagline (left)
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = ink.footerText;
+    ctx.font = font(800, 28);
+    ctx.letterSpacing = "1px";
+    ctx.fillText("DECISIONS THAT", M, barY + 54);
+
+    const buildText = "BUILD WEALTH";
+    ctx.font = font(800, 36);
+    const buildW = ctx.measureText(buildText).width;
+    const buildGrad = ctx.createLinearGradient(M, 0, M + buildW, 0);
+    buildGrad.addColorStop(0, "#22d3ee");
+    buildGrad.addColorStop(1, "#6366f1");
+    ctx.fillStyle = buildGrad;
+    ctx.fillText(buildText, M, barY + 98);
+    ctx.letterSpacing = "0px";
+
+    // Socials (right, stacked)
+    const rowGap = 38;
+    const socialsTop = barY + 34;
+    ctx.font = font(500, 21);
+    for (let i = 0; i < SOCIALS.length; i++) {
+        const s = SOCIALS[i];
+        const cy = socialsTop + i * rowGap;
+        const handleW = ctx.measureText(s.handle).width;
+        const iconSize = 24;
+        const handleLeft = W - M - handleW;
+        ctx.fillStyle = ink.footerText;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText(s.handle, handleLeft, cy);
+        drawGlyph(ctx, s.icon, handleLeft - iconSize - 12, cy - iconSize / 2, iconSize, ink.footerText);
+    }
+    ctx.textBaseline = "alphabetic";
+    ctx.textAlign = "left";
 
     return new Promise((resolve, reject) => {
         canvas.toBlob(

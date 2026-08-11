@@ -234,7 +234,7 @@ export async function renderWeeklyTrendCard(input: WeeklyTrendCardInput): Promis
 
     ctx.fillStyle = ink.muted;
     ctx.font = font(500, 26);
-    ctx.fillText(`${input.startDate} to ${input.endDate}  ·  Friday close`, M, headerY + 108);
+    ctx.fillText(`${input.startDate} to ${input.endDate}  ·  closing prices`, M, headerY + 108);
 
     // Column geometry (right-aligned price + change with a clear gap between them)
     const priceRightX = W - 330;
