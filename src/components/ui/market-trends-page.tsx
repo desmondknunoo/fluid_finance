@@ -109,42 +109,6 @@ export default function MarketTrendsPage() {
         await fetchAvailableDates();
     };
 
-    const weeklyChanges = useMemo(() => {
-        if (stocks.length === 0) return [];
-        const now = new Date();
-        const lastFriday = getLastFriday(now);
-        const fridayBefore = getFridayBefore(lastFriday);
-        return stocks
-            .map((stock) => {
-                const series = getSeries(stock.symbol, stock.price, now);
-                const allPoints = series.points;
-                const lastFridayPoint = findClosestRecordedPoint(allPoints, lastFriday.getTime());
-                const fridayBeforePoint = findClosestRecordedPoint(allPoints, fridayBefore.getTime());
-                if (!lastFridayPoint || !fridayBeforePoint || lastFridayPoint.t === fridayBeforePoint.t) return null;
-                const weeklyChange = lastFridayPoint.close - fridayBeforePoint.close;
-                const weeklyChangePercent = fridayBeforePoint.close > 0 ? (weeklyChange / fridayBeforePoint.close) * 100 : 0;
-                return { stock, weeklyChange, weeklyChangePercent };
-            })
-            .filter((item): item is NonNullable<typeof item> => item !== null);
-    }, [stocks]);
-
-    const topGainers = useMemo(
-        () => weeklyChanges.filter((w) => w.weeklyChangePercent > 0).sort((a, b) => b.weeklyChangePercent - a.weeklyChangePercent).slice(0, 5),
-        [weeklyChanges]
-    );
-
-    const topLosers = useMemo(
-        () => weeklyChanges.filter((w) => w.weeklyChangePercent < 0).sort((a, b) => a.weeklyChangePercent - b.weeklyChangePercent).slice(0, 5),
-        [weeklyChanges]
-    );
-
-    const getDateRange = () => {
-        const now = new Date();
-        const lastFriday = getLastFriday(now);
-        const fridayBefore = getFridayBefore(lastFriday);
-        return { start: formatDateShort(fridayBefore), end: formatDateShort(lastFriday) };
-    };
-
     const handleExport = async () => {
         setExporting(true);
         setExportError(null);
