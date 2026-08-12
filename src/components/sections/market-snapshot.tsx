@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronRight, Loader2, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
+import { formatCedis, getAllStocks, isMarketOpen, type Stock } from "@/lib/gse";
 import { recordAll } from "@/lib/history";
 import { openStock } from "@/lib/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
@@ -236,7 +236,7 @@ export const MarketSnapshot = () => {
             <MoversShareSheet
                 open={shareOpen}
                 onClose={() => setShareOpen(false)}
-                card={{ category: activeTab, stocks: movers, date: todayLabel() }}
+                card={{ category: activeTab, stocks: movers, date: todayLabel(), marketOpen: isMarketOpen() }}
             />
         </section >
     );

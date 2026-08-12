@@ -15,6 +15,7 @@ export interface MoversCardInput {
     category: MoverCategory;
     stocks: Stock[]; // pre-sorted top 5
     date: string; // e.g. "11 Aug 2026"
+    marketOpen: boolean;
     theme?: "light" | "dark";
 }
 
@@ -337,18 +338,47 @@ export async function renderMoversCard(input: MoversCardInput): Promise<Blob> {
     // Timestamp above footer
     const barH = 152;
     const barY = H - barH;
-    const asOf = new Date().toLocaleString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        timeZone: "UTC",
-    });
+
+    const now = new Date();
+    let timestampText: string;
+    let statusText: string;
+    let statusColor: string;
+
+    if (input.marketOpen) {
+        const time = now.toLocaleString("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+            timeZone: "UTC",
+        });
+        timestampText = `As of Today, ${time} GMT`;
+        statusText = "Market Open";
+        statusColor = ink.up;
+    } else {
+        timestampText = `As of ${input.date}, 15:00 GMT`;
+        statusText = "Market Closed";
+        statusColor = ink.muted;
+    }
+
     ctx.fillStyle = ink.faint;
     ctx.font = font(500, 20);
     ctx.textAlign = "center";
-    ctx.fillText(`As of ${asOf} GMT`, W / 2, barY - 28);
+    ctx.fillText(timestampText, W / 2, barY - 48);
+    ctx.textAlign = "left";
+
+    // Status badge
+    ctx.font = font(600, 18);
+    const badgeW = ctx.measureText(statusText).width + 28;
+    const badgeH = 30;
+    const badgeX = (W - badgeW) / 2;
+    const badgeY = barY - 36;
+    roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 8);
+    ctx.fillStyle = `${statusColor}18`;
+    ctx.fill();
+    ctx.fillStyle = statusColor;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(statusText, badgeX + badgeW / 2, badgeY + badgeH / 2);
+    ctx.textBaseline = "alphabetic";
     ctx.textAlign = "left";
 
     // ---- Footer strip ----
