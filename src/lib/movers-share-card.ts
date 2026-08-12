@@ -14,17 +14,16 @@ export type MoverCategory = "gainers" | "losers" | "active";
 export interface MoversCardInput {
     category: MoverCategory;
     stocks: Stock[]; // pre-sorted top 5
-    date: string; // e.g. "11 Aug 2026"
     theme?: "light" | "dark";
 }
 
 /**
- * Returns the timestamp string to display on the share card.
+ * Returns the date string for the card header and the full timestamp above the footer.
  *
- * - During market hours (Mon–Fri 10:00–15:00 GMT): live time → "As of 11 Aug 2026, 14:30 GMT"
- * - Outside market hours: last official close → "As of 11 Aug 2026, 15:00 GMT"
+ * - During market hours (Mon–Fri 10:00–15:00 GMT): today's date + live time
+ * - Outside market hours: last trading day's date + 15:00
  */
-function getShareTimestamp(now = new Date()): string {
+function getShareDateAndTimestamp(now = new Date()): { date: string; timestamp: string } {
     const day = now.getUTCDay();
     const minutes = now.getUTCHours() * 60 + now.getUTCMinutes();
     const isWeekday = day !== 0 && day !== 6;
@@ -36,7 +35,7 @@ function getShareTimestamp(now = new Date()): string {
         d.toLocaleString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
 
     if (isDuringHours) {
-        return `As of ${fmtDate(now)}, ${fmtTime(now)} GMT`;
+        return { date: fmtDate(now), timestamp: `As of ${fmtDate(now)}, ${fmtTime(now)} GMT` };
     }
 
     // Market closed — find last trading day at 15:00
@@ -49,7 +48,8 @@ function getShareTimestamp(now = new Date()): string {
         close.setUTCDate(close.getUTCDate() - daysBack);
     }
 
-    return `As of ${fmtDate(close)}, 15:00 GMT`;
+    const date = fmtDate(close);
+    return { date, timestamp: `As of ${date}, 15:00 GMT` };
 }
 
 const W = 1080;
@@ -227,6 +227,8 @@ export async function renderMoversCard(input: MoversCardInput): Promise<Blob> {
         }
     }
 
+    const { date, timestamp } = getShareDateAndTimestamp();
+
     const ink = PALETTES[input.theme ?? "dark"];
     const isActive = input.category === "active";
     const accent = input.category === "gainers" ? ink.up : input.category === "losers" ? ink.down : ink.cyan;
@@ -278,7 +280,7 @@ export async function renderMoversCard(input: MoversCardInput): Promise<Blob> {
 
     ctx.fillStyle = ink.muted;
     ctx.font = font(500, 26);
-    ctx.fillText(`${input.date}  ·  Ghana Stock Exchange`, M, headerY + 108);
+    ctx.fillText(`${date}  ·  Ghana Stock Exchange`, M, headerY + 108);
 
     const priceRightX = W - 330;
     const changeRightX = W - M;
@@ -374,7 +376,7 @@ export async function renderMoversCard(input: MoversCardInput): Promise<Blob> {
     ctx.fillStyle = ink.faint;
     ctx.font = font(500, 20);
     ctx.textAlign = "center";
-    ctx.fillText(getShareTimestamp(), W / 2, barY - 28);
+    ctx.fillText(timestamp, W / 2, barY - 28);
     ctx.textAlign = "left";
 
     // ---- Footer strip ----

@@ -11,15 +11,6 @@ import { MoversShareSheet } from "@/components/stock/movers-share-sheet";
 
 type Tab = "gainers" | "losers" | "active";
 
-function todayLabel(): string {
-    return new Date().toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-        timeZone: "UTC",
-    });
-}
-
 const MOVER_TABS: { key: Tab; label: string; shareClasses: string }[] = [
     { key: "gainers", label: "Top Gainers", shareClasses: "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/20 hover:border-emerald-500/30" },
     { key: "losers", label: "Top Losers", shareClasses: "bg-rose-500/10 border-rose-500/20 text-rose-500 hover:bg-rose-500/20 hover:border-rose-500/30" },
@@ -236,7 +227,7 @@ export const MarketSnapshot = () => {
             <MoversShareSheet
                 open={shareOpen}
                 onClose={() => setShareOpen(false)}
-                card={{ category: activeTab, stocks: movers, date: todayLabel() }}
+                card={{ category: activeTab, stocks: movers }}
             />
         </section >
     );

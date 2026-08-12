@@ -11,15 +11,6 @@ import { StockCard } from "@/components/stock/stock-card";
 import { MoversShareSheet } from "@/components/stock/movers-share-sheet";
 import { useEffect, useMemo, useState } from "react";
 
-function todayLabel(): string {
-    return new Date().toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-        timeZone: "UTC",
-    });
-}
-
 const marketInsights = [
     {
         category: "Business & Financial Times",
@@ -328,7 +319,7 @@ export default function BusinessNewsPage() {
             <MoversShareSheet
                 open={shareOpen}
                 onClose={() => setShareOpen(false)}
-                card={{ category: activeTab, stocks: movers, date: todayLabel() }}
+                card={{ category: activeTab, stocks: movers }}
             />
         </div>
     );
