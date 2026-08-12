@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { ChevronRight, Share2, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatCedis, getAllStocks, isMarketOpen, type Stock } from "@/lib/gse";
+import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
 import { recordAll } from "@/lib/history";
 import { openStock } from "@/lib/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
@@ -328,7 +328,7 @@ export default function BusinessNewsPage() {
             <MoversShareSheet
                 open={shareOpen}
                 onClose={() => setShareOpen(false)}
-                card={{ category: activeTab, stocks: movers, date: todayLabel(), marketOpen: isMarketOpen() }}
+                card={{ category: activeTab, stocks: movers, date: todayLabel() }}
             />
         </div>
     );
