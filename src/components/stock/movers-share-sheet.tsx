@@ -32,7 +32,7 @@ function shareText(card: MoversCardInput): string {
                 : `${s.symbol}: ${s.changePercent >= 0 ? "+" : ""}${s.changePercent.toFixed(2)}%`,
         )
         .join(", ");
-    return `MARKET MOVERS - ${title} on the Ghana Stock Exchange (${card.date}): ${list}`;
+    return `MARKET MOVERS - ${title} on the Ghana Stock Exchange: ${list}`;
 }
 
 interface Network {
@@ -100,7 +100,7 @@ export function MoversShareSheet({ open, onClose, card }: MoversShareSheetProps)
         return () => {
             cancelled = true;
         };
-    }, [open, card.category, card.date, card.stocks, resolved]);
+    }, [open, card.category, card.stocks, resolved]);
 
     useEffect(
         () => () => {
