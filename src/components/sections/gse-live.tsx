@@ -281,7 +281,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                 <button
                                     key={key}
                                     type="button"
-                                    onClick={() => { setMode(key); }}
+                                    onClick={() => { console.log("TOGGLE:", key, "current:", mode); setMode(key); }}
                                     aria-pressed={mode === key}
                                     className={cn(
                                         "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold uppercase tracking-widest transition-colors",

@@ -1,19 +1,29 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronRight, Loader2, TrendingDown, TrendingUp } from "lucide-react";
+import { ChevronRight, Loader2, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCedis, getAllStocks, type Stock } from "@/lib/gse";
 import { recordAll } from "@/lib/history";
 import { openStock } from "@/lib/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
 import { StockCard } from "@/components/stock/stock-card";
+import { MoversShareSheet } from "@/components/stock/movers-share-sheet";
 
 type Tab = "gainers" | "losers" | "active";
 
-const MOVER_TABS: { key: Tab; label: string }[] = [
-    { key: "gainers", label: "Top Gainers" },
-    { key: "losers", label: "Top Losers" },
-    { key: "active", label: "Most Active" },
+function todayLabel(): string {
+    return new Date().toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC",
+    });
+}
+
+const MOVER_TABS: { key: Tab; label: string; shareClasses: string }[] = [
+    { key: "gainers", label: "Top Gainers", shareClasses: "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/20 hover:border-emerald-500/30" },
+    { key: "losers", label: "Top Losers", shareClasses: "bg-rose-500/10 border-rose-500/20 text-rose-500 hover:bg-rose-500/20 hover:border-rose-500/30" },
+    { key: "active", label: "Most Active", shareClasses: "bg-fluid-cyan/10 border-fluid-cyan/20 text-fluid-cyan hover:bg-fluid-cyan/20 hover:border-fluid-cyan/30" },
 ];
 
 export const MarketSnapshot = () => {
@@ -21,6 +31,7 @@ export const MarketSnapshot = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<Tab>("gainers");
+    const [shareOpen, setShareOpen] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -59,6 +70,8 @@ export const MarketSnapshot = () => {
         }
     }, [stocks, activeTab]);
 
+    const activeTabConfig = MOVER_TABS.find((t) => t.key === activeTab) ?? MOVER_TABS[0];
+
     if (loading) {
         return (
             <section id="market-snapshot" className="relative overflow-hidden bg-canvas py-14 sm:py-20 md:py-24">
@@ -92,25 +105,51 @@ export const MarketSnapshot = () => {
                     className="rounded-2xl bg-ink/[0.03] border border-ink/[0.08] overflow-hidden"
                 >
                     <div className="flex flex-col gap-4 border-b border-ink/[0.08] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-                        <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/40">Market movers</p>
-                            <h2 className="mt-1 text-lg font-bold text-ink">Today&apos;s standouts</h2>
+                        <div className="flex items-start justify-between gap-3">
+                            <div>
+                                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/40">Market movers</p>
+                                <h2 className="mt-1 text-lg font-bold text-ink">Today&apos;s standouts</h2>
+                            </div>
+                            <button
+                                onClick={() => setShareOpen(true)}
+                                disabled={movers.length === 0}
+                                className={cn(
+                                    "shrink-0 inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all disabled:opacity-40 sm:hidden",
+                                    activeTabConfig.shareClasses,
+                                )}
+                            >
+                                <Share2 size={13} />
+                                Share
+                            </button>
                         </div>
-                        <div className="grid grid-cols-3 rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-1 sm:min-w-[440px]">
-                            {MOVER_TABS.map(({ key, label }) => (
-                                <button
-                                    key={key}
-                                    onClick={() => setActiveTab(key)}
-                                    className={cn(
-                                        "min-w-0 rounded-lg px-2 py-2.5 text-xs font-semibold transition-all sm:px-3",
-                                        activeTab === key
-                                            ? "bg-canvas text-ink shadow-sm"
-                                            : "text-ink/40 hover:text-ink/70",
-                                    )}
-                                >
-                                    <span className="block truncate">{label}</span>
-                                </button>
-                            ))}
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="grid flex-1 grid-cols-3 rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-1 sm:flex-none sm:min-w-[440px]">
+                                {MOVER_TABS.map(({ key, label }) => (
+                                    <button
+                                        key={key}
+                                        onClick={() => setActiveTab(key)}
+                                        className={cn(
+                                            "min-w-0 rounded-lg px-2 py-2.5 text-xs font-semibold transition-all sm:px-3",
+                                            activeTab === key
+                                                ? "bg-canvas text-ink shadow-sm"
+                                                : "text-ink/40 hover:text-ink/70",
+                                        )}
+                                    >
+                                        <span className="block truncate">{label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                            <button
+                                onClick={() => setShareOpen(true)}
+                                disabled={movers.length === 0}
+                                className={cn(
+                                    "hidden shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition-all disabled:opacity-40 sm:inline-flex",
+                                    activeTabConfig.shareClasses,
+                                )}
+                            >
+                                <Share2 size={13} />
+                                Share
+                            </button>
                         </div>
                     </div>
 
@@ -193,6 +232,12 @@ export const MarketSnapshot = () => {
             {/* Background Glows */}
             <div className="absolute top-1/4 left-0 w-96 h-96 bg-ink/[0.02] rounded-full blur-[120px] pointer-events-none" />
             <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-ink/[0.02] rounded-full blur-[120px] pointer-events-none" />
+
+            <MoversShareSheet
+                open={shareOpen}
+                onClose={() => setShareOpen(false)}
+                card={{ category: activeTab, stocks: movers, date: todayLabel() }}
+            />
         </section >
     );
 };

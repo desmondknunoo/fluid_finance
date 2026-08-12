@@ -21,7 +21,7 @@ export const VIEW_MODES: ViewMode[] = ["table", "heatmap"];
 export const GSE_LIVE_SECTION = "gse-live";
 
 const STOCK_ROUTE = /^#\/stock\/([A-Za-z0-9._-]+)$/;
-const LIVE_VIEW_ROUTE = /^#gse-live\/([A-Za-z]+)$/;
+const LIVE_VIEW_ROUTE = /^#\/?gse-live\/([A-Za-z]+)$/;
 
 const PAGE_ROUTES = [
     { kind: "about", pattern: /^#\/about(-us)?$/ },
@@ -114,7 +114,7 @@ export function openMarketTrends(): void {
 }
 
 export function openGseLive(view?: ViewMode): void {
-    window.location.hash = view ? `#gse-live/${view}` : "#/gse-live";
+    window.location.hash = view ? `#/gse-live/${view}` : "#/gse-live";
 }
 
 /** Leaving a ticker returns to the GSE Live page. */

@@ -1,8 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, Percent, LineChart, Landmark, FileText, Video, Table2, Bell, BookOpen, GraduationCap } from "lucide-react";
+import { FileText, Video, Table2, Bell, BookOpen, GraduationCap } from "lucide-react";
 
 function MarketEducationPage() {
     const fadeUpVariants = {
@@ -17,13 +16,6 @@ function MarketEducationPage() {
             },
         }),
     };
-
-    const economicIndicators = [
-        { label: "GSE All-Share Index", value: "12,456.78", change: "+1.2%", tone: "up", icon: TrendingUp },
-        { label: "Inflation Rate", value: "32.1%", change: "-0.5%", tone: "down", icon: Percent },
-        { label: "GDP Growth", value: "3.8%", change: "+0.2%", tone: "up", icon: LineChart },
-        { label: "Interest Rate", value: "27.0%", change: "+0.25%", tone: "up", icon: Landmark }
-    ];
 
     const educationalArticles = [
         {
@@ -103,38 +95,6 @@ function MarketEducationPage() {
                         <p className="text-xl text-ink/60 max-w-2xl mx-auto leading-relaxed">
                             Master financial markets, economic indicators, and investment strategies through expert insights and comprehensive educational resources.
                         </p>
-                    </motion.div>
-
-                    <motion.div
-                        custom={1}
-                        variants={fadeUpVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-20"
-                    >
-                        {economicIndicators.map((indicator) => (
-                            <Card
-                                key={indicator.label}
-                                className="bg-ink/[0.02] border border-ink/[0.08] hover:bg-ink/[0.04] transition-all"
-                            >
-                                <CardContent className="p-6">
-                                    <div className="flex items-center gap-3 mb-3">
-                                        <div className="p-2 rounded-lg bg-ink/[0.05]">
-                                            <indicator.icon className="h-5 w-5 text-ink/60" />
-                                        </div>
-                                        <p className="text-xs font-semibold text-ink/40 uppercase tracking-wider">
-                                            {indicator.label}
-                                        </p>
-                                    </div>
-                                    <p className={`text-2xl font-bold mb-1 ${indicator.tone === "up" ? "text-emerald-400" : indicator.tone === "down" ? "text-rose-400" : "text-ink"}`}>
-                                        {indicator.value}
-                                    </p>
-                                    <p className={`text-xs font-medium ${indicator.tone === "up" ? "text-emerald-400" : indicator.tone === "down" ? "text-rose-400" : "text-ink/60"}`}>
-                                        {indicator.change}
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        ))}
                     </motion.div>
 
                     <motion.div
