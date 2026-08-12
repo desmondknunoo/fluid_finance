@@ -18,6 +18,43 @@ export interface MoversCardInput {
     theme?: "light" | "dark";
 }
 
+/**
+ * Returns the timestamp string to display on the share card.
+ *
+ * - During market hours (Mon–Fri 10:00–15:00 GMT): live time → "As of Today, 14:30 GMT"
+ * - Outside market hours: last official close → "As of Friday, 15:00 GMT"
+ */
+function getShareTimestamp(now = new Date()): string {
+    const day = now.getUTCDay();
+    const minutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+    const isWeekday = day !== 0 && day !== 6;
+    const isDuringHours = isWeekday && minutes >= 10 * 60 && minutes < 15 * 60;
+
+    if (isDuringHours) {
+        const time = now.toLocaleString("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+            timeZone: "UTC",
+        });
+        return `As of Today, ${time} GMT`;
+    }
+
+    // Market closed — find last trading day
+    const close = new Date(now);
+    if (isWeekday && minutes >= 15 * 60) {
+        // Mon–Fri after 15:00 → last close was today at 15:00
+        close.setUTCHours(15, 0, 0, 0);
+    } else {
+        // Before 10:00 on a weekday, or weekend → go back to last weekday at 15:00
+        let daysBack = isWeekday ? 1 : day === 0 ? 2 : 1; // Sun→Fri(2), Sat→Fri(1), Mon-before-10→Fri(1), Tue-Fri-before-10→yesterday(1)
+        close.setUTCHours(15, 0, 0, 0);
+        close.setUTCDate(close.getUTCDate() - daysBack);
+    }
+
+    const dayName = close.toLocaleString("en-GB", { weekday: "long", timeZone: "UTC" });
+    return `As of ${dayName}, 15:00 GMT`;
+}
+
 const W = 1080;
 const H = 1350;
 
@@ -337,18 +374,10 @@ export async function renderMoversCard(input: MoversCardInput): Promise<Blob> {
     // Timestamp above footer
     const barH = 152;
     const barY = H - barH;
-    const asOf = new Date().toLocaleString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        timeZone: "UTC",
-    });
     ctx.fillStyle = ink.faint;
     ctx.font = font(500, 20);
     ctx.textAlign = "center";
-    ctx.fillText(`As of ${asOf} GMT`, W / 2, barY - 28);
+    ctx.fillText(getShareTimestamp(), W / 2, barY - 28);
     ctx.textAlign = "left";
 
     // ---- Footer strip ----
