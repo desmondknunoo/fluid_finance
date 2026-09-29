@@ -8,7 +8,7 @@ import {
     Mail,
     MapPin,
     Phone,
-    // ShoppingCart, // FEATURE:BUY-REDIRECT — uncomment when enabling the Buy CTA (see APP-FT.md)
+    ShoppingCart,
     Share2,
     TrendingDown,
     TrendingUp,
@@ -17,8 +17,7 @@ import { cn } from "@/lib/utils";
 import { PriceChart } from "@/components/stock/price-chart";
 import { TickerLogo } from "@/components/stock/ticker-logo";
 import { ShareSheet } from "@/components/stock/share-sheet";
-// FEATURE:BUY-REDIRECT — uncomment when enabling the Buy CTA (see APP-FT.md)
-// import { BuyRedirectSheet } from "@/components/stock/buy-redirect-sheet";
+import { BuyRedirectSheet } from "@/components/stock/buy-redirect-sheet";
 import {
     formatCedis,
     formatCompact,
@@ -76,8 +75,7 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
     const [range, setRange] = useState<RangeKey>("ALL");
     const [tab, setTab] = useState<Tab>("details");
     const [shareOpen, setShareOpen] = useState(false);
-    // FEATURE:BUY-REDIRECT — uncomment when enabling the Buy CTA (see APP-FT.md)
-    // const [buyOpen, setBuyOpen] = useState(false);
+    const [buyOpen, setBuyOpen] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -194,14 +192,12 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                 }}
             />
 
-            {/* FEATURE:BUY-REDIRECT — uncomment when enabling the Buy CTA (see APP-FT.md)
             <BuyRedirectSheet
                 open={buyOpen}
                 onClose={() => setBuyOpen(false)}
                 symbol={stock.symbol}
                 company={stock.company}
             />
-            */}
 
             <div className="mx-auto max-w-3xl px-4 md:px-6">
                 {/* Identity + price */}
@@ -308,14 +304,12 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
 
                     {/* Alerts */}
                 <div className="mt-4 flex gap-2">
-                    {/* FEATURE:BUY-REDIRECT — uncomment when enabling the Buy CTA (see APP-FT.md)
                     <ActionChip
                         icon={<ShoppingCart size={16} />}
                         label="Buy"
                         tone="positive"
                         onClick={() => setBuyOpen(true)}
                     />
-                    */}
                     <ActionChip
                         icon={<Download size={16} />}
                         label="Export CSV"

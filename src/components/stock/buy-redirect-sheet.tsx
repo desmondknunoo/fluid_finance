@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ExternalLink, ShoppingCart, X } from "lucide-react";
 import { APP_FT_URL } from "@/lib/links";
@@ -16,6 +17,35 @@ interface BuyRedirectSheetProps {
  * an order here.
  */
 export function BuyRedirectSheet({ open, onClose, symbol, company }: BuyRedirectSheetProps) {
+    const panelRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        if (!open) return;
+        const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        panelRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+        const onKey = (event: KeyboardEvent) => {
+            if (event.key === "Escape") onClose();
+            if (event.key !== "Tab") return;
+            const controls = panelRef.current?.querySelectorAll<HTMLElement>("button, a[href]");
+            if (!controls?.length) return;
+            const first = controls[0];
+            const last = controls[controls.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        };
+        window.addEventListener("keydown", onKey);
+        return () => {
+            window.removeEventListener("keydown", onKey);
+            document.body.style.overflow = previousOverflow;
+            previouslyFocused?.focus();
+        };
+    }, [open, onClose]);
     return (
         <AnimatePresence>
             {open && (
@@ -31,6 +61,7 @@ export function BuyRedirectSheet({ open, onClose, symbol, company }: BuyRedirect
                     className="fixed inset-0 z-[60] flex items-end justify-center bg-canvas/80 backdrop-blur-sm sm:items-center"
                 >
                     <motion.div
+                        ref={panelRef}
                         initial={{ y: 40, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: 24, opacity: 0 }}
