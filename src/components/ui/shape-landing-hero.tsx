@@ -71,7 +71,7 @@ function ElegantShape({
 }
 
 function HeroGeometric({
-    badge = "Fluid Finance",
+    badge,
     title1 = "Ghana's Market",
     title2 = "Information Hub",
     description = "Live GSE prices, full company histories, and market education in one place.",
@@ -148,18 +148,20 @@ function HeroGeometric({
 
             <div className="page-container relative z-10">
                 <div className="max-w-3xl mx-auto text-center">
-                    <motion.div
-                        custom={0}
-                        variants={fadeUpVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-ink/[0.03] border border-ink/[0.08] mb-8 md:mb-12"
-                    >
-                        <Circle className="h-2 w-2 fill-ink/80" />
-                        <span className="text-sm text-ink/60 tracking-wide font-poppins">
-                            {badge}
-                        </span>
-                    </motion.div>
+                    {badge ? (
+                        <motion.div
+                            custom={0}
+                            variants={fadeUpVariants}
+                            initial="hidden"
+                            animate="visible"
+                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-ink/[0.03] border border-ink/[0.08] mb-8 md:mb-12"
+                        >
+                            <Circle className="h-2 w-2 fill-ink/80" />
+                            <span className="text-sm text-ink/60 tracking-wide font-poppins">
+                                {badge}
+                            </span>
+                        </motion.div>
+                    ) : null}
 
                     <motion.div
                         custom={1}

@@ -9,7 +9,6 @@ export default function LandingPage() {
     return (
         <>
             <HeroGeometric
-                badge="Decisions that Build Wealth"
                 title1="Ghana's Market"
                 title2="Information Hub"
                 description="Live GSE prices, full company histories, and market education in one place."
