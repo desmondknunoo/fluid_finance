@@ -67,3 +67,14 @@ Register `finance.fluidterra.com` under the Pages project's **Custom domains**,
 then point its DNS CNAME at the hostname Cloudflare assigns to the project
 (normally `fluid-finance.pages.dev`). Verify the Pages deployment before replacing
 the former Vercel DNS target. The Supabase data configuration remains the same.
+
+## Buy redirect and acceptance
+
+The stock-detail Buy action opens the existing redirect sheet and links to
+`https://app.fluidterra.com`; the destination is defined in `src/lib/links.ts`.
+The sheet implements Escape dismissal, keyboard focus containment, focus restoration,
+and background scroll locking.
+
+Browser acceptance remains pending: open a stock, select Buy, follow Continue and confirm
+the investor app opens in a new tab. Reopen and dismiss with Escape; focus should return
+to Buy. Check keyboard navigation and scroll restoration on phone and desktop.
