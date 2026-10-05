@@ -34,12 +34,13 @@ intended reads and upserts.
 ## Hosting on Cloudflare Pages
 
 The site uses the `fluid-finance` Pages project and the production domain
-`https://finance.fluidterra.com`. Cloudflare builds the connected
-`desmondknunoo/fluid_finance` repository automatically when `develop` is pushed.
+`https://finance.fluidterra.com`. Deploy the build from
+`desmondknunoo/fluid_finance` on `develop` using Direct Upload. The current Pages
+project is not connected to GitHub; pushing code alone does not publish it.
 
 | Setting | Value |
 | --- | --- |
-| Production branch | `develop` |
+| Source branch | `develop` |
 | Build command | `npm run build` |
 | Build output | `dist` |
 | Root directory | Repository root |
@@ -54,8 +55,13 @@ For a manual deployment to the existing project:
 ```sh
 npm ci
 npm run build
-npx wrangler@4 pages deploy dist --project-name=fluid-finance --branch=develop
+npx wrangler@4 pages deploy dist --project-name=fluid-finance --branch=main
 ```
+
+The direct-upload project's production branch is `main`; the Wrangler command
+above publishes the build from the checked-out `develop` branch to production.
+Alternatively, ZIP the contents of `dist` (with `index.html` at the archive root)
+and upload it as a production deployment in the Pages dashboard.
 
 Register `finance.fluidterra.com` under the Pages project's **Custom domains**,
 then point its DNS CNAME at the hostname Cloudflare assigns to the project
