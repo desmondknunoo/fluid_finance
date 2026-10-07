@@ -18,6 +18,23 @@ export async function saveFuelReport(authorization: string, date: string, rows: 
     validateFuelReport(date, rows, true);
     return await request(authorization, { report_date: date, rows }) as FuelReport;
 }
+export async function updateFuelReport(id: string, date: string, rows: FuelDraftRow[]): Promise<FuelReport> {
+    validateFuelReport(date, rows, true);
+    const response = await fetch("/api/fuel-reports", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, report_date: date, rows }),
+    });
+    if (!response.headers.get("content-type")?.includes("application/json")) throw new Error("The fuel reports API is unavailable. Start the Cloudflare Pages server or deploy the Pages Function.");
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Could not update the fuel report. Please retry.");
+    return data as FuelReport;
+}
+export async function deleteFuelReport(id: string): Promise<void> {
+    const response = await fetch(`/api/fuel-reports?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+    if (!response.headers.get("content-type")?.includes("application/json")) throw new Error("The fuel reports API is unavailable. Start the Cloudflare Pages server or deploy the Pages Function.");
+    if (!response.ok) throw new Error((await response.json()).error || "Could not delete the fuel report. Please retry.");
+}
 
 async function omcRequest(authorization: string, body?: unknown): Promise<unknown> {
     const response = await fetch("/api/fuel-omcs", { method: body ? "POST" : "GET", headers: { Authorization: authorization, "Content-Type": "application/json" }, ...(body ? { body: JSON.stringify(body) } : {}) });

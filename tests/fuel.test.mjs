@@ -74,31 +74,17 @@ test('invalid dates, duplicates, empty reports and invalid prices cannot be save
   assert.throws(() => validateFuelReport('2026-10-02', []));
   assert.throws(() => validateFuelReport('2026-10-02', [{ name: 'Blank', petrol: '', diesel: '', premium: '' }]));
 });
-test('unauthenticated API requests are rejected before accessing storage', { skip: 'Editor disabled: reads are public and writes return 403. Restore when sign-in returns.' }, async () => {
-  assert.equal((await onRequest({ request: request(undefined, ''), env })).status, 401);
-  assert.equal((await onRequest({ request: request({ report_date: '2026-10-02', rows: [row] }, 'Basic wrong'), env })).status, 401);
-  assert.equal((await onRequest({ request: request(), env: {} })).status, 503);
-});
-test('pump reports are public to read and closed to writes while the editor is disabled', async () => {
+test('pump report reads are public: no credentials are checked', async () => {
   // No credentials and no storage key: a 503 (not 401) proves reads pass no auth gate.
   assert.equal((await onRequest({ request: request(undefined, ''), env: {} })).status, 503);
-  // Every write is refused before payload validation, whatever the credentials or shape.
-  for (const body of [null, {}, { report_date: '2026-10-02', rows: [row] }, { report_date: '2026-10-02', rows: [{ ...row, petrol: '-1' }] }]) {
-    const response = await onRequest({ request: request(body), env });
-    assert.equal(response.status, 403);
-    assert.match((await response.json()).error, /disabled/);
-  }
-  const crossOrigin = request({ report_date: '2026-10-02', rows: [row] });
-  crossOrigin.headers.set('Origin', 'https://other.example');
-  assert.equal((await onRequest({ request: crossOrigin, env })).status, 403);
 });
-test('server rejects malformed reports and cross-origin writes', { skip: 'Editor disabled: every POST returns 403 before validation. Restore when sign-in returns.' }, async () => {
+test('server rejects malformed reports and cross-origin writes', async () => {
   for (const body of [null, {}, { report_date: '2026-10-02', rows: [{ ...row, petrol: 16 }] }, { report_date: '2026-10-02', rows: [{ ...row, petrol: '-1' }] }]) assert.equal((await onRequest({ request: request(body), env })).status, 400);
   const req = request({ report_date: '2026-10-02', rows: [row] });
   req.headers.set('Origin', 'https://other.example');
   assert.equal((await onRequest({ request: req, env })).status, 403);
 });
-test('authorized save inserts a complete immutable edition using only the server key', { skip: 'Editor disabled: POST returns 403 until sign-in is restored.' }, async () => {
+test('saving inserts a complete immutable edition using only the server key', async () => {
   const originalFetch = globalThis.fetch;
   try {
     globalThis.fetch = async (url, options) => {
@@ -134,22 +120,69 @@ test('missing and untrusted logos block save and sharing, even on later pages', 
   const prices = validateFuelReport('2026-10-07', rows, true);
   delete prices[10].logo_url;
   assert.throws(() => fuelReportPages(prices), /OMC 10/);
-  assert.equal((await onRequest({ request: request({ report_date: '2026-10-07', rows: [{ ...row, logo_url: '' }] }), env })).status, 403);
+  assert.equal((await onRequest({ request: request({ report_date: '2026-10-07', rows: [{ ...row, logo_url: '' }] }), env })).status, 400);
 });
 
-test('OMC API rejects unauthenticated, missing-name and non-image uploads', { skip: 'Editor disabled: every OMC request returns 401 until sign-in is restored.' }, async () => {
-  assert.equal((await omcRequest({ request: request(undefined, ''), env })).status, 401);
+const putRequest = (body) => new Request('https://finance.fluidterra.com/api/fuel-reports', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+const deleteRequest = (id) => new Request(`https://finance.fluidterra.com/api/fuel-reports${id === undefined ? '' : `?id=${encodeURIComponent(id)}`}`, { method: 'DELETE' });
+
+test('updating overwrites one edition in place and reports a missing one', async () => {
+  const originalFetch = globalThis.fetch;
+  try {
+    globalThis.fetch = async (url, options) => {
+      assert.match(url, /fuel_reports\?id=eq\.edition-1$/);
+      assert.equal(options.method, 'PATCH');
+      assert.equal(options.headers.apikey, env.SUPABASE_SERVICE_ROLE_KEY);
+      assert.deepEqual(JSON.parse(options.body), { report_date: '2026-10-03', prices: [{ name: 'Goil PLC', logo_url: row.logo_url, petrol: 17.0, diesel: 18.46, premium: null }] });
+      return Response.json([{ id: 'edition-1', report_date: '2026-10-03' }]);
+    };
+    const response = await onRequest({ request: putRequest({ id: 'edition-1', report_date: '2026-10-03', rows: [{ ...row, petrol: '17.00' }] }), env });
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).id, 'edition-1');
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('updating needs an id, a valid report, and an existing edition', async () => {
+  assert.equal((await onRequest({ request: putRequest({ report_date: '2026-10-03', rows: [row] }), env })).status, 400);
+  assert.equal((await onRequest({ request: putRequest({ id: 'edition-1', report_date: '2026-10-03', rows: [{ ...row, petrol: '-1' }] }), env })).status, 400);
+  const originalFetch = globalThis.fetch;
+  try {
+    globalThis.fetch = async () => Response.json([]);
+    assert.equal((await onRequest({ request: putRequest({ id: 'edition-gone', report_date: '2026-10-03', rows: [row] }), env })).status, 404);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('deleting removes one edition and reports a missing one', async () => {
+  const originalFetch = globalThis.fetch;
+  try {
+    let calls = 0;
+    globalThis.fetch = async (url, options) => {
+      calls += 1;
+      assert.equal(options.method, 'DELETE');
+      return Response.json(calls === 1 ? [{ id: 'edition-1' }] : []);
+    };
+    const deleted = await onRequest({ request: deleteRequest('edition-1'), env });
+    assert.equal(deleted.status, 200);
+    assert.deepEqual(await deleted.json(), { deleted: true });
+    assert.equal((await onRequest({ request: deleteRequest('edition-gone'), env })).status, 404);
+    assert.equal((await onRequest({ request: deleteRequest(undefined), env })).status, 400);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('OMC library reads openly while uploads validate name and image', async () => {
+  const originalFetch = globalThis.fetch;
+  try {
+    globalThis.fetch = async () => Response.json([{ name: 'Shell', logo_url: '/fuel/shell.webp' }]);
+    const response = await omcRequest({ request: request(undefined, ''), env });
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), [{ name: 'Shell', logo_url: '/fuel/shell.webp' }]);
+  } finally { globalThis.fetch = originalFetch; }
   assert.equal((await omcRequest({ request: request({ name: '', image: 'data:image/png;base64,AA==' }), env })).status, 400);
   assert.equal((await omcRequest({ request: request({ name: 'Shell', image: 'data:image/svg+xml,<svg/>' }), env })).status, 400);
   assert.equal((await omcRequest({ request: request({ name: 'Shell', image: 'data:image/png;base64,AA==' }), env })).status, 400);
 });
 
-test('OMC endpoints stay closed while the editor is disabled', async () => {
-  assert.equal((await omcRequest({ request: request(undefined, ''), env })).status, 401);
-  assert.equal((await omcRequest({ request: request({ name: 'Shell', image: 'data:image/png;base64,AA==' }), env })).status, 401);
-});
-
-test('OMC upload stores an immutable PNG and persists the company in the library', { skip: 'Editor disabled: every OMC request returns 401 until sign-in is restored.' }, async () => {
+test('OMC upload stores an immutable PNG and persists the company in the library', async () => {
   const originalFetch = globalThis.fetch;
   const calls = [];
   try {

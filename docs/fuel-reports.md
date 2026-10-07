@@ -1,16 +1,14 @@
 # Fluid Pump Report
 
-Public read-only entry point: `https://finance.fluidterra.com/#/fuel-prices` (after deployment).
+Open entry point: `https://finance.fluidterra.com/#/fuel-prices` (after deployment).
 There are no homepage, navbar or footer links to this page. It renders without the public site navigation and footer.
 
-## Login (disabled for now)
+## Login (none)
 
-Editor sign-in is commented out: the sign-in form and draft editor were removed from the page,
-`GET /api/fuel-reports` needs no credentials, and `POST` returns 403. To re-enable editing,
-restore the sign-in form in `src/components/ui/fuel-prices-page.tsx` and the commented
-`authorizeFuelEditor` check plus POST handling in `functions/api/fuel-reports.ts`.
-
-The fixed username and password live in `server/fuel-editor-credentials.ts` (kept out of git).
+There is no sign-in: anyone with the link can record, update and delete reports. Saving without
+an open edition inserts a new one; opening an edition and saving overwrites it in place.
+`GET`/`POST`/`PUT`/`DELETE /api/fuel-reports` all skip credentials. Git history has the
+Basic-auth version (`server/fuel-editor-credentials.ts`, kept out of git) that gated writes.
 Change them there and redeploy to rotate access. There is no user database, registration or password-reset screen.
 The Cloudflare Pages Function validates the login on every read and save. Credentials remain in browser memory only and refreshing signs the editor out.
 

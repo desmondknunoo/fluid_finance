@@ -1,4 +1,4 @@
-import { authorizeFuelEditor, type Context } from "./fuel-reports";
+import type { Context } from "./fuel-reports";
 import { OMC_LOGO_BASE } from "../../src/lib/fuel-prices";
 
 const json = (value: unknown, status = 200) => Response.json(value, { status, headers: { "Cache-Control": "no-store" } });
@@ -6,7 +6,7 @@ const base = "https://agzazndvqrencvgpovyh.supabase.co";
 
 export async function onRequest({ request, env }: Context): Promise<Response> {
     if (!["GET", "POST"].includes(request.method)) return json({ error: "Method not allowed." }, 405);
-    if (!await authorizeFuelEditor(request)) return json({ error: "Incorrect username or password." }, 401);
+    // No sign-in: the open editor uploads logos without credentials.
     if (!env.SUPABASE_SERVICE_ROLE_KEY) return json({ error: "OMC storage is not configured." }, 503);
     const headers = { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}` };
     try {
