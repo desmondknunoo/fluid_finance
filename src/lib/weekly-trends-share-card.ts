@@ -340,6 +340,23 @@ export async function renderWeeklyTrendCard(input: WeeklyTrendCardInput): Promis
     ctx.fillText(`As of ${asOf} GMT`, W / 2, barY - 28);
     ctx.textAlign = "left";
 
+    drawReportFooter(ctx, input.theme ?? "dark");
+
+    return new Promise((resolve, reject) => {
+        canvas.toBlob(
+            (blob) => (blob ? resolve(blob) : reject(new Error("Could not encode share image"))),
+            "image/png",
+        );
+    });
+}
+
+/** Shared report branding, kept identical for market and fuel reports. */
+export function drawReportFooter(ctx: CanvasRenderingContext2D, theme: "light" | "dark", height = H): void {
+    const ink = PALETTES[theme];
+    const M = 64;
+    const barH = 152;
+    const barY = height - barH;
+    const changeRightX = W - M;
     // ---- Footer strip ----
     ctx.fillStyle = ink.footerBg;
     ctx.fillRect(0, barY, W, barH);
@@ -380,10 +397,4 @@ export async function renderWeeklyTrendCard(input: WeeklyTrendCardInput): Promis
     ctx.textBaseline = "alphabetic";
     ctx.textAlign = "left";
 
-    return new Promise((resolve, reject) => {
-        canvas.toBlob(
-            (blob) => (blob ? resolve(blob) : reject(new Error("Could not encode share image"))),
-            "image/png",
-        );
-    });
 }

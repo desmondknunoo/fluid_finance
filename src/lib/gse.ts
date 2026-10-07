@@ -1,17 +1,19 @@
 /**
- * Fluid Finance - Ghana Stock Exchange API client
+ * Fluid Finance - shared Fluid market snapshot and GSE company metadata client
  *
- * Upstream: https://dev.kwayisi.org/apis/gse
- * Resources: GET /live, GET /live/{symbol}, GET /equities, GET /equities/{symbol}
+ * Quotes: https://api.fluidterra.com/api/v1/market/stocks
+ * Company metadata: https://dev.kwayisi.org/apis/gse/equities/{symbol}
  */
 
 const API_BASE = "https://dev.kwayisi.org/apis/gse";
+const MARKET_API_BASE = "https://api.fluidterra.com/api/v1/market";
 const TTL = 60_000;
 
-export interface LiveQuote {
-    name: string;
-    price: number;
-    change: number;
+interface MarketQuote {
+    symbol: string;
+    price: number | string;
+    change: number | string;
+    changePercent: number | string;
     volume: number;
 }
 
@@ -56,7 +58,7 @@ export interface Stock {
 /**
  * Company metadata for every symbol currently listed on the GSE, sourced from
  * `/equities/{symbol}`. Kept locally so the landing page can render all 39
- * companies from a single `/live` call instead of 39 detail requests.
+ * companies from one backend market snapshot instead of 39 detail requests.
  */
 export const COMPANY_META: Record<string, { company: string; sector: string; industry: string }> = {
     AADS: { company: "AngloGold Ashanti Depositary Shares", sector: "Basic Materials", industry: "Mining" },
@@ -102,19 +104,20 @@ export const COMPANY_META: Record<string, { company: string; sector: string; ind
 
 const cache = new Map<string, { expiry: number; data: unknown }>();
 
-async function request<T>(endpoint: string, force = false): Promise<T> {
+async function request<T>(endpoint: string, force = false, base = API_BASE): Promise<T> {
+    const key = `${base}${endpoint}`;
     if (!force) {
-        const hit = cache.get(endpoint);
+        const hit = cache.get(key);
         if (hit && Date.now() < hit.expiry) return hit.data as T;
     }
 
-    const response = await fetch(`${API_BASE}${endpoint}`, {
+    const response = await fetch(key, {
         headers: { Accept: "application/json" },
     });
     if (!response.ok) throw new Error(`GSE API ${response.status} for ${endpoint}`);
 
     const data = (await response.json()) as T;
-    cache.set(endpoint, { expiry: Date.now() + TTL, data });
+    cache.set(key, { expiry: Date.now() + TTL, data });
     return data;
 }
 
@@ -134,28 +137,35 @@ export function metaFor(symbol: string) {
     );
 }
 
-function toStock(quote: LiveQuote): Stock {
-    const meta = metaFor(quote.name);
+function toStock(quote: MarketQuote): Stock {
+    const meta = metaFor(quote.symbol);
+    const price = Number(quote.price);
+    const change = Number(quote.change);
+    const percent = Number(quote.changePercent);
+    if (!quote.symbol || !Number.isFinite(price) || !Number.isFinite(change) || !Number.isFinite(percent)) {
+        throw new Error("Invalid Fluid market quote");
+    }
     return {
-        symbol: quote.name,
+        symbol: quote.symbol,
         company: meta.company,
         sector: meta.sector,
         industry: meta.industry,
-        price: quote.price,
-        change: quote.change,
-        changePercent: changePercent(quote.price, quote.change),
+        price,
+        change,
+        changePercent: percent,
         volume: quote.volume ?? 0,
     };
 }
 
-/** Every symbol trading on the GSE, with today's price action. */
+/** The same complete market snapshot used by the Fluid webapp. */
 export async function getAllStocks(force = false): Promise<Stock[]> {
-    const quotes = await request<LiveQuote[]>("/live", force);
-    return quotes.map(toStock).sort((a, b) => a.symbol.localeCompare(b.symbol));
+    const response = await request<{ items: MarketQuote[] }>("/stocks", force, MARKET_API_BASE);
+    if (!Array.isArray(response.items) || !response.items.length) throw new Error("Fluid market snapshot is empty");
+    return response.items.map(toStock).sort((a, b) => a.symbol.localeCompare(b.symbol));
 }
 
 export async function getStock(symbol: string): Promise<Stock> {
-    const quote = await request<LiveQuote>(`/live/${symbol.toLowerCase()}`);
+    const quote = await request<MarketQuote>(`/stocks/${encodeURIComponent(symbol.toUpperCase())}`, false, MARKET_API_BASE);
     return toStock(quote);
 }
 

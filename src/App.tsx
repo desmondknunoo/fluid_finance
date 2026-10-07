@@ -13,6 +13,7 @@ import MarketTrendsPage from "@/components/ui/market-trends-page"
 import BusinessNewsPage from "@/components/ui/business-news-page"
 import TermsOfServicePage from "@/components/ui/terms-of-service-page"
 import GseLivePage from "@/components/ui/gse-live-page"
+import FuelPricesPage from "@/components/ui/fuel-prices-page"
 import { StockDetail } from "@/components/stock/stock-detail"
 import { closeStock, parseRoute, type Route } from "@/lib/navigation"
 
@@ -64,6 +65,8 @@ function App() {
       window.removeEventListener("keydown", release)
     }
   }, [route])
+
+  if (route.kind === "fuel-prices") return <FuelPricesPage />
 
   if (route.kind === "stock") {
     return (

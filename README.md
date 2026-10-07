@@ -25,6 +25,18 @@ npm run preview  # serve the built site locally
 
 ## Data configuration
 
+Live quotes come from the same Fluid backend snapshot used by the webapp:
+`https://api.fluidterra.com/api/v1/market/stocks`. The backend uses the official GSE Market Watch
+provider in production and refreshes quotes automatically. Company metadata still comes from
+Kwayisi. The backend must allow `https://finance.fluidterra.com` and
+`https://fluid-finance.pages.dev` in its CORS origins.
+
+Run the market client regression tests with:
+
+```sh
+node --experimental-strip-types --test tests/gse.test.mjs
+```
+
 The current Supabase project URL and public anonymous key are configured in
 `src/lib/supabase.ts`. The browser key is public client configuration; access must be protected by
 appropriate Supabase Row Level Security policies. Never put a Supabase service-role key in this
@@ -46,9 +58,10 @@ project is not connected to GitHub; pushing code alone does not publish it.
 | Root directory | Repository root |
 | Node.js | 22 (from `.node-version`) |
 
-`wrangler.jsonc` records the project name and output directory. This is a static
-site: it requires no Pages Functions or server environment variables. Pages
-serves the app's hash routes directly and falls back to `index.html` for SPA paths.
+`wrangler.jsonc` records the project name and output directory. Public market pages
+are static. The direct-link fuel editor also uses a Pages Function and a server-only
+Supabase key; see [fuel report setup](docs/fuel-reports.md). Pages serves the app's
+hash routes directly and falls back to `index.html` for SPA paths.
 
 For a manual deployment to the existing project:
 
@@ -60,8 +73,8 @@ npx wrangler@4 pages deploy dist --project-name=fluid-finance --branch=main
 
 The direct-upload project's production branch is `main`; the Wrangler command
 above publishes the build from the checked-out `develop` branch to production.
-Alternatively, ZIP the contents of `dist` (with `index.html` at the archive root)
-and upload it as a production deployment in the Pages dashboard.
+Use Wrangler from the repository root to include the fuel editor's Pages Function.
+Uploading only `dist` through the dashboard will not include that API.
 
 Register `finance.fluidterra.com` under the Pages project's **Custom domains**,
 then point its DNS CNAME at the hostname Cloudflare assigns to the project

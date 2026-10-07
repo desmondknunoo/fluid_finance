@@ -24,6 +24,7 @@ const STOCK_ROUTE = /^#\/stock\/([A-Za-z0-9._-]+)$/;
 const LIVE_VIEW_ROUTE = /^#\/?gse-live\/([A-Za-z]+)$/;
 
 const PAGE_ROUTES = [
+    { kind: "fuel-prices", pattern: /^#\/fuel-prices$/ },
     { kind: "about", pattern: /^#\/about(-us)?$/ },
     { kind: "contact-support", pattern: /^#\/contact-support$/ },
     { kind: "privacy-policy", pattern: /^#\/privacy-policy$/ },
