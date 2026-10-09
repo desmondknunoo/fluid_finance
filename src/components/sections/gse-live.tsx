@@ -5,13 +5,11 @@ import { cn } from "@/lib/utils";
 import { TickerLogo } from "@/components/stock/ticker-logo";
 import { StockCard } from "@/components/stock/stock-card";
 import { Sparkline } from "@/components/stock/price-chart";
-import { heatColor } from "@/components/stock/heat-squares";
-// import { HeatSquares } from "@/components/stock/heat-squares";
+import { heatmapTileClass } from "@/lib/heatmap-style";
 import {
     formatCedis,
     formatCompact,
     getAllStocks,
-    getEquityDetail,
     isMarketOpen,
     type Stock,
 } from "@/lib/gse";
@@ -20,6 +18,7 @@ import {
     GSE_LIVE_SECTION,
     openStock,
     VIEW_MODES,
+    openGseLive,
     type ViewMode,
 } from "@/lib/navigation";
 
@@ -48,16 +47,6 @@ function Stat({ label, value, tone }: { label: string; value: string; tone?: "up
     );
 }
 
-function tileSpanClass(marketCap: number | undefined, largestMarketCap: number) {
-    if (!marketCap || !largestMarketCap) return "col-span-1 sm:col-span-2";
-
-    const relativeSize = marketCap / largestMarketCap;
-    if (relativeSize >= 0.45) return "col-span-2 row-span-2 sm:col-span-4 lg:col-span-6 lg:row-span-3";
-    if (relativeSize >= 0.18) return "col-span-2 sm:col-span-3 lg:col-span-4 lg:row-span-2";
-    if (relativeSize >= 0.06) return "col-span-1 sm:col-span-2 lg:col-span-3 lg:row-span-2";
-    return "col-span-1 sm:col-span-2";
-}
-
 /**
  * The market floor of the landing page: every listed company, readable as a
  * table, a heatmap of cards, or a heatmap, alongside session stats and movers.
@@ -71,7 +60,6 @@ export function GseLive({ view }: { view: ViewMode | null }) {
     const [query, setQuery] = useState("");
     const [sort, setSort] = useState<SortKey>("symbol");
     const [descending, setDescending] = useState(false);
-    const [marketCaps, setMarketCaps] = useState<Record<string, number>>({});
 
     // A #gse-live/<view> link sets the initial mode; the toggle drives it after.
     const [mode, setMode] = useState<ViewMode>(view ?? "table");
@@ -79,33 +67,6 @@ export function GseLive({ view }: { view: ViewMode | null }) {
     useEffect(() => {
         if (view) setMode(view);
     }, [view]);
-
-    useEffect(() => {
-        if (mode === "table" || stocks.length === 0) return;
-
-        let cancelled = false;
-        void Promise.allSettled(
-            stocks.map(async (stock) => {
-                const detail = await getEquityDetail(stock.symbol);
-                return [stock.symbol, detail.shares ? detail.shares * stock.price : 0] as const;
-            }),
-        ).then((results) => {
-            if (cancelled) return;
-            setMarketCaps((current) => {
-                const next = { ...current };
-                for (const result of results) {
-                    if (result.status === "fulfilled" && result.value[1] > 0) {
-                        next[result.value[0]] = result.value[1];
-                    }
-                }
-                return next;
-            });
-        });
-
-        return () => {
-            cancelled = true;
-        };
-    }, [mode, stocks]);
 
     const load = useCallback(async (silent = false) => {
         if (silent) setRefreshing(true);
@@ -174,15 +135,8 @@ export function GseLive({ view }: { view: ViewMode | null }) {
         return map;
     }, [stocks]);
 
-    const largestMarketCap = useMemo(
-        () => Math.max(0, ...filtered.map((stock) => marketCaps[stock.symbol] ?? 0)),
-        [filtered, marketCaps],
-    );
-
-    const gridStocks = useMemo(
-        () => [...filtered].sort((a, b) => (marketCaps[b.symbol] ?? 0) - (marketCaps[a.symbol] ?? 0)),
-        [filtered, marketCaps],
-    );
+    // Keep the heatmap independent of per-equity detail requests.
+    const gridStocks = filtered;
 
     const toggleSort = (key: SortKey) => {
         if (sort === key) setDescending((d) => !d);
@@ -268,8 +222,8 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                     <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
                         <Stat label="Total volume" value={formatCompact(stats.volume)} />
                         <Stat label="Total value" value={`₵${formatCompact(stats.value)}`} />
-                        <Stat label="Advancers" value={String(stats.advancers)} tone="up" />
-                        <Stat label="Decliners" value={String(stats.decliners)} tone="down" />
+                        <Stat label="Gainers" value={String(stats.advancers)} tone="up" />
+                        <Stat label="Losers" value={String(stats.decliners)} tone="down" />
                         <Stat label="Unchanged" value={String(stats.unchanged)} />
                     </div>
                 {/* View toggle + search */}
@@ -281,7 +235,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                 <button
                                     key={key}
                                     type="button"
-                                    onClick={() => { console.log("TOGGLE:", key, "current:", mode); setMode(key); }}
+                                    onClick={() => { setMode(key); openGseLive(key); }}
                                     aria-pressed={mode === key}
                                     className={cn(
                                         "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold uppercase tracking-widest transition-colors",
@@ -500,53 +454,32 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                             )}
 
                             {mode === "heatmap" && (
-                                <div className="grid auto-rows-[88px] grid-flow-dense grid-cols-2 gap-1.5 sm:auto-rows-[96px] sm:grid-cols-6 lg:auto-rows-[108px] lg:grid-cols-12">
+                                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-6">
                                     {filtered.length === 0 ? (
-                                        <p className="col-span-full py-10 text-center text-ink/40">
+                                        <p className="col-span-full py-10 text-center text-ink/60">
                                             No stocks match “{query}”.
                                         </p>
-                                    ) : (
-                                        gridStocks.map((stock) => {
-                                            const marketCap = marketCaps[stock.symbol];
-                                            return (
-                                                <button
-                                                    key={stock.symbol}
-                                                    type="button"
-                                                    onClick={() => openStock(stock.symbol)}
-                                                    title={`${stock.symbol} · ${stock.company} · ${stock.changePercent >= 0 ? "+" : ""}${stock.changePercent.toFixed(2)}%`}
-                                                    className={cn(
-                                                        "group relative flex min-w-0 flex-col justify-between overflow-hidden rounded-lg p-3 text-left text-white transition-transform hover:z-10 hover:scale-[1.015] focus:z-10 focus:outline-none focus:ring-2 focus:ring-fluid-cyan/60 sm:p-4",
-                                                        tileSpanClass(marketCap, largestMarketCap),
-                                                    )}
-                                                    style={{ backgroundColor: heatColor(stock.changePercent) }}
-                                                >
-                                                    <div className="min-w-0">
-                                                        <div className="truncate text-sm font-bold sm:text-lg">{stock.symbol}</div>
-                                                        <div className="hidden truncate text-[10px] font-medium uppercase tracking-wider text-white/70 sm:block">
-                                                            {stock.company}
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-mono text-sm font-bold sm:text-xl">
-                                                            {stock.changePercent >= 0 ? "+" : ""}
-                                                            {stock.changePercent.toFixed(2)}%
-                                                        </div>
-                                                        <div className="mt-0.5 hidden font-mono text-[10px] text-white/75 sm:block">
-                                                            {formatCedis(stock.price)}
-                                                        </div>
-                                                    </div>
-                                                </button>
-                                            );
-                                        })
-                                    )}
+                                    ) : gridStocks.map((stock) => (
+                                        <button
+                                            key={stock.symbol}
+                                            type="button"
+                                            onClick={() => openStock(stock.symbol)}
+                                            title={`${stock.symbol} · ${stock.company}`}
+                                            className={cn(
+                                                "min-w-0 rounded-lg p-3 text-left transition-shadow hover:ring-2 hover:ring-inset hover:ring-current/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fluid-cyan",
+                                                heatmapTileClass(stock.change, stock.changePercent),
+                                            )}
+                                        >
+                                            <div className="truncate text-sm font-bold">{stock.symbol}</div>
+                                            <div className="mt-1 text-xs">
+                                                {stock.changePercent > 0 ? "+" : ""}{stock.changePercent.toFixed(2)}%
+                                            </div>
+                                            <div className="mt-2 truncate text-xs">{formatCedis(stock.price)}</div>
+                                        </button>
+                                    ))}
                                 </div>
                             )}
 
-                            {/* mode === "heatmap" && (
-                                <div className="rounded-2xl border border-ink/[0.08] bg-ink/[0.03] p-2 sm:p-4">
-                                    <HeatSquares stocks={filtered} onSelect={openStock} marketCaps={marketCaps} />
-                                </div>
-                            ) */}
                         </div>
                     </div>
                 )}

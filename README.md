@@ -25,8 +25,69 @@ npm run preview  # serve the built site locally
 
 ## Data configuration
 
+Live quotes come from the same Fluid backend snapshot used by the webapp:
+`https://api.fluidterra.com/api/v1/market/stocks`. The backend uses the official GSE Market Watch
+provider in production and refreshes quotes automatically. Company metadata still comes from
+Kwayisi. The backend must allow `https://finance.fluidterra.com` and
+`https://fluid-finance.pages.dev` in its CORS origins.
+
+Run the market client regression tests with:
+
+```sh
+node --experimental-strip-types --test tests/gse.test.mjs
+```
+
 The current Supabase project URL and public anonymous key are configured in
 `src/lib/supabase.ts`. The browser key is public client configuration; access must be protected by
 appropriate Supabase Row Level Security policies. Never put a Supabase service-role key in this
 frontend. Historical price features require the `stock_prices` table and policies that allow the
 intended reads and upserts.
+
+## Hosting on Cloudflare Pages
+
+The site uses the `fluid-finance` Pages project and the production domain
+`https://finance.fluidterra.com`. Deploy the build from
+`desmondknunoo/fluid_finance` on `develop` using Direct Upload. The current Pages
+project is not connected to GitHub; pushing code alone does not publish it.
+
+| Setting | Value |
+| --- | --- |
+| Source branch | `develop` |
+| Build command | `npm run build` |
+| Build output | `dist` |
+| Root directory | Repository root |
+| Node.js | 22 (from `.node-version`) |
+
+`wrangler.jsonc` records the project name and output directory. Public market pages
+are static. The direct-link fuel editor also uses a Pages Function and a server-only
+Supabase key; see [fuel report setup](docs/fuel-reports.md). Pages serves the app's
+hash routes directly and falls back to `index.html` for SPA paths.
+
+For a manual deployment to the existing project:
+
+```sh
+npm ci
+npm run build
+npx wrangler@4 pages deploy dist --project-name=fluid-finance --branch=main
+```
+
+The direct-upload project's production branch is `main`; the Wrangler command
+above publishes the build from the checked-out `develop` branch to production.
+Use Wrangler from the repository root to include the fuel editor's Pages Function.
+Uploading only `dist` through the dashboard will not include that API.
+
+Register `finance.fluidterra.com` under the Pages project's **Custom domains**,
+then point its DNS CNAME at the hostname Cloudflare assigns to the project
+(normally `fluid-finance.pages.dev`). Verify the Pages deployment before replacing
+the former Vercel DNS target. The Supabase data configuration remains the same.
+
+## Buy redirect and acceptance
+
+The stock-detail Buy action opens the existing redirect sheet and links to
+`https://app.fluidterra.com`; the destination is defined in `src/lib/links.ts`.
+The sheet implements Escape dismissal, keyboard focus containment, focus restoration,
+and background scroll locking.
+
+Browser acceptance remains pending: open a stock, select Buy, follow Continue and confirm
+the investor app opens in a new tab. Reopen and dismiss with Escape; focus should return
+to Buy. Check keyboard navigation and scroll restoration on phone and desktop.
