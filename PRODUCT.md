@@ -16,7 +16,7 @@ Present financial information and education, with branded images for sharing sto
 
 ## Capabilities and Constraints
 
-The fuel editor is available by direct hash URL only and has no links from the public landing page, navigation or footer. A fixed username and password in server code control access; users cannot register or change these credentials. Fuel reports use their own table in the existing Supabase project. The app uses React, Vite and Cloudflare Pages.
+The fuel editor is available by direct hash URL only and has no links from the public landing page, navigation or footer. Staff sign in with Fluid Finance's Firebase project and the backend checks their operations or admin role before any save. Fuel reports live in the Fluid backend on AWS. The app uses React, Vite and Cloudflare Pages.
 
 ## Brand Commitments
 

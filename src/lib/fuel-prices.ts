@@ -2,8 +2,9 @@ export const FUEL_TYPES = ["petrol", "diesel", "premium"] as const;
 export type FuelType = typeof FUEL_TYPES[number];
 export const MAX_OMCS = 500;
 export const OMCS_PER_IMAGE = 10;
-export const OMC_LOGO_BASE = "https://agzazndvqrencvgpovyh.supabase.co/storage/v1/object/public/omc-logos/";
-export const validOmcLogo = (url: unknown): url is string => typeof url === "string" && (bundledLogoUrls.has(url) || new RegExp(`^${OMC_LOGO_BASE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[a-f0-9-]+\\.png$`).test(url));
+// Logos are uploaded through the Fluid API, which serves them from `/editorial/media/omc-logos/…`.
+export const OMC_LOGO_BASE = "/editorial/media/omc-logos/";
+export const validOmcLogo = (url: unknown): url is string => typeof url === "string" && (bundledLogoUrls.has(url) || /^https?:\/\/[^\s]+\/editorial\/media\/omc-logos\/[a-f0-9-]+\.(png|jpg|webp)$/.test(url));
 export interface Omc { name: string; logo_url: string }
 export interface FuelPriceRow {
     name: string;

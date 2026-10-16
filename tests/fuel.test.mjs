@@ -2,18 +2,16 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { build } from 'esbuild';
 import { access } from 'node:fs/promises';
+// Fuel report storage lives in the Fluid backend (fluid-backend/app/domains/editorial); these tests
+// cover the browser-side validation, sorting and pagination shared by the site and the portal.
 
 async function bundle(path) {
   const result = await build({ entryPoints: [path], bundle: true, write: false, platform: 'node', format: 'esm' });
   return import(`data:text/javascript;base64,${Buffer.from(result.outputFiles[0].text).toString('base64')}`);
 }
 const { validateFuelReport, averageFuelPrice, fuelReportPages, OMC_LOGO_BASE, DEFAULT_SUPPLIERS, DEFAULT_OMCS, blankFuelRow, mergeOmcLibrary, validOmcLogo, sortFuelRows, POPULAR_OMCS } = await bundle('src/lib/fuel-prices.ts');
-const { onRequest } = await bundle('functions/api/fuel-reports.ts');
-const { onRequest: omcRequest } = await bundle('functions/api/fuel-omcs.ts');
-// Editor credentials are intentionally not imported: sign-in is disabled and the suite must run
-// without the gitignored server/fuel-editor-credentials.ts present.
-const row = { name: 'Goil PLC', logo_url: `${OMC_LOGO_BASE}1234-abcd.png`, petrol: '16.64', diesel: '18.46', premium: '' };
-const env = { SUPABASE_SERVICE_ROLE_KEY: 'test-only-server-key' };
+// Logos the backend stores are served from its media endpoint; only those URLs (or bundled files) validate.
+const row = { name: 'Goil PLC', logo_url: `https://api.fluidterra.com/api/v1${OMC_LOGO_BASE}1234-abcd.png`, petrol: '16.64', diesel: '18.46', premium: '' };
 test('arrangements preserve full rows, exact popularity and global pagination order', () => {
   const rows = DEFAULT_SUPPLIERS.map((name, index) => ({ ...blankFuelRow(name), petrol: String(index + 1) }));
   const original = structuredClone(rows);
@@ -37,7 +35,6 @@ test('price sorting is numeric, supports each fuel, and puts missing prices last
     assert.deepEqual(sortFuelRows(rows, 'price-desc', fuel).map(row => row.name), ['C', 'A', 'B', 'Invalid', 'Missing']);
   }
 });
-const request = (body, auth = '') => new Request('https://finance.fluidterra.com/api/fuel-reports', { method: body === undefined ? 'GET' : 'POST', headers: { Authorization: auth, 'Content-Type': 'application/json' }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
 
 test('all 18 supplied logos exist, validate, and paginate as 10 + 8', async () => {
   assert.equal(DEFAULT_OMCS.length, 18);
@@ -74,32 +71,6 @@ test('invalid dates, duplicates, empty reports and invalid prices cannot be save
   assert.throws(() => validateFuelReport('2026-10-02', []));
   assert.throws(() => validateFuelReport('2026-10-02', [{ name: 'Blank', petrol: '', diesel: '', premium: '' }]));
 });
-test('pump report reads are public: no credentials are checked', async () => {
-  // No credentials and no storage key: a 503 (not 401) proves reads pass no auth gate.
-  assert.equal((await onRequest({ request: request(undefined, ''), env: {} })).status, 503);
-});
-test('server rejects malformed reports and cross-origin writes', async () => {
-  for (const body of [null, {}, { report_date: '2026-10-02', rows: [{ ...row, petrol: 16 }] }, { report_date: '2026-10-02', rows: [{ ...row, petrol: '-1' }] }]) assert.equal((await onRequest({ request: request(body), env })).status, 400);
-  const req = request({ report_date: '2026-10-02', rows: [row] });
-  req.headers.set('Origin', 'https://other.example');
-  assert.equal((await onRequest({ request: req, env })).status, 403);
-});
-test('saving inserts a complete immutable edition using only the server key', async () => {
-  const originalFetch = globalThis.fetch;
-  try {
-    globalThis.fetch = async (url, options) => {
-      assert.match(url, /agzazndvqrencvgpovyh\.supabase\.co\/rest\/v1\/fuel_reports/);
-      assert.equal(options.method, 'POST');
-      assert.equal(options.headers.apikey, env.SUPABASE_SERVICE_ROLE_KEY);
-      assert.deepEqual(JSON.parse(options.body), { report_date: '2026-10-02', prices: [{ name: 'Goil PLC', logo_url: row.logo_url, petrol: 16.64, diesel: 18.46, premium: null }] });
-      return Response.json([{ id: 'saved-edition', ...JSON.parse(options.body) }]);
-    };
-    const response = await onRequest({ request: request({ report_date: '2026-10-02', rows: [row] }), env });
-    assert.equal(response.status, 201);
-    assert.equal((await response.json()).id, 'saved-edition');
-    assert.equal(response.headers.get('Cache-Control'), 'no-store');
-  } finally { globalThis.fetch = originalFetch; }
-});
 
 test('pagination preserves every OMC in order, ten per image', () => {
   for (const count of [1, 10, 11, 18, 20, 21, 500]) {
@@ -120,86 +91,5 @@ test('missing and untrusted logos block save and sharing, even on later pages', 
   const prices = validateFuelReport('2026-10-07', rows, true);
   delete prices[10].logo_url;
   assert.throws(() => fuelReportPages(prices), /OMC 10/);
-  assert.equal((await onRequest({ request: request({ report_date: '2026-10-07', rows: [{ ...row, logo_url: '' }] }), env })).status, 400);
 });
 
-const putRequest = (body) => new Request('https://finance.fluidterra.com/api/fuel-reports', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-const deleteRequest = (id) => new Request(`https://finance.fluidterra.com/api/fuel-reports${id === undefined ? '' : `?id=${encodeURIComponent(id)}`}`, { method: 'DELETE' });
-
-test('updating overwrites one edition in place and reports a missing one', async () => {
-  const originalFetch = globalThis.fetch;
-  try {
-    globalThis.fetch = async (url, options) => {
-      assert.match(url, /fuel_reports\?id=eq\.edition-1$/);
-      assert.equal(options.method, 'PATCH');
-      assert.equal(options.headers.apikey, env.SUPABASE_SERVICE_ROLE_KEY);
-      assert.deepEqual(JSON.parse(options.body), { report_date: '2026-10-03', prices: [{ name: 'Goil PLC', logo_url: row.logo_url, petrol: 17.0, diesel: 18.46, premium: null }] });
-      return Response.json([{ id: 'edition-1', report_date: '2026-10-03' }]);
-    };
-    const response = await onRequest({ request: putRequest({ id: 'edition-1', report_date: '2026-10-03', rows: [{ ...row, petrol: '17.00' }] }), env });
-    assert.equal(response.status, 200);
-    assert.equal((await response.json()).id, 'edition-1');
-  } finally { globalThis.fetch = originalFetch; }
-});
-
-test('updating needs an id, a valid report, and an existing edition', async () => {
-  assert.equal((await onRequest({ request: putRequest({ report_date: '2026-10-03', rows: [row] }), env })).status, 400);
-  assert.equal((await onRequest({ request: putRequest({ id: 'edition-1', report_date: '2026-10-03', rows: [{ ...row, petrol: '-1' }] }), env })).status, 400);
-  const originalFetch = globalThis.fetch;
-  try {
-    globalThis.fetch = async () => Response.json([]);
-    assert.equal((await onRequest({ request: putRequest({ id: 'edition-gone', report_date: '2026-10-03', rows: [row] }), env })).status, 404);
-  } finally { globalThis.fetch = originalFetch; }
-});
-
-test('deleting removes one edition and reports a missing one', async () => {
-  const originalFetch = globalThis.fetch;
-  try {
-    let calls = 0;
-    globalThis.fetch = async (url, options) => {
-      calls += 1;
-      assert.equal(options.method, 'DELETE');
-      return Response.json(calls === 1 ? [{ id: 'edition-1' }] : []);
-    };
-    const deleted = await onRequest({ request: deleteRequest('edition-1'), env });
-    assert.equal(deleted.status, 200);
-    assert.deepEqual(await deleted.json(), { deleted: true });
-    assert.equal((await onRequest({ request: deleteRequest('edition-gone'), env })).status, 404);
-    assert.equal((await onRequest({ request: deleteRequest(undefined), env })).status, 400);
-  } finally { globalThis.fetch = originalFetch; }
-});
-
-test('OMC library reads openly while uploads validate name and image', async () => {
-  const originalFetch = globalThis.fetch;
-  try {
-    globalThis.fetch = async () => Response.json([{ name: 'Shell', logo_url: '/fuel/shell.webp' }]);
-    const response = await omcRequest({ request: request(undefined, ''), env });
-    assert.equal(response.status, 200);
-    assert.deepEqual(await response.json(), [{ name: 'Shell', logo_url: '/fuel/shell.webp' }]);
-  } finally { globalThis.fetch = originalFetch; }
-  assert.equal((await omcRequest({ request: request({ name: '', image: 'data:image/png;base64,AA==' }), env })).status, 400);
-  assert.equal((await omcRequest({ request: request({ name: 'Shell', image: 'data:image/svg+xml,<svg/>' }), env })).status, 400);
-  assert.equal((await omcRequest({ request: request({ name: 'Shell', image: 'data:image/png;base64,AA==' }), env })).status, 400);
-});
-
-test('OMC upload stores an immutable PNG and persists the company in the library', async () => {
-  const originalFetch = globalThis.fetch;
-  const calls = [];
-  try {
-    globalThis.fetch = async (url, options) => {
-      calls.push({ url, options });
-      assert.equal(options.headers.apikey, env.SUPABASE_SERVICE_ROLE_KEY);
-      return Response.json({});
-    };
-    const image = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a0V8AAAAASUVORK5CYII=';
-    const response = await omcRequest({ request: request({ name: ' Shell ', image }), env });
-    assert.equal(response.status, 201);
-    const omc = await response.json();
-    assert.equal(omc.name, 'Shell');
-    assert.ok(omc.logo_url.startsWith(OMC_LOGO_BASE));
-    assert.equal(calls.length, 2);
-    assert.match(calls[0].url, /storage\/v1\/object\/omc-logos\/[a-f0-9-]+\.png$/);
-    assert.match(calls[1].url, /fuel_omcs\?on_conflict=name_key/);
-    assert.equal(JSON.parse(calls[1].options.body).logo_url, omc.logo_url);
-  } finally { globalThis.fetch = originalFetch; }
-});

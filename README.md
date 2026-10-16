@@ -2,8 +2,40 @@
 
 Fluid Finance is a standalone React, TypeScript, and Vite market information site for Ghana Stock
 Exchange investors. It includes market snapshots, company and price history views, educational
-content, and export/share features. Historical stock prices are read from and written to the
-configured Supabase `stock_prices` table; the GSE live view uses the app's GSE data service.
+content, and export/share features. Historical daily closes, fuel reports, FX rates and all
+community data come from the Fluid backend's editorial API on AWS; the GSE live view uses the
+backend's market snapshot.
+
+It is also an interactive community: visitors can create a free account, read the research team's
+articles and comment on them, start and join forum discussions, and keep a public profile. The
+team manages all of that from the separate [Fluid Finance Portal](../fluid_finance_portal/README.md).
+
+## Public and member features
+
+| Area | Hash | Who |
+| --- | --- | --- |
+| Front page: quote tape, market bar, Markets Wrap (equal-weight composite chart and auto headline), lead story, stock spotlight, Latest feed, movers, cedi and pump rails, community and learning bands | `#/` | Everyone |
+| Markets: GSE live, stock pages, weekly trends | `#/gse-live`, `#/stock/<SYM>`, `#/market-trends` | Everyone |
+| Fuel pump report (read-only) and FX rates with converter | `#/fuel`, `#/fx` | Everyone |
+| Articles and single article with comments | `#/articles`, `#/articles/<slug>` | Read: everyone · comment: members |
+| Forum categories, threads, replies | `#/forum`, `#/forum/c/<category>`, `#/forum/t/<id>`, `#/forum/new` | Read: everyone · post: members |
+| Account: sign in, register, reset, settings | `#/login`, `#/register`, `#/reset-password`, `#/settings` | Members |
+| Public profile | `#/u/<username>` | Everyone |
+
+Members can edit their own posts and report others'; moderation, publishing, fuel/FX data entry
+and role assignment happen only in the portal. The portal is an internal tool and is never linked
+or mentioned anywhere on this site, including the account menu. `#/fuel-prices` (editor) and
+`#/team-portal` (preview) remain reachable by direct URL only until the portal ships.
+
+Authentication is Firebase Authentication in **Fluid Finance's own Firebase project** (the
+`finance.fluidterra` Google account), not the investor app's `app-fluidterra` project: email +
+password, or **Continue with Google**. In that project's console enable the Email/Password and
+Google sign-in providers, add `finance.fluidterra.com`, `finance-portal.fluidterra.com` and
+`localhost` under Authentication → Settings → Authorised domains, and copy the web app's
+`apiKey`, `authDomain` and `projectId` into `.env` (see `.env.example`). The web API key is public
+client configuration. Members sign in with the Firebase SDK and every API call carries the ID
+token; the backend verifies it and creates the member's profile on first contact. Roles are set
+only by administrators in the portal, never by the client.
 
 ## Development
 
@@ -12,7 +44,10 @@ npm install
 npm run dev
 ```
 
-Vite prints the local URL (normally `http://localhost:5173`).
+Vite prints the local URL (normally `http://localhost:5173`). In development the market client
+calls `/market-api`, which `vite.config.ts` proxies to `https://api.fluidterra.com/api/v1/market`
+so live quotes load from any local port despite the API's origin allow-list; production builds
+call the API directly.
 
 ## Commands
 
@@ -37,11 +72,15 @@ Run the market client regression tests with:
 node --experimental-strip-types --test tests/gse.test.mjs
 ```
 
-The current Supabase project URL and public anonymous key are configured in
-`src/lib/supabase.ts`. The browser key is public client configuration; access must be protected by
-appropriate Supabase Row Level Security policies. Never put a Supabase service-role key in this
-frontend. Historical price features require the `stock_prices` table and policies that allow the
-intended reads and upserts.
+All other data is served by the Fluid backend (`fluid-backend`, FastAPI on AWS) under
+`/api/v1/editorial`: daily closes (`/closes`, recorded by the backend from the live snapshot),
+fuel reports and OMC logos (`/fuel/*`, logos in the S3 documents bucket), FX rates (`/fx`),
+articles, comments, forum, profiles and reports. `VITE_API_BASE_URL` selects the backend
+(default `https://api.fluidterra.com/api/v1`; the local Compose stack is
+`http://localhost:8000/api/v1`). The backend needs `FINANCE_FIREBASE_PROJECT_ID` set to the finance
+Firebase project and the two site origins in `ALLOWED_ORIGINS`. The schema is Alembic migration
+`c7e1d2f3a4b5_fluid_finance_editorial_platform` in the backend repository; nothing Supabase remains
+in this app.
 
 ## Hosting on Cloudflare Pages
 
@@ -58,10 +97,11 @@ project is not connected to GitHub; pushing code alone does not publish it.
 | Root directory | Repository root |
 | Node.js | 22 (from `.node-version`) |
 
-`wrangler.jsonc` records the project name and output directory. Public market pages
-are static. The direct-link fuel editor also uses a Pages Function and a server-only
-Supabase key; see [fuel report setup](docs/fuel-reports.md). Pages serves the app's
-hash routes directly and falls back to `index.html` for SPA paths.
+`wrangler.jsonc` records the project name and output directory. The whole site is static:
+every write goes to the Fluid backend with the member's Firebase token, so the Pages project
+needs no Functions and no server-side secrets. Set the `VITE_FIREBASE_*` and `VITE_API_BASE_URL`
+build variables in the Pages project. Pages serves the app's hash routes directly and falls back
+to `index.html` for SPA paths.
 
 For a manual deployment to the existing project:
 
@@ -73,13 +113,11 @@ npx wrangler@4 pages deploy dist --project-name=fluid-finance --branch=main
 
 The direct-upload project's production branch is `main`; the Wrangler command
 above publishes the build from the checked-out `develop` branch to production.
-Use Wrangler from the repository root to include the fuel editor's Pages Function.
-Uploading only `dist` through the dashboard will not include that API.
 
 Register `finance.fluidterra.com` under the Pages project's **Custom domains**,
 then point its DNS CNAME at the hostname Cloudflare assigns to the project
 (normally `fluid-finance.pages.dev`). Verify the Pages deployment before replacing
-the former Vercel DNS target. The Supabase data configuration remains the same.
+the former Vercel DNS target.
 
 ## Buy redirect and acceptance
 
