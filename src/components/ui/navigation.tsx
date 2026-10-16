@@ -1,257 +1,82 @@
-"use client";
-
-import { memo, useState, useRef, useEffect, useCallback } from "react";
-import { Menu, X, ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { memo, useEffect, useState } from "react";
+import { ArrowUpRight, ChevronDown, Menu, X } from "lucide-react";
+import { AccountMenu } from "@/components/community/account-menu";
 import { BrandLogo } from "@/components/ui/brand-logo";
+import { ThemeToggleButton } from "@/components/ui/theme-toggle";
 
-const NAV_LINK =
-    "text-xs font-semibold uppercase tracking-widest transition-colors font-poppins";
-
-interface DropdownItem {
-    label: string;
-    href: string;
-}
-
-interface DropdownGroup {
-    label: string;
-    items: DropdownItem[];
-}
-
-const DROPDOWN_GROUPS: DropdownGroup[] = [
-    {
-        label: "Education",
-        items: [
-            { label: "Learning Center", href: "#/learning-center" },
-            { label: "Market Education", href: "#/market-education" },
-        ],
-    },
-    {
-        label: "Market Data",
-        items: [
-            { label: "Market Trends", href: "#/market-trends" },
-            { label: "Business & News", href: "#/business-news" },
-        ],
-    },
-    {
-        label: "Support",
-        items: [
-            { label: "Help Center", href: "#/help-center" },
-            { label: "Contact Support", href: "#/contact-support" },
-        ],
-    },
-];
-
-const SECTIONS = [
-    { label: "Home", href: "#/" },
-    { label: "About", href: "#/about-us" },
+const LINKS = [
+    ["Markets", "#/gse-live"],
+    ["Research", "#/articles"],
+    ["Opinion", "#/opinion"],
+    ["Economy", "#/business-news"],
+    ["Currencies", "#/fx"],
+    ["Energy", "#/fuel"],
+    ["Community", "#/forum"],
+    ["Education", "#/learning-center"],
+] as const;
+const MORE = [
+    ["Watch & live", "#watch"],
+    ["Listen", "#listen"],
+    ["Saved for later", "#/saved"],
+    ["Market trends", "#/market-trends"],
+    ["Market education", "#/market-education"],
+    ["About Fluid", "#/about-us"],
+    ["Help center", "#/help-center"],
+    ["Contact support", "#/contact-support"],
 ] as const;
 
-function DesktopDropdown({ group }: { group: DropdownGroup }) {
-    const [open, setOpen] = useState(false);
-    const ref = useRef<HTMLDivElement>(null);
-
-    const handleClickOutside = useCallback((e: MouseEvent) => {
-        if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }, []);
+export const Navigation = memo(() => {
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [moreOpen, setMoreOpen] = useState(false);
+    const [hash, setHash] = useState(window.location.hash);
 
     useEffect(() => {
-        if (open) document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [open, handleClickOutside]);
+        const close = () => { setMobileOpen(false); setMoreOpen(false); setHash(window.location.hash); };
+        const escape = (event: KeyboardEvent) => { if (event.key === "Escape") { setMobileOpen(false); setMoreOpen(false); } };
+        window.addEventListener("hashchange", close);
+        window.addEventListener("keydown", escape);
+        return () => { window.removeEventListener("hashchange", close); window.removeEventListener("keydown", escape); };
+    }, []);
 
     return (
-        <div ref={ref} className="relative">
-            <button
-                type="button"
-                onClick={() => setOpen(!open)}
-                onKeyDown={(e) => {
-                    if (e.key === "Escape") setOpen(false);
-                }}
-                className={cn(
-                    NAV_LINK,
-                    "flex items-center gap-1 text-ink/40 hover:text-ink transition-colors"
-                )}
-                aria-expanded={open}
-                aria-haspopup="true"
-            >
-                {group.label}
-                <ChevronDown
-                    size={12}
-                    className={cn("transition-transform duration-200", open && "rotate-180")}
-                />
-            </button>
-            {open && (
-                <div
-                    className="absolute top-full left-0 mt-2 w-64 bg-canvas border border-ink/[0.08] rounded-xl shadow-lg overflow-hidden z-50"
-                    role="menu"
-                >
-                    {group.items.map((item) => (
-                        <a
-                            key={item.href}
-                            href={item.href}
-                            role="menuitem"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                window.location.hash = item.href;
-                                setOpen(false);
-                            }}
-                            className="block px-4 py-3 hover:bg-ink/[0.03] transition-colors"
-                        >
-                            <span className="text-sm font-semibold text-ink font-poppins block">
-                                {item.label}
-                            </span>
-                        </a>
-                    ))}
+        <header className="news-header">
+            <a href="#main-content" className="news-skip" onClick={(event) => { event.preventDefault(); const content = document.getElementById("main-content"); content?.focus(); content?.scrollIntoView({ behavior: "instant" }); }}>Skip to content</a>
+            <div className="news-utility">
+                <div className="page-container flex items-center justify-between gap-4">
+                    <a href="#/about-us" className="hover:underline">Fluid Finance · Ghana's markets, in focus</a>
+                    <a href="#/gse-live" className="inline-flex items-center gap-1.5 whitespace-nowrap">Explore market data <ArrowUpRight size={12} aria-hidden="true" /></a>
                 </div>
-            )}
-        </div>
-    );
-}
-
-function MobileAccordion({ group }: { group: DropdownGroup }) {
-    const [open, setOpen] = useState(false);
-
-    return (
-        <div>
-            <button
-                type="button"
-                onClick={() => setOpen(!open)}
-                className="flex items-center justify-between w-full text-sm font-bold uppercase tracking-widest text-ink/60 font-poppins py-2"
-            >
-                {group.label}
-                <ChevronDown
-                    size={16}
-                    className={cn("transition-transform duration-200", open && "rotate-180")}
-                />
-            </button>
-            {open && (
-                <div className="pl-4 flex flex-col gap-3 mt-1">
-                    {group.items.map((item) => (
-                        <a
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setOpen(false)}
-                            className="text-xs font-semibold uppercase tracking-widest text-ink/40 hover:text-ink font-poppins"
-                        >
-                            {item.label}
-                        </a>
-                    ))}
+            </div>
+            <div className="page-container news-masthead">
+                <a href="#/" aria-label="Fluid Finance home" className="news-brand">
+                    <BrandLogo variant="horizontal" className="h-12 sm:h-14" />
+                </a>
+                <div className="flex items-center gap-2 sm:gap-5">
+                    <span className="news-edition hidden lg:block">Ghana edition <span aria-hidden="true">/</span> Accra, GMT</span>
+                    <ThemeToggleButton />
+                    <div className="hidden sm:block"><AccountMenu /></div>
+                    <button type="button" onClick={() => setMobileOpen(!mobileOpen)} aria-expanded={mobileOpen} aria-controls="news-mobile-menu" aria-label={mobileOpen ? "Close navigation" : "Open navigation"} className="grid h-11 w-11 place-items-center border border-ink/20 lg:hidden">
+                        {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+                    </button>
                 </div>
-            )}
-        </div>
-    );
-}
-
-export const Navigation = memo(() => {
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-    return (
-        <header className="fixed top-0 w-full z-50 border-b border-ink/[0.08] bg-canvas/90 backdrop-blur-md">
-            <nav className="max-w-7xl mx-auto px-6 py-4">
-                <div className="flex items-center justify-between gap-4">
-                    <a href="#" aria-label="Fluid Finance home" className="shrink-0">
-                        <BrandLogo variant="horizontal" className="h-12 sm:h-[6rem] lg:h-[7rem]" />
-                    </a>
-
-                    {/* Desktop Navigation */}
-                    <div className="hidden md:flex flex-1 items-center justify-center gap-6 lg:gap-8">
-                        {SECTIONS.map((section) => (
-                            <a
-                                key={section.href}
-                                href={section.href}
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                    window.location.hash = section.href;
-                                }}
-                                className={cn(NAV_LINK, "text-ink/40 hover:text-ink")}
-                            >
-                                {section.label}
-                            </a>
-                        ))}
-
-                        {DROPDOWN_GROUPS.map((group) => (
-                            <DesktopDropdown key={group.label} group={group} />
-                        ))}
-
-                        <a
-                            href="#/gse-live"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                window.location.hash = "#/gse-live";
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }}
-                            className={cn(NAV_LINK, "text-ink/40 hover:text-ink")}
-                        >
-                            GSE Live
-                        </a>
+            </div>
+            <div className="news-topic-bar">
+                <nav aria-label="Main navigation" className="page-container hidden items-center lg:flex">
+                    <a href="#/" className="news-nav-link" aria-current={!hash || hash === "#/" ? "page" : undefined}>Home</a>
+                    {LINKS.map(([label, href]) => <a key={href} href={href} className="news-nav-link" aria-current={hash.startsWith(href) ? "page" : undefined}>{label}</a>)}
+                    <div className="relative ml-auto" onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setMoreOpen(false); }}>
+                        <button type="button" className="news-nav-link flex items-center gap-1.5" onClick={() => setMoreOpen(!moreOpen)} aria-expanded={moreOpen} aria-controls="news-more">More <ChevronDown size={13} aria-hidden="true" /></button>
+                        {moreOpen && <div id="news-more" className="absolute right-0 top-full z-50 w-56 border border-ink/20 bg-canvas p-2 shadow-lg">{MORE.map(([label, href]) => <a key={href} href={href} className="block px-3 py-3 text-sm hover:bg-ink/[0.06]">{label}</a>)}</div>}
                     </div>
-
-                    {/* Mobile Toggle */}
-                    <div className="flex items-center md:hidden">
-                        <button
-                            type="button"
-                            className="text-ink"
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            aria-label="Toggle menu"
-                        >
-                            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                        </button>
-                    </div>
-                </div>
-            </nav>
-
-            {/* Bottom clickable area to return to top */}
-            <div
-                className="absolute bottom-0 left-0 right-0 h-8 cursor-pointer"
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                aria-label="Return to top of page"
-            />
-
-            {/* Mobile Menu */}
-            {mobileMenuOpen && (
-                <div className="md:hidden bg-canvas border-t border-ink/[0.08] animate-in fade-in slide-in-from-top-4 duration-300">
-                    <div className="px-6 py-8 flex flex-col gap-5">
-                {SECTIONS.map((section) => (
-                    <a
-                        key={section.href}
-                        href={section.href}
-                        onClick={(e) => {
-                            e.preventDefault();
-                            setMobileMenuOpen(false);
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                            window.location.hash = section.href;
-                        }}
-                        className="text-sm font-bold uppercase tracking-widest text-ink/60 font-poppins"
-                    >
-                                {section.label}
-                            </a>
-                        ))}
-
-                    <a
-                        href="#/gse-live"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            setMobileMenuOpen(false);
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                            window.location.hash = "#/gse-live";
-                        }}
-                        className="text-sm font-bold uppercase tracking-widest text-ink/60 font-poppins"
-                    >
-                            GSE Live
-                        </a>
-
-                        <hr className="border-ink/10" />
-
-                        {DROPDOWN_GROUPS.map((group) => (
-                            <MobileAccordion key={group.label} group={group} />
-                        ))}
-
-                        <hr className="border-ink/10" />
-                    </div>
-                </div>
-            )}
+                </nav>
+                <nav aria-label="Quick navigation" className="page-container flex overflow-x-auto lg:hidden">
+                    {LINKS.slice(0, 5).map(([label, href]) => <a key={href} href={href} className="news-nav-link shrink-0" aria-current={hash.startsWith(href) ? "page" : undefined}>{label}</a>)}
+                </nav>
+            </div>
+            {mobileOpen && <nav id="news-mobile-menu" aria-label="Expanded navigation" className="page-container border-b border-ink/20 py-5 lg:hidden">
+                <div className="grid grid-cols-2 gap-x-6">{[["Home", "#/"], ...LINKS, ...MORE].map(([label, href]) => <a key={href} href={href} onClick={() => setMobileOpen(false)} className="border-b border-ink/10 py-3 text-sm font-semibold">{label}</a>)}</div>
+                <div className="mt-5"><AccountMenu variant="mobile" onNavigate={() => setMobileOpen(false)} /></div>
+            </nav>}
         </header>
     );
 });

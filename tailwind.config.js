@@ -36,8 +36,8 @@ export default {
                 panel: 'var(--panel-shadow)',
             },
             fontFamily: {
-                sans: ['Poppins', 'sans-serif'],
-                poppins: ['Poppins', 'sans-serif'],
+                sans: ['Inter', 'Arial', 'sans-serif'],
+                poppins: ['Barlow', 'Arial', 'sans-serif'],
             },
         },
     },

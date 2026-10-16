@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-15T00:00:00Z",
+  "title": "Design System: Fluid Finance Public Editorial",
+  "extensions": {
+    "sourceFiles": [
+      "src/index.css",
+      "tailwind.config.js",
+      "src/components/ui/navigation.tsx",
+      "src/components/home/quote-tape.tsx",
+      "src/components/sections/footer.tsx"
+    ],
+    "themeRules": {
+      "dark": ":root, :root.dark",
+      "light": ":root.light",
+      "rule": "rgb(var(--ink) / .19)",
+      "subtle": "rgb(var(--ink) / .055)",
+      "muted": "rgb(var(--ink) / .68)",
+      "focus": "2px solid rgb(var(--cyan-ink)); outline-offset: 4px"
+    },
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ],
+    "motion": [
+      {
+        "name": "quote-tape",
+        "value": "90s linear infinite",
+        "purpose": "Pause on hover, focus-within or explicit user control; disable for reduced motion."
+      }
+    ],
+    "shadows": [
+      {
+        "name": "more-menu",
+        "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        "purpose": "Existing Tailwind shadow-lg on desktop More overlay only."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Topic link",
+      "kind": "nav",
+      "description": "Public editorial topic link.",
+      "html": "<a class=\"ds-topic\" href=\"#/gse-live\">Markets</a>",
+      "css": ".ds-topic { display:inline-block; padding:14px 19px; font:700 13px Inter,Arial,sans-serif; color:rgb(var(--ink)); text-decoration:none; } .ds-topic:hover { color:rgb(var(--cyan-ink)); text-decoration:underline; text-underline-offset:6px; } :focus-visible { outline:2px solid rgb(var(--cyan-ink)); outline-offset:4px; }"
+    },
+    {
+      "name": "Theme control",
+      "kind": "button",
+      "description": "Public editorial theme control.",
+      "html": "<button class=\"ds-theme\" aria-label=\"Switch theme\">\u25d0</button>",
+      "css": ".ds-theme { width:40px; height:40px; border:1px solid var(--news-rule); border-radius:0; background:rgb(var(--canvas)); color:rgb(var(--ink)); font:16px Inter,Arial,sans-serif; cursor:pointer; } .ds-theme:hover { background:var(--news-subtle); } :focus-visible { outline:2px solid rgb(var(--cyan-ink)); outline-offset:4px; }"
+    },
+    {
+      "name": "Story link",
+      "kind": "custom",
+      "description": "Public editorial story link.",
+      "html": "<a class=\"ds-story\" href=\"#/articles\">Research and market perspective</a>",
+      "css": ".ds-story { display:block; font:700 34px/1.08 Barlow,Arial,sans-serif; letter-spacing:-.02em; color:rgb(var(--ink)); text-decoration:none; } .ds-story:hover { text-decoration:underline; } :focus-visible { outline:2px solid rgb(var(--cyan-ink)); outline-offset:4px; }"
+    },
+    {
+      "name": "Editorial action",
+      "kind": "button",
+      "description": "Public editorial editorial action.",
+      "html": "<a class=\"ds-action\" href=\"#/articles\">Read research \u2197</a>",
+      "css": ".ds-action { display:inline-flex; gap:8px; color:rgb(var(--cyan-ink)); font:700 12px Inter,Arial,sans-serif; text-decoration:none; } .ds-action:hover { text-decoration:underline; text-underline-offset:4px; } :focus-visible { outline:2px solid rgb(var(--cyan-ink)); outline-offset:4px; }"
+    },
+    {
+      "name": "Latest item",
+      "kind": "card",
+      "description": "Public editorial latest item.",
+      "html": "<a class=\"ds-latest\" href=\"#/articles\"><span>Latest research</span><strong>Ghana markets in focus</strong></a>",
+      "css": ".ds-latest { display:block; padding:12px 0; border-bottom:1px solid var(--news-rule); color:rgb(var(--ink)); text-decoration:none; font-family:Inter,Arial,sans-serif; } .ds-latest span { display:block; margin-bottom:6px; color:var(--news-muted); font-size:10px; } .ds-latest strong { font-size:14px; line-height:1.4; font-weight:600; } .ds-latest:hover strong { text-decoration:underline; } :focus-visible { outline:2px solid rgb(var(--cyan-ink)); outline-offset:4px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Financial Front Page",
+    "overview": "A compact Ghanaian financial publication, following the user-selected Bloomberg-like editorial direction. Market data and research establish the hierarchy through large sans-serif headlines, disciplined columns and strong rules. White and neutral charcoal themes share one composition.",
+    "keyCharacteristics": [
+      "Data-led editorial hierarchy.",
+      "Flat paper, fine dividers and heavy section rules.",
+      "Fluid cyan actions and semantic market changes.",
+      "Equally supported light and dark themes."
+    ],
+    "rules": [
+      {
+        "name": "The Paper Rule",
+        "body": "Use the canvas and ink channels for ordinary surfaces and text so both themes remain coherent.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "Do preserve the supplied Fluid identity and existing company imagery.",
+      "Do use theme channels and signed market values.",
+      "Do maintain headline hierarchy, compact metadata and rule-separated columns."
+    ],
+    "donts": [
+      "Don't introduce decorative gradients, rounded marketing cards or unrelated imagery into this editorial surface.",
+      "Don't fabricate live quotes, research or timestamps when sources are unavailable."
+    ]
+  }
+}

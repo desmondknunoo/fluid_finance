@@ -3,11 +3,19 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { ThemeProvider } from '@/lib/theme'
+import { AuthProvider } from '@/lib/auth'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </ThemeProvider>
   </StrictMode>,
 )
+
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+    const register=()=>{void navigator.serviceWorker.register('/reading-sw.js').catch(()=>{/* online reading remains available */});};
+    if(document.readyState==='complete')register();else window.addEventListener('load',register,{once:true});
+}
