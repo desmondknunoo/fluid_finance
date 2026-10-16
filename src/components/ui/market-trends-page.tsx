@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Download, Loader2, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { formatCedis, metaFor, getAllStocks, type Stock } from "@/lib/gse";
 import { recordAll } from "@/lib/history";
-import { saveStockPrices, getStockPriceHistory, supabase } from "@/lib/supabase";
+import { getStockPriceHistory, listCloseDates } from "@/lib/closes";
 import { exportStockPricesToExcel } from "@/lib/export-excel";
 import { openStock } from "@/lib/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
@@ -89,19 +89,13 @@ export default function MarketTrendsPage() {
     const [exporting, setExporting] = useState(false);
     const [exportError, setExportError] = useState<string | null>(null);
 
-    // Fetch the distinct trading dates we have in Supabase.
+    // The trading days the backend has recorded a close for.
     useEffect(() => {
         let cancelled = false;
         (async () => {
             try {
-                const { data } = await supabase
-                    .from("stock_prices")
-                    .select("trading_date")
-                    .order("trading_date", { ascending: true });
-
-                if (cancelled || !data) return;
-
-                const dates = [...new Set(data.map((r) => r.trading_date))].sort();
+                const dates = await listCloseDates();
+                if (cancelled) return;
                 setAvailableDates(dates);
                 if (dates.length > 0) {
                     setExportStartDate(dates[0]);
@@ -116,7 +110,7 @@ export default function MarketTrendsPage() {
         };
     }, []);
 
-    // Pull live prices (records today's close into Supabase + local history).
+    // Pull live prices for the local history; the backend records the daily close itself.
     useEffect(() => {
         let cancelled = false;
         (async () => {
@@ -124,7 +118,6 @@ export default function MarketTrendsPage() {
                 const data = await getAllStocks();
                 if (cancelled) return;
                 recordAll(data.map((s) => ({ symbol: s.symbol, price: s.price })));
-                saveStockPrices(data.map((s) => ({ symbol: s.symbol, price: s.price }))).catch(() => {});
             } catch (err) {
                 if (!cancelled) setError(err instanceof Error ? err.message : "An error occurred");
             } finally {

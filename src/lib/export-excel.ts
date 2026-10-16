@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import { getStockPriceHistory } from "./supabase";
+import { getStockPriceHistory } from "./closes";
 
 interface WeekGroup {
   label: string;

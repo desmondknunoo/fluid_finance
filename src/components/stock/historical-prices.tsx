@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { supabase, type StockPrice } from "@/lib/supabase";
+import { listCloses, type StockClose as StockPrice } from "@/lib/closes";
 
 interface DateGroup {
   date: string;
@@ -20,17 +20,11 @@ export function HistoricalPrices() {
     let cancelled = false;
     (async () => {
       try {
-        const { data, error: fetchError } = await supabase
-          .from("stock_prices")
-          .select("*")
-          .order("trading_date", { ascending: false })
-          .order("symbol", { ascending: true });
-
-        if (fetchError) throw fetchError;
+        const data = await listCloses();
         if (cancelled) return;
 
         const map = new Map<string, StockPrice[]>();
-        for (const row of data || []) {
+        for (const row of data) {
           const existing = map.get(row.trading_date) || [];
           existing.push(row);
           map.set(row.trading_date, existing);
@@ -125,7 +119,7 @@ export function HistoricalPrices() {
               </thead>
               <tbody>
                 {current.prices.map((row) => (
-                  <tr key={row.id} className="border-b border-ink/[0.04] last:border-0 hover:bg-ink/[0.02] transition-colors">
+                  <tr key={`${row.trading_date}-${row.symbol}`} className="border-b border-ink/[0.04] last:border-0 hover:bg-ink/[0.02] transition-colors">
                     <td className="px-5 py-2.5 font-bold text-ink uppercase text-sm">{row.symbol}</td>
                     <td className="px-5 py-2.5 text-right font-mono text-sm text-ink">
                       GHS {row.price.toFixed(2)}

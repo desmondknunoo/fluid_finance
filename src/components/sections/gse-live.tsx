@@ -438,6 +438,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                                                     <Sparkline
                                                                         points={sparks.get(stock.symbol) ?? []}
                                                                         positive={positive}
+                                                                        flat={stock.change === 0}
                                                                         width={72}
                                                                         height={24}
                                                                     />

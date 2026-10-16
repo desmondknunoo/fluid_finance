@@ -315,12 +315,14 @@ export function PriceChart({ points, positive, height = 300, unit = "₵", class
 interface SparklineProps {
     points: number[];
     positive: boolean;
+    /** No change on the day: draw in the muted text colour instead of green or red. */
+    flat?: boolean;
     width?: number;
     height?: number;
     className?: string;
 }
 
-export function Sparkline({ points, positive, width = 88, height = 28, className }: SparklineProps) {
+export function Sparkline({ points, positive, flat = false, width = 88, height = 28, className }: SparklineProps) {
     const { resolved } = useTheme();
 
     if (points.length < 2) return <div style={{ width, height }} className={className} />;
@@ -338,11 +340,11 @@ export function Sparkline({ points, positive, width = 88, height = 28, className
         .join(" ");
 
     return (
-        <svg width={width} height={height} className={className} aria-hidden="true">
+        <svg width={width} height={height} className={cn(flat && "text-ink/40", className)} aria-hidden="true">
             <path
                 d={d}
                 fill="none"
-                stroke={positive ? (dark ? "#34d399" : "#059669") : dark ? "#fb7185" : "#e11d48"}
+                stroke={flat ? "currentColor" : positive ? (dark ? "#34d399" : "#059669") : dark ? "#fb7185" : "#e11d48"}
                 strokeWidth={1.5}
                 strokeLinejoin="round"
                 strokeLinecap="round"

@@ -6,7 +6,9 @@
  */
 
 const API_BASE = "https://dev.kwayisi.org/apis/gse";
-const MARKET_API_BASE = "https://api.fluidterra.com/api/v1/market";
+// The backend only allows the deployed origins, so the Vite dev server proxies `/market-api`
+// to it (see vite.config.ts); production calls the API directly.
+const MARKET_API_BASE = import.meta.env?.DEV ? "/market-api" : "https://api.fluidterra.com/api/v1/market";
 const TTL = 60_000;
 
 interface MarketQuote {
