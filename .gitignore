@@ -7,3 +7,6 @@ dist-ssr
 .wrangler/
 .dev.vars
 .dev.vars.*
+
+# Local Claude Code configuration
+.claude/
