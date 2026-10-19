@@ -5,17 +5,17 @@
  * Company metadata: https://dev.kwayisi.org/apis/gse/equities/{symbol}
  */
 
+// kwayisi proxies the GSE's own feed and is CORS-open (`*`), so the board reads it directly in both
+// dev and production. `/live` gives the day's price, change and volume per ticker; `/equities/{s}`
+// gives company metadata. (This is the public market source; the Fluid trading app has its own.)
 const API_BASE = "https://dev.kwayisi.org/apis/gse";
-// The backend only allows the deployed origins, so the Vite dev server proxies `/market-api`
-// to it (see vite.config.ts); production calls the API directly.
-const MARKET_API_BASE = import.meta.env?.DEV ? "/market-api" : "https://api.fluidterra.com/api/v1/market";
 const TTL = 60_000;
 
-interface MarketQuote {
-    symbol: string;
+/** A row from kwayisi's `/live` ticker: `change` is the day's move vs the previous close. */
+interface LiveQuote {
+    name: string;
     price: number | string;
     change: number | string;
-    changePercent: number | string;
     volume: number;
 }
 
@@ -139,35 +139,40 @@ export function metaFor(symbol: string) {
     );
 }
 
-function toStock(quote: MarketQuote): Stock {
-    const meta = metaFor(quote.symbol);
+function toStock(quote: LiveQuote): Stock {
+    const meta = metaFor(quote.name);
     const price = Number(quote.price);
     const change = Number(quote.change);
-    const percent = Number(quote.changePercent);
-    if (!quote.symbol || !Number.isFinite(price) || !Number.isFinite(change) || !Number.isFinite(percent)) {
-        throw new Error("Invalid Fluid market quote");
+    if (!quote.name || !Number.isFinite(price) || !Number.isFinite(change)) {
+        throw new Error("Invalid GSE live quote");
     }
     return {
-        symbol: quote.symbol,
+        symbol: quote.name,
         company: meta.company,
         sector: meta.sector,
         industry: meta.industry,
         price,
         change,
-        changePercent: percent,
-        volume: quote.volume ?? 0,
+        // kwayisi gives the absolute move, so the previous close is price − change.
+        changePercent: changePercent(price, change),
+        volume: Number(quote.volume) || 0,
     };
 }
 
-/** The same complete market snapshot used by the Fluid webapp. */
+/** The whole GSE board from kwayisi's live ticker. */
 export async function getAllStocks(force = false): Promise<Stock[]> {
-    const response = await request<{ items: MarketQuote[] }>("/stocks", force, MARKET_API_BASE);
-    if (!Array.isArray(response.items) || !response.items.length) throw new Error("Fluid market snapshot is empty");
-    return response.items.map(toStock).sort((a, b) => a.symbol.localeCompare(b.symbol));
+    const items = await request<LiveQuote[]>("/live", force);
+    if (!Array.isArray(items) || !items.length) throw new Error("GSE live snapshot is empty");
+    // Guard against the odd non-trading listing with no quote (e.g. a suspended cross-listing), which
+    // would otherwise render as a ¢0.00 row — only show equities the exchange is actually pricing.
+    return items
+        .map(toStock)
+        .filter((stock) => stock.price > 0)
+        .sort((a, b) => a.symbol.localeCompare(b.symbol));
 }
 
 export async function getStock(symbol: string): Promise<Stock> {
-    const quote = await request<MarketQuote>(`/stocks/${encodeURIComponent(symbol.toUpperCase())}`, false, MARKET_API_BASE);
+    const quote = await request<LiveQuote>(`/live/${encodeURIComponent(symbol.toUpperCase())}`);
     return toStock(quote);
 }
 
