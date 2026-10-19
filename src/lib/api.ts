@@ -7,7 +7,7 @@ import { authToken } from "@/lib/firebase";
  * Errors arrive as RFC 7807 problem documents; the message shown to people is the `detail`.
  */
 
-export const API_BASE: string = (import.meta.env.VITE_API_BASE_URL ?? "https://api.fluidterra.com/api/v1").replace(/\/+$/, "");
+export const API_BASE: string = (import.meta.env.VITE_API_BASE_URL ?? "https://api.finance.fluidterra.com/api/v1").replace(/\/+$/, "");
 
 export class ApiError extends Error {
     constructor(message: string, readonly status: number, readonly code: string) {

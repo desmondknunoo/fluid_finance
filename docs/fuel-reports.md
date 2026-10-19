@@ -14,7 +14,7 @@ The Cloudflare Pages Function validates the login on every read and save. Creden
 
 ## Storage
 
-Reports and the OMC logo library live in the Fluid backend (`fluid-backend`, AWS):
+Reports and the OMC logo library live in the Fluid Finance backend (`fluid_finance_backend`, AWS):
 `GET /api/v1/editorial/fuel/reports` and `/fuel/omcs` are public reads; creating, overwriting and
 deleting editions (`/api/v1/editorial/desk/fuel/reports`) and uploading logos
 (`/desk/fuel/omcs`) require a signed-in operations or admin staff member, whose Firebase ID token
@@ -29,7 +29,7 @@ then remove the route from the public site.
 ## Local testing
 
 `npm run dev` and open `http://localhost:5175/#/fuel-prices`; point `VITE_API_BASE_URL` at a local
-backend (`http://localhost:8000/api/v1`) or at production. Enter a report date and prices, upload
+backend (`http://localhost:8001/api/v1`) or at production. Enter a report date and prices, upload
 company logos, and save. Share opens numbered 1080×1350 PNG previews, with at most 10 OMCs per
 image. Every page retains the Fluid Finance logo at the top right, the report date, full-report
 averages and the stock report footer. Copy, download and native file sharing operate on the

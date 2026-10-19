@@ -4,15 +4,14 @@ import { browserLocalPersistence, getAuth, setPersistence, type Auth } from "fir
 /**
  * Fluid Finance - Firebase
  *
- * The public site and the portal share one Firebase project of their own (owned by the Fluid
- * Finance Google account), separate from the investor app's `app-fluidterra` project: a Fluid
- * Finance member is not an investor-app user and the two must never sign in to each other. The
- * project is named only by build-time `VITE_FIREBASE_*` variables, which are public configuration
- * and grant no privileged access.
+ * The public site and the portal share Fluid Finance's own Firebase project, `finance-fluidterra`
+ * (the finance.fluidterra Google account), separate from the investor app's `app-fluidterra`: a
+ * Fluid Finance member is not an investor-app user and the two never sign in to each other. The
+ * web API key is public configuration supplied at build time and grants no privileged access.
  */
 
 const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
-export const FIREBASE_PROJECT_ID: string = import.meta.env.VITE_FIREBASE_PROJECT_ID ?? "";
+export const FIREBASE_PROJECT_ID: string = import.meta.env.VITE_FIREBASE_PROJECT_ID || "finance-fluidterra";
 export const firebaseConfigured = Boolean(apiKey && FIREBASE_PROJECT_ID);
 
 let app: FirebaseApp | null = null;

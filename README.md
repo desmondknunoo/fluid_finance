@@ -27,9 +27,9 @@ and role assignment happen only in the portal. The portal is an internal tool an
 or mentioned anywhere on this site, including the account menu. `#/fuel-prices` (editor) and
 `#/team-portal` (preview) remain reachable by direct URL only until the portal ships.
 
-Authentication is Firebase Authentication in **Fluid Finance's own Firebase project** (the
-`finance.fluidterra` Google account), not the investor app's `app-fluidterra` project: email +
-password, or **Continue with Google**. In that project's console enable the Email/Password and
+Authentication is Firebase Authentication in **Fluid Finance's own Firebase project**,
+`finance-fluidterra` (the finance.fluidterra Google account), not the investor app's
+`app-fluidterra`: email + password, or **Continue with Google**. In that project's console enable the Email/Password and
 Google sign-in providers, add `finance.fluidterra.com`, `finance-portal.fluidterra.com` and
 `localhost` under Authentication → Settings → Authorised domains, and copy the web app's
 `apiKey`, `authDomain` and `projectId` into `.env` (see `.env.example`). The web API key is public
@@ -60,11 +60,11 @@ npm run preview  # serve the built site locally
 
 ## Data configuration
 
-Live quotes come from the same Fluid backend snapshot used by the webapp:
-`https://api.fluidterra.com/api/v1/market/stocks`. The backend uses the official GSE Market Watch
+Live quotes come from the investor platform's public market snapshot:
+`https://api.fluidterra.com/api/v1/market/stocks`. That backend uses the official GSE Market Watch
 provider in production and refreshes quotes automatically. Company metadata still comes from
-Kwayisi. The backend must allow `https://finance.fluidterra.com` and
-`https://fluid-finance.pages.dev` in its CORS origins.
+Kwayisi. It must allow `https://finance.fluidterra.com` and `https://fluid-finance.pages.dev` in
+its CORS origins.
 
 Run the market client regression tests with:
 
@@ -72,15 +72,13 @@ Run the market client regression tests with:
 node --experimental-strip-types --test tests/gse.test.mjs
 ```
 
-All other data is served by the Fluid backend (`fluid-backend`, FastAPI on AWS) under
-`/api/v1/editorial`: daily closes (`/closes`, recorded by the backend from the live snapshot),
+All other data is served by the Fluid Finance backend (`fluid_finance_backend`, FastAPI on the
+finance AWS account) under `/api/v1/editorial`: daily closes (`/closes`, recorded by the backend from the live snapshot),
 fuel reports and OMC logos (`/fuel/*`, logos in the S3 documents bucket), FX rates (`/fx`),
 articles, comments, forum, profiles and reports. `VITE_API_BASE_URL` selects the backend
-(default `https://api.fluidterra.com/api/v1`; the local Compose stack is
-`http://localhost:8000/api/v1`). The backend needs `FINANCE_FIREBASE_PROJECT_ID` set to the finance
-Firebase project and the two site origins in `ALLOWED_ORIGINS`. The schema is Alembic migration
-`c7e1d2f3a4b5_fluid_finance_editorial_platform` in the backend repository; nothing Supabase remains
-in this app.
+(default `https://api.finance.fluidterra.com/api/v1`; the local Compose stack is
+`http://localhost:8001/api/v1`). Live GSE quotes still come from the investor platform's public
+market API. Nothing Supabase remains in this app.
 
 ## Hosting on Cloudflare Pages
 

@@ -11,7 +11,7 @@ async function bundle(path) {
 }
 const { validateFuelReport, averageFuelPrice, fuelReportPages, OMC_LOGO_BASE, DEFAULT_SUPPLIERS, DEFAULT_OMCS, blankFuelRow, mergeOmcLibrary, validOmcLogo, sortFuelRows, POPULAR_OMCS } = await bundle('src/lib/fuel-prices.ts');
 // Logos the backend stores are served from its media endpoint; only those URLs (or bundled files) validate.
-const row = { name: 'Goil PLC', logo_url: `https://api.fluidterra.com/api/v1${OMC_LOGO_BASE}1234-abcd.png`, petrol: '16.64', diesel: '18.46', premium: '' };
+const row = { name: 'Goil PLC', logo_url: `https://api.finance.fluidterra.com/api/v1${OMC_LOGO_BASE}1234-abcd.png`, petrol: '16.64', diesel: '18.46', premium: '' };
 test('arrangements preserve full rows, exact popularity and global pagination order', () => {
   const rows = DEFAULT_SUPPLIERS.map((name, index) => ({ ...blankFuelRow(name), petrol: String(index + 1) }));
   const original = structuredClone(rows);
