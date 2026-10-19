@@ -30,7 +30,9 @@ export async function api<T>(path: string, options: { method?: "GET" | "POST" | 
     try {
         response = await fetch(url.toString(), { method: options.method ?? "GET", headers, body: options.body === undefined ? undefined : JSON.stringify(options.body) });
     } catch {
-        throw new ApiError("The Fluid API could not be reached. Check your connection and try again.", 0, "NETWORK");
+        // Covers the backend being unreachable as well as a genuinely offline client; don't blame the
+        // reader's connection for what is usually a service-side outage.
+        throw new ApiError("This section is temporarily unavailable. Please try again shortly.", 0, "NETWORK");
     }
     if (response.status === 204) return undefined as T;
     const text = await response.text();
