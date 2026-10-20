@@ -1,12 +1,10 @@
 # Fluid Finance: https://finance.fluidterra.com
+#
+# Every public page may be crawled. Account pages (sign-in, register, reset, settings, saved,
+# new-thread) are not blocked here on purpose: they carry <meta name="robots" content="noindex">,
+# and crawlers can only obey that tag if they are allowed to fetch the page.
 User-agent: *
 Allow: /
-Disallow: /login
-Disallow: /register
-Disallow: /reset-password
-Disallow: /settings
-Disallow: /saved
-Disallow: /forum/new
 Disallow: /shell
 
 Sitemap: https://finance.fluidterra.com/sitemap.xml

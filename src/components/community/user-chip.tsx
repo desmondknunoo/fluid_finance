@@ -6,7 +6,7 @@ import { profileHref } from "@/lib/navigation";
 export function Avatar({ author, size = "md", className }: { author: Pick<Author, "display_name" | "avatar_url">; size?: "sm" | "md" | "lg" | "xl"; className?: string }) {
     const dimension = { sm: "h-7 w-7 text-[11px]", md: "h-9 w-9 text-xs", lg: "h-12 w-12 text-sm", xl: "h-24 w-24 text-2xl" }[size];
     if (author.avatar_url) {
-        return <img src={author.avatar_url} alt="" className={cn("news-avatar", dimension, className)} />;
+        return <img src={author.avatar_url} alt="" loading="lazy" decoding="async" className={cn("news-avatar", dimension, className)} />;
     }
     return (
         <span aria-hidden="true" className={cn("news-avatar", dimension, className)}>

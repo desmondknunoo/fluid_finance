@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useState } from "react"
+import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Loader2 } from "lucide-react"
 import { Navigation } from "@/components/ui/navigation"
 import { ScrollToTop } from "@/components/ui/scroll-to-top"
@@ -7,31 +7,35 @@ import HomePage from "@/components/home/home-page"
 import SavedReadingPage from "@/components/ui/saved-reading-page"
 import { closeStock, consumePendingScroll, onLocationChange, parseRoute, routeKey, type Route } from "@/lib/navigation"
 import { applyMeta } from "@/lib/seo"
-import { metaForPath } from "@/lib/seo-routes"
+import { lazyRoute } from "@/lib/lazy-route"
+import { absoluteUrl, metaForPath } from "@/lib/seo-routes"
 
 // The front page and the shell ship in the main bundle; every other route loads on demand.
 // The saved-reading page stays in the main bundle so it opens offline from the cached shell.
-const AboutUsPage = lazy(() => import("@/components/ui/about-us-page"))
-const ContactSupportPage = lazy(() => import("@/components/ui/contact-support-page"))
-const PrivacyPolicyPage = lazy(() => import("@/components/ui/privacy-policy-page"))
-const LearningCenterPage = lazy(() => import("@/components/ui/learning-center-page"))
-const HelpCenterPage = lazy(() => import("@/components/ui/help-center-page"))
-const MarketEducationPage = lazy(() => import("@/components/ui/market-education-page"))
-const MarketTrendsPage = lazy(() => import("@/components/ui/market-trends-page"))
-const BusinessNewsPage = lazy(() => import("@/components/ui/business-news-page"))
-const TermsOfServicePage = lazy(() => import("@/components/ui/terms-of-service-page"))
-const GseLivePage = lazy(() => import("@/components/ui/gse-live-page"))
-const FuelPublicPage = lazy(() => import("@/components/ui/fuel-public-page"))
-const FxPage = lazy(() => import("@/components/ui/fx-page"))
-const ArticlesPage = lazy(() => import("@/components/ui/articles-page"))
-const ArticlePage = lazy(() => import("@/components/ui/article-page"))
-const ForumPage = lazy(() => import("@/components/ui/forum-page"))
-const ThreadPage = lazy(() => import("@/components/ui/thread-page"))
-const NewThreadPage = lazy(() => import("@/components/ui/new-thread-page"))
-const AuthPage = lazy(() => import("@/components/ui/auth-page"))
-const SettingsPage = lazy(() => import("@/components/ui/settings-page"))
-const ProfilePage = lazy(() => import("@/components/ui/profile-page"))
-const StockDetail = lazy(() => import("@/components/stock/stock-detail").then((module) => ({ default: module.StockDetail })))
+const AboutUsPage = lazyRoute(() => import("@/components/ui/about-us-page"))
+const ContactSupportPage = lazyRoute(() => import("@/components/ui/contact-support-page"))
+const PrivacyPolicyPage = lazyRoute(() => import("@/components/ui/privacy-policy-page"))
+const LearningCenterPage = lazyRoute(() => import("@/components/ui/learning-center-page"))
+const HelpCenterPage = lazyRoute(() => import("@/components/ui/help-center-page"))
+const MarketEducationPage = lazyRoute(() => import("@/components/ui/market-education-page"))
+const MarketTrendsPage = lazyRoute(() => import("@/components/ui/market-trends-page"))
+const BusinessNewsPage = lazyRoute(() => import("@/components/ui/business-news-page"))
+const TermsOfServicePage = lazyRoute(() => import("@/components/ui/terms-of-service-page"))
+const GseLivePage = lazyRoute(() => import("@/components/ui/gse-live-page"))
+const FuelPublicPage = lazyRoute(() => import("@/components/ui/fuel-public-page"))
+const FxPage = lazyRoute(() => import("@/components/ui/fx-page"))
+const ArticlesPage = lazyRoute(() => import("@/components/ui/articles-page"))
+const ArticlePage = lazyRoute(() => import("@/components/ui/article-page"))
+const ForumPage = lazyRoute(() => import("@/components/ui/forum-page"))
+const ThreadPage = lazyRoute(() => import("@/components/ui/thread-page"))
+const NewThreadPage = lazyRoute(() => import("@/components/ui/new-thread-page"))
+const AuthPage = lazyRoute(() => import("@/components/ui/auth-page"))
+const SettingsPage = lazyRoute(() => import("@/components/ui/settings-page"))
+const ProfilePage = lazyRoute(() => import("@/components/ui/profile-page"))
+const StockDetail = lazyRoute(() => import("@/components/stock/stock-detail").then((module) => ({ default: module.StockDetail })))
+
+/** Routes whose metadata comes from the API (and, on a first load, from the Pages Functions). */
+const DYNAMIC_KINDS = new Set<Route["kind"]>(["article", "thread", "profile", "forum"])
 
 /** Restore a back/forward position once the page is tall enough, giving late content a moment. */
 function restoreScroll(top: number): () => void {
@@ -76,8 +80,16 @@ function App() {
   }, [])
 
   // Route-level metadata first (layout effect); pages with API content refine it in their own effects.
+  // On the first load of an article, thread, profile or forum category, the Pages Function has
+  // already written that record's metadata into the HTML, so the generic placeholder is skipped.
+  const firstLoad = useRef(true)
   useLayoutEffect(() => {
-    applyMeta(metaForPath(path))
+    const meta = metaForPath(path)
+    const served = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href
+    const fromServer = firstLoad.current && DYNAMIC_KINDS.has(route.kind) && served === absoluteUrl(meta.path)
+    firstLoad.current = false
+    if (!fromServer) applyMeta(meta)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, path])
 
   useEffect(() => {

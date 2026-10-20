@@ -16,6 +16,7 @@ import { getSeries, recordAll, sliceRange } from "@/lib/history";
 import {
     GSE_LIVE_SECTION,
     openStock,
+    stockHref,
     VIEW_MODES,
     openGseLive,
     type ViewMode,
@@ -329,7 +330,8 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                                         <td>
                                                             <div className="flex items-center gap-3">
                                                                 <TickerLogo symbol={stock.symbol} size={36} />
-                                                                <span className="font-bold text-ink">{stock.symbol}</span>
+                                                                {/* A real link for crawlers and new-tab clicks; the row keeps the keyboard behaviour. */}
+                                                                <a href={stockHref(stock.symbol)} tabIndex={-1} onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) e.stopPropagation(); }} className="font-bold text-ink">{stock.symbol}</a>
                                                             </div>
                                                             <span className="mt-1 block max-w-[180px] truncate text-xs text-ink/[0.68] md:hidden">{stock.company}</span>
                                                         </td>

@@ -5,7 +5,6 @@ import { Download, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { formatCedis, metaFor, getAllStocks, type Stock } from "@/lib/gse";
 import { recordAll } from "@/lib/history";
 import { getStockPriceHistory, listCloseDates } from "@/lib/closes";
-import { exportStockPricesToExcel } from "@/lib/export-excel";
 import { openStock } from "@/lib/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
 import { HistoricalPrices } from "@/components/stock/historical-prices";
@@ -248,6 +247,8 @@ export default function MarketTrendsPage() {
         setExporting(true);
         setExportError(null);
         try {
+            // The spreadsheet library is large, so it loads only when someone exports.
+            const { exportStockPricesToExcel } = await import("@/lib/export-excel");
             await exportStockPricesToExcel(exportStartDate, exportEndDate, exportFridaysOnly, exportWeeklyComparison);
         } catch (err) {
             setExportError(err instanceof Error ? err.message : "Export failed");

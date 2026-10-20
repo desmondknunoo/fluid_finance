@@ -94,7 +94,7 @@ export default function ArticlePage({ slug }: { slug: string }) {
 
                 {article.cover_url && (
                     <figure className="mt-8 border border-ink/[0.19] bg-ink/[0.055]">
-                        <img src={article.cover_url} alt="" className="block w-full object-cover" />
+                        <img src={article.cover_url} alt={article.title} className="block w-full object-cover" />
                     </figure>
                 )}
 

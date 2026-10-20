@@ -22,20 +22,22 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const dist = path.join(root, "dist");
 const START = "<!-- seo:start -->";
 const END = "<!-- seo:end -->";
-const ROOT_DIV = '<div id="root"></div>';
+// The app root up to </body>; matching its whole content keeps the script safe to re-run on dist.
+const ROOT_DIV = /<div id="root">[\s\S]*<\/div>(\s*<\/body>)/;
 
 const bundle = await build({ entryPoints: [path.join(root, "src/lib/seo-routes.ts")], bundle: true, write: false, format: "esm", platform: "neutral", logLevel: "silent" });
 const seo = await import(`data:text/javascript;base64,${Buffer.from(bundle.outputFiles[0].text).toString("base64")}`);
 
 const template = await readFile(path.join(dist, "index.html"), "utf8");
-for (const marker of [START, END, ROOT_DIV]) {
+for (const marker of [START, END]) {
     if (!template.includes(marker)) throw new Error(`dist/index.html is missing ${marker}; keep it in index.html`);
 }
+if (!ROOT_DIV.test(template)) throw new Error('dist/index.html is missing <div id="root"></div> before </body>');
 
 function page(headBlock, body = "") {
     const start = template.indexOf(START) + START.length;
     const end = template.indexOf(END);
-    return `${template.slice(0, start)}\n${headBlock}\n    ${template.slice(end)}`.replace(ROOT_DIV, `<div id="root">${body}</div>`);
+    return `${template.slice(0, start)}\n${headBlock}\n    ${template.slice(end)}`.replace(ROOT_DIV, (_match, tail) => `<div id="root">${body}</div>${tail}`);
 }
 
 const render = (meta) => page(seo.renderHeadTags(meta), seo.renderSummary(meta));
@@ -51,6 +53,11 @@ for (const route of Object.keys(seo.STATIC_PAGES)) {
     const file = route === "/" ? "index.html" : `${route.slice(1)}.html`;
     await write(file, render(seo.staticPageMeta(route)));
     outputs.push(file);
+}
+// Aliases the router accepts: served with the canonical page's metadata so they never compete with it.
+for (const [alias, canonical] of [["about", "/about-us"], ["gse-live/table", "/gse-live"]]) {
+    await write(`${alias}.html`, render(seo.staticPageMeta(canonical)));
+    outputs.push(`${alias}.html`);
 }
 for (const symbol of seo.STOCK_SYMBOLS) {
     const file = `stock/${symbol}.html`;
@@ -68,4 +75,4 @@ outputs.push("shell.html");
 const has404 = await access(path.join(dist, "404.html")).then(() => true, () => false);
 if (has404) throw new Error("dist/404.html exists; Cloudflare Pages would stop serving the app shell for client routes");
 
-console.log(`prerender: wrote ${outputs.length} pages (${Object.keys(seo.STATIC_PAGES).length} static, ${seo.STOCK_SYMBOLS.length} stocks, 1 shell)`);
+console.log(`prerender: wrote ${outputs.length} pages (${Object.keys(seo.STATIC_PAGES).length} static, 2 aliases, ${seo.STOCK_SYMBOLS.length} stocks, 1 shell)`);

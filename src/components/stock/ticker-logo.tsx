@@ -44,7 +44,10 @@ export function TickerLogo({ symbol, size = 56, className }: TickerLogoProps) {
             <img
                 src={src}
                 alt={`${symbol} logo`}
+                width={size}
+                height={size}
                 loading="lazy"
+                decoding="async"
                 onError={() => setFailed(true)}
                 className="h-full w-full object-contain"
             />

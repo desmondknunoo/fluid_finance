@@ -1,6 +1,6 @@
 import { EditorialSections } from '@/components/home/editorial-sections';
 import { SocialFeed, FEED_LINKS } from '@/components/home/social-feed';
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ArrowRight, BookOpen, ChevronRight, Fuel, GraduationCap, Landmark, LifeBuoy, MessageSquare, Newspaper, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { categoryLabel, formatRelative, listForumCategories, listLatestFxRates, listPublicFuelReports, listPublishedArticles, listThreads, type Article, type ForumThread, type FxRate } from "@/lib/community";
@@ -13,9 +13,9 @@ import { compositeSeries } from "@/components/home/composite";
 import { QuoteTape } from "@/components/home/quote-tape";
 import { PriceChart, Sparkline } from "@/components/stock/price-chart";
 import { TickerLogo } from "@/components/stock/ticker-logo";
-import { MoversShareSheet } from "@/components/stock/movers-share-sheet";
 import { UserChip } from "@/components/community/user-chip";
 import { cn } from "@/lib/utils";
+import { lazyRoute } from "@/lib/lazy-route";
 
 /**
  * The front page, laid out like a financial newsroom: tape, market bar, a three-column top grid
@@ -37,6 +37,9 @@ const LEARN = [
     { href: "/help-center", title: "Help Center", note: "Opening an account, minimums, withdrawals and verification.", icon: LifeBuoy },
 ];
 
+// The share sheet (motion and the canvas card renderer) loads the first time someone shares.
+const MoversShareSheet = lazyRoute(() => import("@/components/stock/movers-share-sheet").then((module) => ({ default: module.MoversShareSheet })));
+
 const pct = (value: number) => `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
 
 export default function HomePage() {
@@ -50,6 +53,8 @@ export default function HomePage() {
     const [priorFuel, setPriorFuel] = useState<FuelReport | null>(null);
     const [categories, setCategories] = useState<{ slug: string; name: string }[]>([]);
     const [share, setShare] = useState<"gainers" | "losers" | "active" | null>(null);
+    const [shareLoaded, setShareLoaded] = useState(false);
+    useEffect(() => { if (share) setShareLoaded(true); }, [share]);
 
     useEffect(() => {
         listPublishedArticles({ limit: 120 }).then(setArticles).catch(() => setArticles([]));
@@ -86,7 +91,7 @@ export default function HomePage() {
                     <span>Ghana Stock Exchange · Prices may be delayed</span>
                 </div>
                 <div className="news-page-heading">
-                    <h1>Today<span className="text-fluid-cyan-ink">.</span></h1>
+                    <h1>Today<span className="text-fluid-cyan-ink">.</span><span className="sr-only"> Ghana&apos;s markets on Fluid Finance</span></h1>
                     <div className="news-topic-links"><a href="/gse-live">Equities</a><a href="/fx">Currencies</a><a href="/fuel">Energy</a><a href="/market-trends">Week in review <ArrowRight size={14} aria-hidden="true" /></a></div>
                 </div>
                 <div className="news-session" aria-label="Market session">
@@ -205,13 +210,13 @@ export default function HomePage() {
                     </div>
                     <div className="grid gap-px border-t border-ink/[0.08] bg-ink/[0.08] sm:grid-cols-2 lg:grid-cols-4">
                         {PRESS.map((source) => (
-                            <a key={source.href} href={source.href} target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-canvas px-5 py-3 text-sm hover:bg-ink/[0.02]"><Newspaper size={15} className="shrink-0 text-ink/40" aria-hidden="true" /><span className="min-w-0"><span className="block font-semibold text-ink">{source.title}</span><span className="block truncate text-xs text-ink/45">{source.note}</span></span></a>
+                            <a key={source.href} href={source.href} target="_blank" rel="noreferrer noopener" className="flex items-center gap-3 bg-canvas px-5 py-3 text-sm hover:bg-ink/[0.02]"><Newspaper size={15} className="shrink-0 text-ink/40" aria-hidden="true" /><span className="min-w-0"><span className="block font-semibold text-ink">{source.title}</span><span className="block truncate text-xs text-ink/45">{source.note}</span></span></a>
                         ))}
                     </div>
                 </Band>
             </main>
 
-            <MoversShareSheet open={share !== null} onClose={() => setShare(null)} card={{ category: share ?? "gainers", stocks: share === "losers" ? breadth.losers : share === "active" ? breadth.active : breadth.gainers }} />
+            {(shareLoaded || share !== null) && <Suspense fallback={null}><MoversShareSheet open={share !== null} onClose={() => setShare(null)} card={{ category: share ?? "gainers", stocks: share === "losers" ? breadth.losers : share === "active" ? breadth.active : breadth.gainers }} /></Suspense>}
         </>
     );
 }

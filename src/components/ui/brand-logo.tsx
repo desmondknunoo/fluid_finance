@@ -35,6 +35,7 @@ export function BrandLogo({ variant = "horizontal", className }: BrandLogoProps)
         <img
             src={src}
             alt="Fluid Finance"
+            {...(variant === "mark" ? { width: 343, height: 512 } : { width: 1890, height: 1460 })}
             className={cn("w-auto object-contain", className)}
             draggable={false}
         />

@@ -16,7 +16,9 @@ export function removeSaved(slug:string):void{localStorage.setItem(KEY,JSON.stri
 export async function cacheReadingShell():Promise<void>{
  if(!('serviceWorker'in navigator)||import.meta.env.DEV)return;
  const registration=await Promise.race([navigator.serviceWorker.ready,new Promise<never>((_,reject)=>setTimeout(()=>reject(new Error('Offline caching did not start. Try again while online.')),8000))]);
- const urls=[location.origin+'/',...Array.from(document.querySelectorAll('script[src],link[rel="stylesheet"]')).map(node=>(node as HTMLScriptElement).src||(node as HTMLLinkElement).href)];
+ // The shell, the saved list, this article's page and every script chunk loaded so far (route chunks load on demand).
+ const loaded=performance.getEntriesByType('resource').map(entry=>entry.name).filter(name=>name.startsWith(location.origin+'/assets/'));
+ const urls=[...new Set([location.origin+'/',location.origin+'/shell',location.origin+'/saved',location.origin+location.pathname,...Array.from(document.querySelectorAll('script[src],link[rel="stylesheet"],link[rel="modulepreload"]')).map(node=>(node as HTMLScriptElement).src||(node as HTMLLinkElement).href),...loaded])];
  if(!registration.active)throw Error('Offline cache is not ready. Try again.');
  await new Promise<void>((resolve,reject)=>{
   const channel=new MessageChannel();const timer=setTimeout(()=>{channel.port1.close();reject(Error('Offline files could not be cached. Try again while online.'));},10000);

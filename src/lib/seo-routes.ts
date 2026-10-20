@@ -468,9 +468,12 @@ export interface CategoryLike {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-    markets: "Markets", stocks: "Stocks", economy: "Economy", fuel: "Fuel", fx: "FX & cedi",
+    markets: "Markets", stocks: "Stocks", economy: "Economy", fuel: "Fuel", fx: "FX",
     "personal-finance": "Personal finance", education: "Education", "company-news": "Company news",
 };
+
+/** Article categories the API filters by (community.ARTICLE_CATEGORIES). */
+export const ARTICLE_CATEGORY_IDS = Object.keys(CATEGORY_LABELS);
 
 /** Markdown and HTML reduced to one line of plain text. */
 export function plainText(source: string): string {
