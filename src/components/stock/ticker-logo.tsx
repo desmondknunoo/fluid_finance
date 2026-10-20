@@ -22,12 +22,12 @@ export function TickerLogo({ symbol, size = 56, className }: TickerLogoProps) {
         const hue = tickerHue(symbol);
         return (
             <div
-                className={cn("flex shrink-0 items-center justify-center rounded-xl font-bold text-white", className)}
+                className={cn("flex shrink-0 items-center justify-center font-bold text-white", className)}
                 style={{
                     width: size,
                     height: size,
                     fontSize: size * 0.32,
-                    background: `linear-gradient(135deg, hsl(${hue} 62% 42%), hsl(${(hue + 40) % 360} 58% 26%))`,
+                    background: `hsl(${hue} 55% 34%)`,
                 }}
                 aria-hidden="true"
             >
@@ -38,7 +38,7 @@ export function TickerLogo({ symbol, size = 56, className }: TickerLogoProps) {
 
     return (
         <div
-            className={cn("flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white", className)}
+            className={cn("flex shrink-0 items-center justify-center overflow-hidden border border-ink/[0.19] bg-white", className)}
             style={{ width: size, height: size, padding: Math.max(3, size * 0.1) }}
         >
             <img

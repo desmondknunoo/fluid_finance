@@ -137,7 +137,7 @@ export function HeatSquares({ stocks, onSelect, marketCaps = {}, height = 560 }:
         <div>
             <div
                 ref={containerRef}
-                className="relative w-full overflow-hidden rounded-xl"
+                className="relative w-full overflow-hidden"
                 style={{ height }}
             >
                 {tiles.map(({ stock, x, y, w, h }) => {
@@ -182,7 +182,7 @@ export function HeatSquares({ stocks, onSelect, marketCaps = {}, height = 560 }:
             {/* Legend */}
             <div className="mt-4 flex items-center justify-center gap-3">
                 <span className="font-mono text-[11px] text-ink/40">-5%</span>
-                <div className="flex h-2 w-56 overflow-hidden rounded-full">
+                <div className="flex h-2 w-56 overflow-hidden">
                     {[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5].map((p) => (
                         <div key={p} className="flex-1" style={{ backgroundColor: heatColor(p) }} />
                     ))}

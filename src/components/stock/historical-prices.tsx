@@ -1,8 +1,5 @@
-"use client";
-
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { listCloses, type StockClose as StockPrice } from "@/lib/closes";
 
 interface DateGroup {
@@ -10,6 +7,7 @@ interface DateGroup {
   prices: StockPrice[];
 }
 
+/** Recorded closing prices, one trading day at a time, as an editorial data table. */
 export function HistoricalPrices() {
   const [groups, setGroups] = useState<DateGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,23 +43,18 @@ export function HistoricalPrices() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-6 h-6 animate-spin text-ink/40" />
-      </div>
-    );
+    return <p className="news-loading" role="status">Loading closing prices…</p>;
   }
 
   if (error) {
-    return (
-      <div className="text-center py-12 text-sm text-rose-500">{error}</div>
-    );
+    return <p className="news-notice news-notice--error" role="alert">{error}</p>;
   }
 
   if (groups.length === 0) {
     return (
-      <div className="text-center py-12 text-sm text-ink/40">
-        No price history recorded yet. Data will appear as the app is used.
+      <div className="news-empty">
+        <h3>No closing prices yet</h3>
+        <p>No price history recorded yet. Data will appear as the app is used.</p>
       </div>
     );
   }
@@ -71,66 +64,53 @@ export function HistoricalPrices() {
   const hasNext = pageIndex > 0;
 
   return (
-    <div className="rounded-2xl bg-ink/[0.03] border border-ink/[0.08] overflow-hidden">
-      {/* Header with pagination */}
-      <div className="flex items-center justify-between border-b border-ink/[0.08] px-5 py-4">
-        <div className="flex items-center gap-3">
-          <Calendar size={14} className="text-ink/40" />
-          <h3 className="text-sm font-bold text-ink">{formatDisplayDate(current.date)}</h3>
-          <span className="text-xs text-ink/40">{current.prices.length} stocks</span>
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-3 py-3">
+        <div className="flex items-baseline gap-3">
+          <h3 className="news-headline-sm">{formatDisplayDate(current.date)}</h3>
+          <span className="news-byline">{current.prices.length} stocks</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-ink/40 mr-2">
-            {pageIndex + 1} / {groups.length}
-          </span>
+          <span className="news-byline tabular-nums">{pageIndex + 1} / {groups.length}</span>
           <button
+            type="button"
             onClick={() => hasPrev && setPageIndex(pageIndex + 1)}
             disabled={!hasPrev}
-            className="rounded-lg border border-ink/10 p-1.5 text-ink/40 transition-colors hover:bg-ink/[0.05] hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed"
+            aria-label="Earlier trading day"
+            className="news-icon-button disabled:cursor-not-allowed disabled:opacity-30"
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={16} aria-hidden="true" />
           </button>
           <button
+            type="button"
             onClick={() => hasNext && setPageIndex(pageIndex - 1)}
             disabled={!hasNext}
-            className="rounded-lg border border-ink/10 p-1.5 text-ink/40 transition-colors hover:bg-ink/[0.05] hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed"
+            aria-label="Later trading day"
+            className="news-icon-button disabled:cursor-not-allowed disabled:opacity-30"
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={16} aria-hidden="true" />
           </button>
         </div>
       </div>
 
-      {/* Table */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={current.date}
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -10 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-ink/[0.06] bg-ink/[0.01]">
-                  <th className="px-5 py-3 text-[10px] font-semibold text-ink/40 uppercase tracking-wider">Symbol</th>
-                  <th className="px-5 py-3 text-[10px] font-semibold text-ink/40 uppercase tracking-wider text-right">Closing Price</th>
-                </tr>
-              </thead>
-              <tbody>
-                {current.prices.map((row) => (
-                  <tr key={`${row.trading_date}-${row.symbol}`} className="border-b border-ink/[0.04] last:border-0 hover:bg-ink/[0.02] transition-colors">
-                    <td className="px-5 py-2.5 font-bold text-ink uppercase text-sm">{row.symbol}</td>
-                    <td className="px-5 py-2.5 text-right font-mono text-sm text-ink">
-                      GHS {row.price.toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </motion.div>
-      </AnimatePresence>
+      <div className="news-table-wrap">
+        <table className="news-table">
+          <thead>
+            <tr>
+              <th scope="col">Symbol</th>
+              <th scope="col" className="num">Closing price</th>
+            </tr>
+          </thead>
+          <tbody>
+            {current.prices.map((row) => (
+              <tr key={`${row.trading_date}-${row.symbol}`}>
+                <td className="font-bold uppercase">{row.symbol}</td>
+                <td className="num">GHS {row.price.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

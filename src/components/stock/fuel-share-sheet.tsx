@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Copy, Download, Share2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Copy, Download, Loader2, Share2, X } from "lucide-react";
+import { Notice, PrimaryButton, QuietButton } from "@/components/ui/form";
 import { renderFuelCards } from "@/lib/fuel-share-card";
 import { formatFuelDate, type FuelReport } from "@/lib/fuel-prices";
 
@@ -55,16 +56,32 @@ export function FuelShareSheet({ report, previous = null, onClose }: { report: F
         try { await navigator.share({ files: [file], title: "Fluid Pump Report", text: `Fluid Pump Report · ${formatFuelDate(report.report_date)}` }); }
         catch (err) { if (!(err instanceof DOMException && err.name === "AbortError")) setMessage("Sharing failed. Download the image and attach it to your post."); }
     };
-    return <dialog ref={dialog} onCancel={onClose} onClick={e => { if (e.target === e.currentTarget) onClose(); }} aria-labelledby="fuel-share-title" className="m-auto max-h-[92dvh] w-[calc(100%-2rem)] max-w-lg overflow-y-auto rounded-2xl border border-ink/15 bg-canvas p-5 text-ink backdrop:bg-black/75">
-        <div className="mb-4 flex items-center justify-between gap-3"><h2 id="fuel-share-title" className="text-lg font-semibold">Share Fluid Pump Report</h2><button type="button" onClick={onClose} aria-label="Close share preview" className="rounded-lg p-3 hover:bg-ink/10 focus-visible:outline-fluid-cyan"><X size={20} /></button></div>
-        {image ? <img src={image.url} alt={`Fluid Pump Report for ${formatFuelDate(report.report_date)}, page ${page + 1} of ${images.length}`} className="w-full rounded-lg" /> : <div className="flex min-h-64 flex-col items-center justify-center gap-4 p-6 text-center" role="status">{error || "Checking every OMC logo and generating your report images…"}{error && <button onClick={() => setAttempt(n => n + 1)} className="underline">Retry image generation</button>}</div>}
-        {images.length > 1 && <div className="mt-4 flex items-center justify-between gap-3"><button disabled={page === 0} onClick={() => { setPage(n => n - 1); setMessage(""); }} className="rounded-lg border border-ink/20 px-3 py-2 disabled:opacity-40">Previous</button><span aria-live="polite" className="text-sm">Page {page + 1} of {images.length}</span><button disabled={page === images.length - 1} onClick={() => { setPage(n => n + 1); setMessage(""); }} className="rounded-lg border border-ink/20 px-3 py-2 disabled:opacity-40">Next</button></div>}
-        <div className="mt-5 grid grid-cols-3 gap-2">
-            <button disabled={!image} onClick={share} className="flex items-center justify-center gap-2 rounded-xl bg-fluid-cyan px-2 py-3 text-sm font-semibold text-fluid-action-ink disabled:opacity-40"><Share2 size={16} />Share</button>
-            <button disabled={!image} onClick={copy} className="flex items-center justify-center gap-2 rounded-xl border border-ink/20 px-2 py-3 text-sm disabled:opacity-40"><Copy size={16} />Copy</button>
-            <button disabled={!image} onClick={download} className="flex items-center justify-center gap-2 rounded-xl border border-ink/20 px-2 py-3 text-sm disabled:opacity-40"><Download size={16} />Save image</button>
+    return <dialog ref={dialog} onCancel={onClose} onClick={e => { if (e.target === e.currentTarget) onClose(); }} aria-labelledby="fuel-share-title" className="m-auto max-h-[92dvh] w-[calc(100%-2rem)] max-w-lg overflow-y-auto border border-ink bg-canvas p-5 text-ink shadow-lg backdrop:bg-black/70 sm:p-6">
+        <div className="flex items-start justify-between gap-4 border-b-[3px] border-ink pb-3">
+            <div className="min-w-0">
+                <p className="news-kicker">Fuel prices</p>
+                <h2 id="fuel-share-title" className="mt-1 font-poppins text-[22px] font-bold leading-[1.1] tracking-[-0.02em]">Share Fluid Pump Report</h2>
+            </div>
+            <button type="button" onClick={onClose} aria-label="Close share preview" className="news-icon-button h-10 w-10 shrink-0"><X size={18} aria-hidden="true" /></button>
         </div>
-        <p className="mt-4 text-xs leading-relaxed text-ink/60">Share, copy or download the selected page. Each image includes up to 10 OMCs with their logos. Use Previous and Next to export every page.</p>
-        <p role="status" className="mt-3 text-sm text-fluid-cyan-ink">{message}</p>
+        <div className="mt-5 border border-ink/[0.19] bg-canvas">
+            {image
+                ? <img src={image.url} alt={`Fluid Pump Report for ${formatFuelDate(report.report_date)}, page ${page + 1} of ${images.length}`} className="block w-full" />
+                : error
+                    ? <div className="flex min-h-64 flex-col items-center justify-center gap-4 p-6"><Notice tone="error" className="w-full">{error}</Notice><QuietButton size="sm" onClick={() => setAttempt(n => n + 1)}>Retry image generation</QuietButton></div>
+                    : <div className="flex min-h-64 flex-col items-center justify-center gap-4 p-6 text-center text-sm text-ink/[0.68]" role="status"><Loader2 size={22} className="animate-spin" aria-hidden="true" />Checking every OMC logo and generating your report images…</div>}
+        </div>
+        {images.length > 1 && <div className="mt-3 flex items-center justify-between gap-3">
+            <button type="button" disabled={page === 0} onClick={() => { setPage(n => n - 1); setMessage(""); }} className="news-icon-button grid-flow-col gap-1 pl-2 pr-3 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-45"><ChevronLeft size={16} aria-hidden="true" />Previous</button>
+            <span aria-live="polite" className="text-xs font-semibold tabular-nums text-ink/[0.68]"><span className="sr-only">Page {page + 1} of {images.length}</span><span aria-hidden="true">{page + 1} / {images.length}</span></span>
+            <button type="button" disabled={page === images.length - 1} onClick={() => { setPage(n => n + 1); setMessage(""); }} className="news-icon-button grid-flow-col gap-1 pl-3 pr-2 text-xs font-bold disabled:cursor-not-allowed disabled:opacity-45">Next<ChevronRight size={16} aria-hidden="true" /></button>
+        </div>}
+        <div className="mt-5 flex flex-wrap gap-2">
+            <PrimaryButton disabled={!image} onClick={share} className="grow basis-24"><Share2 size={16} aria-hidden="true" />Share</PrimaryButton>
+            <QuietButton disabled={!image} onClick={copy} className="grow basis-24"><Copy size={16} aria-hidden="true" />Copy</QuietButton>
+            <QuietButton disabled={!image} onClick={download} className="grow basis-28"><Download size={16} aria-hidden="true" />Save image</QuietButton>
+        </div>
+        <p className="mt-4 border-t border-ink/[0.19] pt-3 text-xs leading-relaxed text-ink/[0.68]">Share, copy or download the selected page. Each image includes up to 10 OMCs with their logos. Use Previous and Next to export every page.</p>
+        <p role="status" className={message ? "news-notice mt-3" : "sr-only"}>{message}</p>
     </dialog>;
 }

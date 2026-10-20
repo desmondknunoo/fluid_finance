@@ -26,17 +26,17 @@ export function StockCard({ stock, onSelect, rank, showVolume = true }: StockCar
         <button
             type="button"
             onClick={() => onSelect(stock.symbol)}
-            className="flex w-full items-center gap-3 rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-3 text-left transition-colors hover:border-ink/20 hover:bg-ink/[0.05] focus:outline-none focus:ring-2 focus:ring-fluid-cyan/60 active:bg-ink/[0.06]"
+            className="flex w-full items-center gap-3 border-b border-ink/[0.19] px-0 py-3 text-left transition-colors hover:bg-ink/[0.055] active:bg-ink/[0.08]"
         >
             {rank !== undefined && (
-                <span className="w-4 shrink-0 text-center font-mono text-xs text-ink/30">{rank}</span>
+                <span className="w-4 shrink-0 text-center text-xs tabular-nums text-ink/[0.68]">{rank}</span>
             )}
             <TickerLogo symbol={stock.symbol} size={38} />
 
             <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-2">
                     <span className="truncate font-bold uppercase text-ink">{stock.symbol}</span>
-                    <span className="shrink-0 font-mono text-ink">{formatCedis(stock.price)}</span>
+                    <span className="shrink-0 tabular-nums text-ink">{formatCedis(stock.price)}</span>
                 </div>
                 <div className="mt-0.5 flex items-center justify-between gap-2">
                     <span className="truncate text-xs text-ink/40">{stock.company}</span>

@@ -1,23 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
-import {
-    ArrowLeft,
-    Download,
-    Globe,
-    Loader2,
-    Mail,
-    MapPin,
-    Phone,
-    ShoppingCart,
-    Share2,
-    TrendingDown,
-    TrendingUp,
-} from "lucide-react";
+import { ArrowLeft, Download, Loader2, ShoppingCart, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PriceChart } from "@/components/stock/price-chart";
 import { TickerLogo } from "@/components/stock/ticker-logo";
 import { ShareSheet } from "@/components/stock/share-sheet";
 import { BuyRedirectSheet } from "@/components/stock/buy-redirect-sheet";
+import { EmptyState, Notice } from "@/components/ui/form";
+import { ThemeToggleButton } from "@/components/ui/theme-toggle";
 import {
     formatCedis,
     formatCompact,
@@ -30,44 +19,48 @@ import {
 } from "@/lib/gse";
 import { getSeries, periodChange, recordClose, RANGES, sliceRange, type RangeKey } from "@/lib/history";
 
-function StatRow({ label, value }: { label: string; value: string }) {
+/** One label/value row of the key-facts rail. */
+function FactRow({ label, value }: { label: string; value: string }) {
     return (
-        <div className="flex items-baseline justify-between border-b border-ink/[0.05] py-3 last:border-0">
-            <span className="text-sm text-ink/40">{label}</span>
-            <span className="font-mono text-sm text-ink">{value}</span>
-        </div>
+        <li className="flex items-baseline justify-between gap-4 text-sm">
+            <span className="text-ink/[0.68]">{label}</span>
+            <span className="news-mono text-right font-semibold text-ink">{value}</span>
+        </li>
     );
 }
 
-function ActionChip({
-    icon,
-    label,
-    tone = "default",
-    onClick,
-}: {
-    icon: React.ReactNode;
-    label: string;
-    tone?: "default" | "positive";
-    onClick?: () => void;
-}) {
+/** A stacked label/value row for longer company facts (address, contacts). */
+function ProfileRow({ label, children }: { label: string; children: React.ReactNode }) {
     return (
-        <button
-            type="button"
-            onClick={onClick}
-            className={cn(
-                "flex flex-1 items-center justify-center gap-2 rounded-xl border border-ink/[0.08] bg-ink/[0.03] px-3 py-3.5 text-sm font-medium transition-colors hover:border-ink/20 hover:bg-ink/[0.06]",
-                tone === "positive" ? "text-emerald-400" : "text-ink/70",
-            )}
-        >
-            {icon}
-            <span className="hidden sm:inline">{label}</span>
-            <span className="sm:hidden">{label.split(" ")[0]}</span>
-        </button>
+        <li className="text-sm">
+            <span className="news-label">{label}</span>
+            <span className="block break-words text-ink">{children}</span>
+        </li>
+    );
+}
+
+function SessionStat({ label, value, tone }: { label: string; value: string; tone?: "up" | "down" }) {
+    return (
+        <div className="news-stat">
+            <dt>{label}</dt>
+            <dd className={tone === "up" ? "news-up" : tone === "down" ? "news-down" : undefined}>{value}</dd>
+        </div>
     );
 }
 
 type Tab = "details" | "company" | "directors";
 
+const TABS: [Tab, string][] = [
+    ["details", "Details"],
+    ["company", "Company"],
+    ["directors", "Directors"],
+];
+
+/**
+ * The company page at #/stock/<SYMBOL>. It renders on its own, outside the site masthead, so it
+ * carries a slim bar of its own (back, share, theme) above the editorial page: an intro with the
+ * company name and last price, the session figures, then the chart beside a key-facts rail.
+ */
 export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => void }) {
     const [stock, setStock] = useState<Stock | null>(null);
     const [detail, setDetail] = useState<EquityDetail | null>(null);
@@ -122,27 +115,32 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
 
     if (error) {
         return (
-            <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-canvas px-6 text-center">
-                <p className="text-ink/60">{error}</p>
-                <button
-                    onClick={onBack}
-                    className="rounded-full border border-ink/10 px-5 py-2 text-sm text-ink/70 transition-colors hover:text-ink"
-                >
-                    Back to market
-                </button>
+            <div className="finance-public min-h-screen bg-canvas text-ink">
+                <main className="page-container news-page">
+                    {/* .news-page zeroes top padding, so the gap comes from this wrapper. */}
+                    <div className="pt-10">
+                        <Notice tone="error">{error}</Notice>
+                        <button type="button" onClick={onBack} className="news-button-secondary mt-6">
+                            <ArrowLeft size={16} aria-hidden="true" />
+                            Back to market
+                        </button>
+                    </div>
+                </main>
             </div>
         );
     }
 
     if (!stock || !series) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-canvas">
-                <Loader2 className="h-8 w-8 animate-spin text-ink/40" />
+            <div className="finance-public flex min-h-screen items-center justify-center bg-canvas text-ink/[0.68]" role="status">
+                <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+                <span className="sr-only">Loading {symbol}</span>
             </div>
         );
     }
 
     const positive = stock.change >= 0;
+    const windowPositive = windowChange.change >= 0;
     const asOf = new Date().toLocaleString("en-GB", {
         day: "numeric",
         month: "short",
@@ -153,25 +151,28 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
     });
 
     return (
-        <div className="min-h-screen bg-canvas pb-16 text-ink selection:bg-fluid-cyan selection:text-fluid-action-ink">
-            {/* Header */}
-            <header className="sticky top-0 z-40 border-b border-ink/[0.08] bg-canvas/85 backdrop-blur-md">
-                <div className="mx-auto flex max-w-3xl items-center px-4 py-4 md:px-6">
-                    <button
-                        onClick={onBack}
-                        aria-label="Back to market"
-                        className="rounded-full p-2 text-ink/70 transition-colors hover:bg-ink/[0.06] hover:text-ink"
-                    >
-                        <ArrowLeft size={20} />
+        <div className="finance-public min-h-screen bg-canvas text-ink selection:bg-fluid-cyan selection:text-fluid-action-ink">
+            {/* Page bar: this route has no site masthead, so back, share and theme live here. */}
+            <header className="sticky top-0 z-40 border-b border-ink/[0.19] bg-canvas">
+                <div className="page-container flex min-h-[56px] items-center justify-between gap-4">
+                    <button type="button" onClick={onBack} aria-label="Back to market" className="news-text-link">
+                        <ArrowLeft size={16} aria-hidden="true" />
+                        Back to market
                     </button>
-                    <h1 className="flex-1 text-center text-base font-bold tracking-widest">{stock.symbol}</h1>
-                    <button
-                        onClick={() => setShareOpen(true)}
-                        aria-label={`Share ${stock.symbol}`}
-                        className="rounded-full p-2 text-ink/70 transition-colors hover:bg-ink/[0.06] hover:text-ink"
-                    >
-                        <Share2 size={19} />
-                    </button>
+                    <span className="news-mono text-sm font-bold tracking-[0.12em]" aria-hidden="true">
+                        {stock.symbol}
+                    </span>
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setShareOpen(true)}
+                            aria-label={`Share ${stock.symbol}`}
+                            className="news-icon-button"
+                        >
+                            <Share2 size={16} aria-hidden="true" />
+                        </button>
+                        <ThemeToggleButton className="h-9 w-9" />
+                    </div>
                 </div>
             </header>
 
@@ -199,290 +200,250 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                 company={stock.company}
             />
 
-            <div className="mx-auto max-w-3xl px-4 md:px-6">
+            <main className="page-container news-page">
                 {/* Identity + price */}
-                <motion.section
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4 }}
-                    className="flex items-start gap-4 py-6"
-                >
-                    <TickerLogo symbol={stock.symbol} />
-                    <div className="min-w-0 flex-1">
-                        <h2 className="truncate text-xl font-bold">{stock.company}</h2>
-                        <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                            <span className="rounded bg-ink/[0.08] px-2 py-0.5 font-mono text-xs text-ink/70">
-                                {stock.symbol}
+                <header className="news-page-intro">
+                    <div>
+                        <div className="news-kicker">
+                            {meta.sector} · Ghana Stock Exchange
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <TickerLogo symbol={stock.symbol} size={52} />
+                            <h1 className="min-w-0 break-words">{stock.company}</h1>
+                        </div>
+                        <div className="news-byline mt-4 flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <span>Equity · {meta.industry}</span>
+                            <span aria-hidden="true">·</span>
+                            <span>As of {asOf} GMT</span>
+                            <span aria-hidden="true">·</span>
+                            <span className="inline-flex items-center gap-1.5">
+                                <span
+                                    className={cn(
+                                        "h-2 w-2 rounded-full",
+                                        marketOpen ? "animate-pulse bg-fluid-green" : "bg-fluid-rose",
+                                    )}
+                                    aria-hidden="true"
+                                />
+                                <strong className={marketOpen ? "text-fluid-green" : "text-fluid-rose"}>
+                                    {marketOpen ? "Market open" : "Market closed"}
+                                </strong>
                             </span>
-                            <span className="text-xs text-ink/40">Equity</span>
-                            <span className="text-ink/20">·</span>
-                            <span className="text-xs text-ink/40">{meta.sector}</span>
                         </div>
                     </div>
-                    <div className="text-right">
-                        <div className="text-2xl font-bold">{formatCedis(stock.price)}</div>
-                        <div
-                            className={cn(
-                                "mt-1 flex items-center justify-end gap-1 text-sm font-medium",
-                                positive ? "text-emerald-400" : "text-rose-400",
-                            )}
-                        >
-                            {positive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+
+                    <div className="news-page-actions !flex-none flex-col items-start md:items-end">
+                        <dl className="md:text-right">
+                            <div className="news-stat">
+                                <dt>{stock.symbol} · GHS</dt>
+                                <dd>{formatCedis(stock.price)}</dd>
+                            </div>
+                        </dl>
+                        <span className={cn("news-pill gap-1", positive ? "news-pill--up" : "news-pill--down")}>
+                            {positive ? <TrendingUp size={12} aria-hidden="true" /> : <TrendingDown size={12} aria-hidden="true" />}
                             {positive ? "+" : ""}
                             {stock.changePercent.toFixed(2)}% ({positive ? "+" : ""}
                             {stock.change.toFixed(2)})
-                        </div>
-                    </div>
-                </motion.section>
-
-                <div className="flex flex-wrap items-center gap-2 pb-4 text-xs text-ink/40">
-                    <span>As of {asOf} GMT</span>
-                    <span className="text-ink/20">·</span>
-                    <span className="flex items-center gap-1.5">
-                        <span
-                            className={cn(
-                                "h-2 w-2 rounded-full",
-                                marketOpen ? "animate-pulse bg-emerald-400" : "bg-red-500",
-                            )}
-                        />
-                        <span className={marketOpen ? "" : "text-red-500"}>
-                            {marketOpen ? "Market open" : "Market closed"}
                         </span>
-                    </span>
-                </div>
-
-                {/* Chart */}
-                <motion.section
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.05 }}
-                    className="rounded-2xl border border-ink/[0.08] bg-ink/[0.02] p-4"
-                >
-                    <div className="mb-2 flex items-baseline justify-between">
-                        <span className="text-xs uppercase tracking-wider text-ink/40">Price history</span>
-                        <span
-                            className={cn(
-                                "font-mono text-xs",
-                                windowChange.change >= 0 ? "text-emerald-400" : "text-rose-400",
-                            )}
-                        >
-                            {windowChange.change >= 0 ? "+" : ""}
-                            {windowChange.percent.toFixed(2)}% over {range}
-                        </span>
+                        <button type="button" onClick={() => setBuyOpen(true)} className="news-button mt-1">
+                            <ShoppingCart size={16} aria-hidden="true" />
+                            Buy
+                        </button>
                     </div>
+                </header>
 
-                    <PriceChart points={visible} positive={windowChange.change >= 0} height={300} />
+                {/* Session figures */}
+                <dl className="news-stats" aria-label="Session">
+                    <SessionStat label="Last" value={formatCedis(stock.price)} />
+                    <SessionStat
+                        label="Change"
+                        value={`${positive ? "+" : ""}${stock.change.toFixed(2)}`}
+                        tone={stock.change > 0 ? "up" : stock.change < 0 ? "down" : undefined}
+                    />
+                    <SessionStat label="Prev close" value={formatCedis(stock.price - stock.change)} />
+                    <SessionStat label="Volume" value={stock.volume.toLocaleString()} />
+                </dl>
 
-                    <div className="mt-3 flex items-center justify-between gap-1 border-t border-ink/[0.06] pt-3">
-                        {RANGES.map((key) => (
+                <div className="news-columns news-columns--main mt-10">
+                    {/* Chart */}
+                    <section aria-labelledby="price-history-heading">
+                        <h2 id="price-history-heading" className="news-subhead flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                            Price history
+                            <span className={cn("news-mono font-sans text-xs font-semibold", windowPositive ? "news-up" : "news-down")}>
+                                {windowPositive ? "+" : ""}
+                                {windowChange.percent.toFixed(2)}% over {range}
+                            </span>
+                        </h2>
+
+                        {/* Range tabs and export share one hairline, as on the GSE Live board. */}
+                        <div className="mb-6 flex flex-wrap items-end justify-between gap-x-4 gap-y-2 border-b border-ink/[0.19]">
+                            <div className="flex flex-wrap gap-x-1" role="tablist" aria-label="Chart range">
+                                {RANGES.map((key) => (
+                                    <button
+                                        key={key}
+                                        type="button"
+                                        role="tab"
+                                        aria-selected={range === key}
+                                        onClick={() => setRange(key)}
+                                        className="news-tab !px-2.5 first:!pl-0"
+                                    >
+                                        {key}
+                                    </button>
+                                ))}
+                            </div>
                             <button
-                                key={key}
-                                onClick={() => setRange(key)}
-                                className={cn(
-                                    "flex-1 rounded-lg py-2 text-xs font-semibold transition-colors",
-                                    range === key
-                                        ? "bg-ink/[0.1] text-ink"
-                                        : "text-ink/40 hover:text-ink/80",
-                                )}
+                                type="button"
+                                onClick={() => exportSeries(stock.symbol, visible)}
+                                className="news-button-quiet news-button-quiet--sm mb-2"
                             >
-                                {key}
+                                <Download size={14} aria-hidden="true" />
+                                Export CSV
                             </button>
-                        ))}
-                    </div>
-
-                    <p className="mt-3 text-[11px] leading-relaxed text-ink/30">
-                        {series.recordedFrom
-                            ? `Closes recorded live from ${new Date(series.recordedFrom).toLocaleDateString("en-GB", {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                                  timeZone: "UTC",
-                              })}. Earlier bars are backfilled — the GSE API serves live quotes only, with no historical series.`
-                            : "The GSE API serves live quotes only, with no historical series. Earlier bars are backfilled and anchored to today's real close; live closes are recorded from today onward."}
-                    </p>
-                </motion.section>
-
-                    {/* Alerts */}
-                <div className="mt-4 flex gap-2">
-                    <ActionChip
-                        icon={<ShoppingCart size={16} />}
-                        label="Buy"
-                        tone="positive"
-                        onClick={() => setBuyOpen(true)}
-                    />
-                    <ActionChip
-                        icon={<Download size={16} />}
-                        label="Export CSV"
-                        onClick={() => exportSeries(stock.symbol, visible)}
-                    />
-                </div>
-
-                {/* Session stats */}
-                <section className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    {[
-                        { label: "Last", value: formatCedis(stock.price) },
-                        { label: "Change", value: `${positive ? "+" : ""}${stock.change.toFixed(2)}` },
-                        { label: "Prev close", value: formatCedis(stock.price - stock.change) },
-                        { label: "Volume", value: stock.volume.toLocaleString() },
-                    ].map((item) => (
-                        <div
-                            key={item.label}
-                            className="rounded-xl border border-ink/[0.08] bg-ink/[0.02] px-3 py-3"
-                        >
-                            <div className="text-[10px] uppercase tracking-wider text-ink/40">{item.label}</div>
-                            <div className="mt-1 font-mono text-sm text-ink">{item.value}</div>
                         </div>
-                    ))}
-                </section>
 
-                {/* Tabs */}
-                <section className="mt-6 overflow-hidden rounded-2xl border border-ink/[0.08] bg-ink/[0.02]">
-                    <div className="flex border-b border-ink/[0.08]">
-                        {(
-                            [
-                                ["details", "Details"],
-                                ["company", "Company"],
-                                ["directors", "Directors"],
-                            ] as [Tab, string][]
-                        ).map(([key, label]) => (
-                            <button
-                                key={key}
-                                onClick={() => setTab(key)}
-                                className={cn(
-                                    "flex-1 py-3.5 text-sm font-medium transition-colors",
-                                    tab === key ? "bg-ink/[0.05] text-ink" : "text-ink/40 hover:text-ink",
-                                )}
-                            >
-                                {label}
-                            </button>
-                        ))}
-                    </div>
+                        <PriceChart points={visible} positive={windowPositive} height={300} />
 
-                    <div className="px-5 py-2">
-                        {tab === "details" && (
-                            <>
-                                <StatRow label="Ticker" value={stock.symbol} />
-                                <StatRow label="Sector" value={meta.sector} />
-                                <StatRow label="Industry" value={meta.industry} />
-                                <StatRow
-                                    label="Market cap"
-                                    value={detail?.capital ? `₵${formatCompact(detail.capital)}` : "—"}
-                                />
-                                <StatRow
-                                    label="Shares outstanding"
-                                    value={detail?.shares ? formatCompact(detail.shares) : "—"}
-                                />
-                                <StatRow
-                                    label="Earnings per share"
-                                    value={detail?.eps != null ? formatCedis(detail.eps) : "—"}
-                                />
-                                <StatRow
-                                    label="Dividend per share"
-                                    value={detail?.dps != null ? formatCedis(detail.dps) : "—"}
-                                />
-                                <StatRow
-                                    label="P/E ratio"
-                                    value={
-                                        detail?.eps && detail.eps > 0 ? (stock.price / detail.eps).toFixed(2) : "—"
-                                    }
-                                />
-                                <StatRow
-                                    label="Dividend yield"
-                                    value={
-                                        detail?.dps && stock.price > 0
-                                            ? `${((detail.dps / stock.price) * 100).toFixed(2)}%`
-                                            : "—"
-                                    }
-                                />
-                            </>
-                        )}
+                        <p className="news-byline mt-4 border-t border-ink/[0.19] pt-3">
+                            {series.recordedFrom
+                                ? `Closes recorded live from ${new Date(series.recordedFrom).toLocaleDateString("en-GB", {
+                                      day: "numeric",
+                                      month: "short",
+                                      year: "numeric",
+                                      timeZone: "UTC",
+                                  })}. Earlier bars are backfilled — the GSE API serves live quotes only, with no historical series.`
+                                : "The GSE API serves live quotes only, with no historical series. Earlier bars are backfilled and anchored to today's real close; live closes are recorded from today onward."}
+                        </p>
+                    </section>
 
-                        {tab === "company" && (
-                            <div className="py-3">
-                                {detail?.company ? (
-                                    <div className="space-y-4">
-                                        <div>
-                                            <div className="text-xs uppercase tracking-wider text-ink/40">
-                                                Registered name
-                                            </div>
-                                            <div className="mt-1 text-sm text-ink">{detail.company.name}</div>
-                                        </div>
+                    {/* Key facts rail */}
+                    {/* On one column the subhead's heavy rule already divides; drop the stacked hairline above it. */}
+                    <aside aria-labelledby="key-facts-heading" className="max-md:!border-t-0 max-md:!pt-0">
+                        <h2 id="key-facts-heading" className="news-subhead">Key facts</h2>
+                        <div className="news-tabs" role="tablist" aria-label="Company information">
+                            {TABS.map(([key, label]) => (
+                                <button
+                                    key={key}
+                                    id={`stock-tab-${key}`}
+                                    type="button"
+                                    role="tab"
+                                    aria-selected={tab === key}
+                                    aria-controls="stock-tab-panel"
+                                    onClick={() => setTab(key)}
+                                    className="news-tab"
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div id="stock-tab-panel" role="tabpanel" aria-labelledby={`stock-tab-${tab}`}>
+                            {tab === "details" && (
+                                <ul className="news-list">
+                                    <FactRow label="Ticker" value={stock.symbol} />
+                                    <FactRow label="Sector" value={meta.sector} />
+                                    <FactRow label="Industry" value={meta.industry} />
+                                    <FactRow
+                                        label="Market cap"
+                                        value={detail?.capital ? `₵${formatCompact(detail.capital)}` : "—"}
+                                    />
+                                    <FactRow
+                                        label="Shares outstanding"
+                                        value={detail?.shares ? formatCompact(detail.shares) : "—"}
+                                    />
+                                    <FactRow
+                                        label="Earnings per share"
+                                        value={detail?.eps != null ? formatCedis(detail.eps) : "—"}
+                                    />
+                                    <FactRow
+                                        label="Dividend per share"
+                                        value={detail?.dps != null ? formatCedis(detail.dps) : "—"}
+                                    />
+                                    <FactRow
+                                        label="P/E ratio"
+                                        value={
+                                            detail?.eps && detail.eps > 0 ? (stock.price / detail.eps).toFixed(2) : "—"
+                                        }
+                                    />
+                                    <FactRow
+                                        label="Dividend yield"
+                                        value={
+                                            detail?.dps && stock.price > 0
+                                                ? `${((detail.dps / stock.price) * 100).toFixed(2)}%`
+                                                : "—"
+                                        }
+                                    />
+                                </ul>
+                            )}
+
+                            {tab === "company" &&
+                                (detail?.company ? (
+                                    <ul className="news-list">
+                                        <ProfileRow label="Registered name">{detail.company.name}</ProfileRow>
                                         {detail.company.address && (
-                                            <div className="flex gap-3">
-                                                <MapPin size={16} className="mt-0.5 shrink-0 text-ink/30" />
-                                                <span className="text-sm text-ink/70">{detail.company.address}</span>
-                                            </div>
+                                            <ProfileRow label="Address">{detail.company.address}</ProfileRow>
                                         )}
                                         {detail.company.telephone && (
-                                            <div className="flex gap-3">
-                                                <Phone size={16} className="mt-0.5 shrink-0 text-ink/30" />
-                                                <span className="text-sm text-ink/70">{detail.company.telephone}</span>
-                                            </div>
+                                            <ProfileRow label="Telephone">
+                                                <span className="news-mono">{detail.company.telephone}</span>
+                                            </ProfileRow>
                                         )}
                                         {detail.company.email && (
-                                            <div className="flex gap-3">
-                                                <Mail size={16} className="mt-0.5 shrink-0 text-ink/30" />
+                                            <ProfileRow label="Email">
                                                 <a
                                                     href={`mailto:${detail.company.email}`}
-                                                    className="text-sm text-ink/70 hover:text-ink"
+                                                    className="text-fluid-cyan-ink underline-offset-4 hover:underline"
                                                 >
                                                     {detail.company.email}
                                                 </a>
-                                            </div>
+                                            </ProfileRow>
                                         )}
                                         {detail.company.website && (
-                                            <div className="flex gap-3">
-                                                <Globe size={16} className="mt-0.5 shrink-0 text-ink/30" />
+                                            <ProfileRow label="Website">
                                                 <a
                                                     href={`https://${detail.company.website.replace(/^https?:\/\//, "")}`}
                                                     target="_blank"
                                                     rel="noreferrer noopener"
-                                                    className="text-sm text-ink/70 hover:text-ink"
+                                                    className="text-fluid-cyan-ink underline-offset-4 hover:underline"
                                                 >
                                                     {detail.company.website}
                                                 </a>
-                                            </div>
+                                            </ProfileRow>
                                         )}
-                                    </div>
+                                    </ul>
                                 ) : (
-                                    <p className="py-6 text-center text-sm text-ink/40">
+                                    <EmptyState title="No company profile" className="!border-0 !py-2">
                                         No company profile published for {stock.symbol}.
-                                    </p>
-                                )}
-                            </div>
-                        )}
+                                    </EmptyState>
+                                ))}
 
-                        {tab === "directors" && (
-                            <div className="py-3">
-                                {detail?.company?.directors?.length ? (
-                                    <ul className="space-y-3">
+                            {tab === "directors" &&
+                                (detail?.company?.directors?.length ? (
+                                    <ul className="news-list">
                                         {detail.company.directors.map((director) => (
                                             <li
                                                 key={director.name}
-                                                className="flex items-center justify-between border-b border-ink/[0.05] pb-3 last:border-0"
+                                                className="flex items-baseline justify-between gap-4 text-sm"
                                             >
-                                                <span className="text-sm text-ink">{director.name}</span>
-                                                <span className="text-xs text-ink/40">
+                                                <span className="font-semibold text-ink">{director.name}</span>
+                                                <span className="text-right text-xs text-ink/[0.68]">
                                                     {director.position ?? "Director"}
                                                 </span>
                                             </li>
                                         ))}
                                     </ul>
                                 ) : (
-                                    <p className="py-6 text-center text-sm text-ink/40">
+                                    <EmptyState title="No board listing" className="!border-0 !py-2">
                                         The exchange publishes no board listing for {stock.symbol}.
-                                    </p>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                </section>
+                                    </EmptyState>
+                                ))}
+                        </div>
+                    </aside>
+                </div>
 
-                <p className="mt-6 text-center text-[11px] leading-relaxed text-ink/25">
+                <p className="news-byline mt-12 border-t border-ink/[0.19] pt-4">
                     Fluid Finance publishes market information and education only. Nothing here is a trade
                     facility, an offer, or investment advice.
                 </p>
-            </div>
+            </main>
         </div>
     );
 }
