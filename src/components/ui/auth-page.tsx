@@ -1,6 +1,6 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
-import { normaliseUsername, useAuth } from "@/lib/auth";
+import { normaliseUsername, useAuth, type SignUpResult } from "@/lib/auth";
 import { returnAfterAuth, type AuthMode } from "@/lib/navigation";
 import { Notice, panelClass, PrimaryButton, SecondaryButton, TextField } from "@/components/ui/form";
 
@@ -18,23 +18,27 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
     const [displayName, setDisplayName] = useState("");
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
-    const [done, setDone] = useState<"reset-sent" | null>(null);
+    const [done, setDone] = useState<"reset-sent" | "registered" | null>(null);
+    const [registration, setRegistration] = useState<SignUpResult | null>(null);
+    const submitted = useRef(false);
     const recovery = false;
 
     useEffect(() => {
         document.title = `${COPY[mode].title} · Fluid Finance`;
         setError("");
         setDone(null);
+        submitted.current = false;
     }, [mode]);
 
     // Already signed in and not changing a password: go back to where they came from.
     useEffect(() => {
-        if (!loading && user && !recovery && done === null && mode !== "reset-password") returnAfterAuth();
-    }, [loading, user, recovery, done, mode]);
+        if (!submitted.current && !loading && user && !busy && !error && !recovery && done === null && mode !== "reset-password") returnAfterAuth();
+    }, [loading, user, busy, error, recovery, done, mode]);
 
     const submit = async (event: FormEvent) => {
         event.preventDefault();
         if (busy) return;
+        submitted.current = true;
         setBusy(true);
         setError("");
         try {
@@ -42,8 +46,8 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
                 await signIn(email, password);
                 returnAfterAuth();
             } else if (mode === "register") {
-                await signUp({ email, password, username, displayName });
-                returnAfterAuth();
+                setRegistration(await signUp({ email, password, username, displayName }));
+                setDone("registered");
             } else {
                 await requestPasswordReset(email);
                 setDone("reset-sent");
@@ -57,10 +61,12 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
 
     const google = async () => {
         if (busy) return;
+        submitted.current = true;
         setBusy(true);
         setError("");
-        try { await signInWithGoogle(); }
-        catch (caught) { setError(caught instanceof Error ? caught.message : "Google sign-in is unavailable right now."); setBusy(false); }
+        try { await signInWithGoogle(); returnAfterAuth(); }
+        catch (caught) { setError(caught instanceof Error ? caught.message : "Google sign-in is unavailable right now."); }
+        finally { setBusy(false); }
     };
 
     const copy = COPY[mode];
@@ -82,6 +88,11 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
                 <section className={`${panelClass} p-6 sm:p-8`}>
                     {done === "reset-sent" ? (
                         <Done title="Email on its way" body="If an account exists for that address you will receive a password reset link shortly. The link opens a page to choose a new password, then brings you back here." link={{ href: "#/login", label: "Back to sign in" }} />
+                    ) : done === "registered" && registration ? (
+                        <Done title="Account created" body={[
+                            registration.verificationSent ? "Check your inbox for a verification link. Confirm your email before commenting or posting." : "Confirm your email before commenting or posting.",
+                            ...registration.warnings,
+                        ].join(" ")} link={{ href: "#/settings", label: "Open account settings" }} />
                     ) : (
                         <form onSubmit={submit} className="grid gap-5" noValidate>
                             {mode !== "reset-password" && (
@@ -93,7 +104,7 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
                             {mode === "register" && (
                                 <>
                                     <TextField label="Display name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} maxLength={60} autoComplete="name" required placeholder="How your name appears" />
-                                    <TextField label="Username" value={username} onChange={(event) => setUsername(normaliseUsername(event.target.value))} maxLength={24} autoComplete="username" required placeholder="lowercase_letters_123" hint="3–24 lowercase letters, numbers or underscores. This is your profile link." />
+                                    <TextField label="Username" value={username} onChange={(event) => setUsername(normaliseUsername(event.target.value))} maxLength={24} autoComplete="username" required placeholder="e.g. ama_mensah" hint="Choose 3–24 letters, numbers or underscores. This becomes your profile link." />
                                 </>
                             )}
                             {!recovery && <TextField label="Email address" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required inputMode="email" />}

@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
     GoogleAuthProvider,
     createUserWithEmailAndPassword,
@@ -18,8 +18,8 @@ import { getMyProfile, updateOwnProfile, type MemberRole, type Profile } from "@
 /**
  * Fluid Finance - member session
  *
- * Firebase Authentication holds the identity (email + password or Google) in the same project as
- * the investor app, so a person has one Fluid account. The Fluid backend maps each Firebase
+ * Firebase Authentication holds the identity (email + password or Google) in the dedicated
+ * finance-fluidterra project, separate from the investor app. The Fluid backend maps each Firebase
  * subject to an editorial profile that carries the public identity and the team role; both are
  * read once here and shared through context so pages never touch Firebase themselves.
  */
@@ -34,6 +34,11 @@ export interface SessionUser {
     photoURL: string | null;
 }
 
+export interface SignUpResult {
+    verificationSent: boolean;
+    warnings: string[];
+}
+
 interface AuthContextValue {
     user: SessionUser | null;
     profile: Profile | null;
@@ -43,7 +48,7 @@ interface AuthContextValue {
     loading: boolean;
     signIn: (email: string, password: string) => Promise<void>;
     signInWithGoogle: () => Promise<void>;
-    signUp: (input: { email: string; password: string; username: string; displayName: string }) => Promise<"signed-in">;
+    signUp: (input: { email: string; password: string; username: string; displayName: string }) => Promise<SignUpResult>;
     signOut: () => Promise<void>;
     requestPasswordReset: (email: string) => Promise<void>;
     resendVerification: () => Promise<void>;
@@ -102,29 +107,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [profileError, setProfileError] = useState<string | null>(null);
     const [loading, setLoading] = useState(firebaseConfigured);
 
-    const loadProfile = useCallback(async (signedIn: boolean) => {
-        if (!signedIn) {
+    const profileRequest = useRef(0);
+
+    const loadProfile = useCallback(async (expected: FirebaseUser | null) => {
+        const request = ++profileRequest.current;
+        const isCurrent = () => request === profileRequest.current && getFirebaseAuth().currentUser === expected;
+        if (!expected) {
+            if (!isCurrent()) return false;
             setProfile(null);
             setProfileError(null);
-            return;
+            return true;
         }
         try {
-            setProfile(await getMyProfile());
+            const nextProfile = await getMyProfile();
+            if (!isCurrent()) return false;
+            setProfile(nextProfile);
             setProfileError(null);
         } catch (caught) {
-            // A failed profile read must not sign the person out; pages show the reason instead.
+            if (!isCurrent()) return false;
             setProfile(null);
             setProfileError(caught instanceof Error ? caught.message : "Could not load your profile.");
         }
+        if (isCurrent()) setLoading(false);
+        return true;
     }, []);
 
     useEffect(() => {
         if (!firebaseConfigured) return;
-        return onAuthStateChanged(getFirebaseAuth(), async (next) => {
+        const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (next) => {
             setUser(next ? toSessionUser(next) : null);
-            await loadProfile(Boolean(next));
-            setLoading(false);
+            setProfile(null);
+            setProfileError(null);
+            setLoading(true);
+            void loadProfile(next).then((accepted) => { if (accepted) setLoading(false); });
         });
+        return () => { ++profileRequest.current; unsubscribe(); };
     }, [loadProfile]);
 
     const signIn = useCallback(async (email: string, password: string) => {
@@ -136,44 +153,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const signInWithGoogle = useCallback(async () => {
+        let current: FirebaseUser;
         try {
-            const result = await signInWithPopup(getFirebaseAuth(), new GoogleAuthProvider());
-            // First Google sign-in: carry the Google photo over unless the member already chose one.
-            const current = await getMyProfile();
-            if (!current.avatar_url && result.user.photoURL?.startsWith("https://")) {
-                await updateOwnProfile(current.id, { display_name: current.display_name, username: current.username, bio: current.bio ?? "", avatar_url: result.user.photoURL });
-            }
+            current = (await signInWithPopup(getFirebaseAuth(), new GoogleAuthProvider())).user;
         } catch (caught) {
             throw friendlyAuthError(caught);
         }
-    }, []);
+        try {
+            const profile = await getMyProfile();
+            if (getFirebaseAuth().currentUser === current && !profile.avatar_url && current.photoURL?.startsWith("https://")) {
+                await updateOwnProfile(profile.id, { display_name: profile.display_name, username: profile.username, bio: profile.bio ?? "", avatar_url: current.photoURL });
+            }
+        } catch {
+            // Optional avatar setup must not turn a successful Google sign-in into a failure.
+            // The profile read below reports any API outage through profileError.
+        }
+        if (getFirebaseAuth().currentUser === current) await loadProfile(current);
+    }, [loadProfile]);
 
-    const signUp = useCallback(async (input: { email: string; password: string; username: string; displayName: string }) => {
+    const signUp = useCallback(async (input: { email: string; password: string; username: string; displayName: string }): Promise<SignUpResult> => {
         const problem = validateSignUp(input);
         if (problem) throw new Error(problem);
+        let current: FirebaseUser;
         try {
-            const auth = getFirebaseAuth();
-            const credential = await createUserWithEmailAndPassword(auth, input.email.trim(), input.password);
-            await updateFirebaseProfile(credential.user, { displayName: input.displayName.trim() });
-            await credential.user.getIdToken(true);
-            // The API creates the profile on first contact; claim the chosen username and name now.
+            const credential = await createUserWithEmailAndPassword(getFirebaseAuth(), input.email.trim(), input.password);
+            current = credential.user;
+        } catch (caught) {
+            throw friendlyAuthError(caught);
+        }
+        // From here on the account exists. Report partial setup honestly and keep recovery available.
+        const warnings: string[] = [];
+        let verificationSent = false;
+        try {
+            await sendEmailVerification(current, { url: `${window.location.origin}/#/login` });
+            verificationSent = true;
+        } catch {
+            warnings.push("Your account was created, but the verification email could not be sent. Resend it from Account settings.");
+        }
+        try {
+            await updateFirebaseProfile(current, { displayName: input.displayName.trim() });
+            await current.getIdToken(true);
+            if (getFirebaseAuth().currentUser !== current) throw new Error("Session changed.");
             const created = await getMyProfile();
+            if (getFirebaseAuth().currentUser !== current) throw new Error("Session changed.");
             try {
                 await updateOwnProfile(created.id, { display_name: input.displayName.trim(), username: input.username, bio: "", avatar_url: "" });
             } catch (caught) {
-                // A taken username keeps the generated one rather than failing the whole sign-up.
                 if (!(caught instanceof ApiError && caught.code === "USERNAME_TAKEN")) throw caught;
+                warnings.push("That username was taken, so we kept a generated username. You can change it in Account settings.");
             }
-            await sendEmailVerification(credential.user, { url: `${window.location.origin}/#/login` });
-            return "signed-in" as const;
-        } catch (caught) {
-            throw friendlyAuthError(caught);
+        } catch {
+            warnings.push("Your account was created, but profile setup could not finish. Open Account settings to retry.");
         }
-    }, []);
+        if (getFirebaseAuth().currentUser === current) {
+            setUser(toSessionUser(current));
+            await loadProfile(current);
+        }
+        return { verificationSent, warnings };
+    }, [loadProfile]);
 
     const signOut = useCallback(async () => {
+        ++profileRequest.current;
         if (firebaseConfigured) await firebaseSignOut(getFirebaseAuth());
+        setUser(null);
         setProfile(null);
+        setProfileError(null);
     }, []);
 
     const requestPasswordReset = useCallback(async (email: string) => {
@@ -196,11 +240,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const refreshProfile = useCallback(async () => {
         const current = getFirebaseAuth().currentUser;
+        const request = ++profileRequest.current;
         if (current) {
             await current.reload();
+            await current.getIdToken(true);
+            if (request !== profileRequest.current || getFirebaseAuth().currentUser !== current) return;
             setUser(toSessionUser(current));
         }
-        await loadProfile(Boolean(current));
+        await loadProfile(current);
     }, [loadProfile]);
 
     const value = useMemo<AuthContextValue>(() => ({
