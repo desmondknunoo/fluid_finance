@@ -23,7 +23,6 @@ export default function FxPage() {
     const [to, setTo] = useState("GHS");
     const [history, setHistory] = useState<FxRate[]>([]);
 
-    useEffect(() => { document.title = "Exchange rates · Fluid Finance"; }, []);
     useEffect(() => {
         listLatestFxRates()
             .then((data) => {

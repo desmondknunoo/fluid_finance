@@ -11,6 +11,8 @@ import { PageIntro } from "@/components/ui/page-intro";
 import { PostComposer } from "@/components/community/post-composer";
 import { PostList } from "@/components/community/post-list";
 import { UserChip } from "@/components/community/user-chip";
+import { useSeo } from "@/lib/seo";
+import { articleMeta, notFoundMeta } from "@/lib/seo-routes";
 
 export default function ArticlePage({ slug }: { slug: string }) {
     const { user } = useAuth();
@@ -31,7 +33,6 @@ export default function ArticlePage({ slug }: { slug: string }) {
             .then(async (found) => {
                 if (cancelled) return;
                 setArticle(found);
-                document.title = found ? `${found.title} · Fluid Finance` : "Article not found · Fluid Finance";
                 if (found) { try { const loadedComments=await listArticleComments(found.id);if(!cancelled)setComments(loadedComments); } catch { /* article remains readable when comments cannot load */ } }
             })
             .catch((caught) => { if (!cancelled) { const stored=savedArticle(slug);if(stored){setArticle(stored);setOfflineCopy(true);}else setError(caught instanceof Error ? caught.message : "Could not load this article."); } });
@@ -43,6 +44,8 @@ export default function ArticlePage({ slug }: { slug: string }) {
         const created = await addArticleComment({ articleId: article.id, authorId: user.id, body, parentId });
         setComments((current) => [...current, created]);
     }, [user, article]);
+
+    useSeo(article ? articleMeta(article) : article === null ? notFoundMeta(`/articles/${slug}`, "Article") : null);
 
     const copyLink = async () => {
         try {
@@ -59,7 +62,7 @@ export default function ArticlePage({ slug }: { slug: string }) {
     if (article === null) {
         return (
             <main className="page-container news-page">
-                <PageIntro eyebrow="Research desk" title="Article not found" description={<>It may have been unpublished. <a href="#/articles" className="text-fluid-cyan-ink underline">See all articles</a>.</>} />
+                <PageIntro eyebrow="Research desk" title="Article not found" description={<>It may have been unpublished. <a href="/articles" className="text-fluid-cyan-ink underline">See all articles</a>.</>} />
             </main>
         );
     }
@@ -69,7 +72,7 @@ export default function ArticlePage({ slug }: { slug: string }) {
     return (
         <main className="page-container news-page">
             <article className="mx-auto max-w-4xl pt-6">
-                <a href="#/articles" className="news-text-link"><ArrowLeft size={14} aria-hidden="true" /> All articles</a>
+                <a href="/articles" className="news-text-link"><ArrowLeft size={14} aria-hidden="true" /> All articles</a>
                 <header className="mt-6 border-b-[3px] border-ink pb-5">
                     <p className="news-kicker">
                         <span className="text-fluid-cyan-ink">{categoryLabel(article.category)}</span>

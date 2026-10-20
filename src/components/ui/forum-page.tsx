@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { MessageSquare, Plus } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { formatRelative, listForumCategories, listThreads, type ForumCategory, type ForumThread } from "@/lib/community";
-import { forumCategoryHref, newThreadHref, openLogin, threadHref } from "@/lib/navigation";
+import { forumCategoryHref, navigate, newThreadHref, openLogin, threadHref } from "@/lib/navigation";
 import { EmptyState, Notice, PrimaryButton, QuietButton } from "@/components/ui/form";
 import { PageIntro } from "@/components/ui/page-intro";
+import { useSeo } from "@/lib/seo";
+import { forumCategoryMeta, notFoundMeta } from "@/lib/seo-routes";
 
 export default function ForumPage({ categorySlug }: { categorySlug: string | null }) {
     const { user } = useAuth();
@@ -16,9 +18,7 @@ export default function ForumPage({ categorySlug }: { categorySlug: string | nul
 
     const category = useMemo(() => categories?.find((item) => item.slug === categorySlug) ?? null, [categories, categorySlug]);
 
-    useEffect(() => {
-        document.title = `${category ? `${category.name} · ` : ""}Forum · Fluid Finance`;
-    }, [category]);
+    useSeo(categorySlug && category ? forumCategoryMeta(category) : categorySlug && categories ? notFoundMeta(`/forum/c/${categorySlug}`, "Forum category") : null);
 
     useEffect(() => {
         listForumCategories().then(setCategories).catch((caught) => setError(caught instanceof Error ? caught.message : "Could not load the forum."));
@@ -47,7 +47,7 @@ export default function ForumPage({ categorySlug }: { categorySlug: string | nul
 
     const startThread = () => {
         if (!user) { openLogin(newThreadHref(categorySlug)); return; }
-        window.location.hash = newThreadHref(categorySlug);
+        navigate(newThreadHref(categorySlug));
     };
 
     return (
@@ -62,7 +62,7 @@ export default function ForumPage({ categorySlug }: { categorySlug: string | nul
             {error && <Notice tone="error" className="mb-6">{error}</Notice>}
 
             <nav aria-label="Forum categories" className="news-tabs">
-                <CategoryLink href="#/forum" active={!categorySlug} name="All discussions" />
+                <CategoryLink href="/forum" active={!categorySlug} name="All discussions" />
                 {(categories ?? []).map((item) => <CategoryLink key={item.id} href={forumCategoryHref(item.slug)} active={categorySlug === item.slug} name={item.name} />)}
             </nav>
 
@@ -70,7 +70,7 @@ export default function ForumPage({ categorySlug }: { categorySlug: string | nul
                 {threads === null ? (
                     <div className="space-y-3" aria-hidden="true">{[0, 1, 2, 3].map((index) => <div key={index} className="news-skeleton h-16" />)}</div>
                 ) : categorySlug && !category ? (
-                    <Notice tone="error">That category does not exist. <a href="#/forum" className="underline">See all discussions</a>.</Notice>
+                    <Notice tone="error">That category does not exist. <a href="/forum" className="underline">See all discussions</a>.</Notice>
                 ) : threads.length === 0 ? (
                     <EmptyState title="No discussions here yet" action={<PrimaryButton onClick={startThread} className="mt-4"><Plus size={16} aria-hidden="true" /> Start the first one</PrimaryButton>}>
                         Ask a question or share a view to get things going.

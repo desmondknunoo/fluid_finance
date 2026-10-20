@@ -6,16 +6,19 @@ import { articleHref } from "@/lib/navigation";
 import { EmptyState, Notice } from "@/components/ui/form";
 import { PageIntro } from "@/components/ui/page-intro";
 import { UserChip } from "@/components/community/user-chip";
+import { useSeo } from "@/lib/seo";
+import { staticPageMeta } from "@/lib/seo-routes";
 
 export default function ArticlesPage() {
-    const opinion = window.location.hash.split("?")[0] === "#/opinion";
-    const requested = opinion ? "opinion" : new URLSearchParams(window.location.hash.split("?")[1]).get("section");
+    const opinion = window.location.pathname.replace(/\/+$/, "") === "/opinion";
+    const requested = opinion ? "opinion" : new URLSearchParams(window.location.search).get("section");
     const section = HOME_SECTIONS.find(([id])=>id===requested)?.[0] as HomeSection | undefined;
     const [articles, setArticles] = useState<Article[] | null>(null);
     const [error, setError] = useState("");
     const [category, setCategory] = useState<ArticleCategory | null>(null);
 
-    useEffect(() => { document.title = opinion ? "Fluid Finance Opinion" : "Articles & research · Fluid Finance"; }, [opinion]);
+    const sectionTitle = !opinion && section ? HOME_SECTIONS.find(([id])=>id===section)?.[1] : undefined;
+    useSeo(sectionTitle ? { ...staticPageMeta("/articles"), title: `${sectionTitle} · Research · Fluid Finance`, path: `/articles?section=${section}` } : null);
     useEffect(() => {
         let cancelled = false;
         setArticles(null);setError("");
@@ -40,7 +43,7 @@ export default function ArticlesPage() {
                 <div className="news-tiles" aria-hidden="true">{[0, 1, 2].map((index) => <div key={index} className="news-skeleton h-56" />)}</div>
             ) : articles.length === 0 ? (
                 <EmptyState title="Nothing published here yet">
-                    The research team is writing. Check back soon or <a href="#/forum" className="text-fluid-cyan-ink underline">start a discussion</a>.
+                    The research team is writing. Check back soon or <a href="/forum" className="text-fluid-cyan-ink underline">start a discussion</a>.
                 </EmptyState>
             ) : (
                 <>

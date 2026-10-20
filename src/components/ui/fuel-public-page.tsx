@@ -15,7 +15,6 @@ export default function FuelPublicPage() {
     const [sharing, setSharing] = useState<FuelReport | null>(null);
     const [sortBy, setSortBy] = useState<FuelType | "name">("petrol");
 
-    useEffect(() => { document.title = "Fuel prices in Ghana · Fluid Finance"; }, []);
     useEffect(() => {
         listPublicFuelReports(12)
             .then((data) => { setReports(data); setSelectedId(data[0]?.id ?? null); })

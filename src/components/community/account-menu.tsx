@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown, LogOut, Settings, UserRound } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { ROLE_LABELS } from "@/lib/community";
-import { openLogin, profileHref } from "@/lib/navigation";
+import { navigate, onLocationChange, openLogin, profileHref } from "@/lib/navigation";
 import { Avatar } from "@/components/community/user-chip";
 import { cn } from "@/lib/utils";
 
@@ -19,16 +19,12 @@ export function AccountMenu({ variant = "desktop", onNavigate }: { variant?: "de
         if (open) document.addEventListener("mousedown", close);
         return () => document.removeEventListener("mousedown", close);
     }, [open, close]);
-    useEffect(() => {
-        const onHash = () => setOpen(false);
-        window.addEventListener("hashchange", onHash);
-        return () => window.removeEventListener("hashchange", onHash);
-    }, []);
+    useEffect(() => onLocationChange(() => setOpen(false)), []);
 
     const leave = async () => {
         await signOut();
         onNavigate?.();
-        window.location.hash = "#/";
+        navigate("/");
     };
 
     if (loading) return <span className={cn("news-skeleton inline-block", variant === "desktop" ? "h-9 w-24" : "h-10 w-32")} aria-hidden="true" />;
@@ -38,14 +34,14 @@ export function AccountMenu({ variant = "desktop", onNavigate }: { variant?: "de
             return (
                 <div className="grid grid-cols-2 gap-3">
                     <button type="button" onClick={() => { onNavigate?.(); openLogin(); }} className="news-button-quiet">Sign in</button>
-                    <a href="#/register" onClick={onNavigate} className="news-button">Join free</a>
+                    <a href="/register" onClick={onNavigate} className="news-button">Join free</a>
                 </div>
             );
         }
         return (
             <div className="flex items-center gap-2">
                 <button type="button" onClick={() => openLogin()} className="news-button-quiet news-button-quiet--sm">Sign in</button>
-                <a href="#/register" className="news-button news-button--sm">Join</a>
+                <a href="/register" className="news-button news-button--sm">Join</a>
             </div>
         );
     }
@@ -53,7 +49,7 @@ export function AccountMenu({ variant = "desktop", onNavigate }: { variant?: "de
     const name = profile?.display_name ?? user.email ?? "Member";
     const items = [
         ...(profile ? [{ href: profileHref(profile.username), label: "Your profile", icon: UserRound }] : []),
-        { href: "#/settings", label: "Settings", icon: Settings },
+        { href: "/settings", label: "Settings", icon: Settings },
     ];
 
     if (variant === "mobile") {

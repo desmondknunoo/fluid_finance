@@ -1,0 +1,16 @@
+{
+    "name": "Fluid Finance",
+    "short_name": "Fluid Finance",
+    "description": "Ghana Stock Exchange share prices, cedi exchange rates, fuel prices and market research for investors in Ghana.",
+    "lang": "en-GH",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff",
+    "icons": [
+        { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+        { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+        { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    ]
+}

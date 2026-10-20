@@ -1,90 +1,54 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GH">
 
 <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/logo/favicon-32.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="/logo/mark-512.png" />
-    <link rel="apple-touch-icon" href="/logo/favicon-180.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Primary Meta Tags -->
-    <title>Fluid Finance | Ghana Stock Exchange (GSE) Data, Stocks & Market Insights</title>
-    <meta name="title" content="Fluid Finance | Ghana Stock Exchange (GSE) Data, Stocks & Market Insights" />
-    <meta name="description"
-        content="Track Ghana Stock Exchange (GSE) stocks, market performance, financial data, listed companies, historical prices, and investment insights on Fluid Finance by Fluid Terra." />
-    <meta name="keywords"
-        content="Ghana Stocks, Ghana Stock Exchange, GSE, Ghana Stock Market, Ghana Listed Companies, Ghana Shares, Buy Stocks in Ghana, Investing in Ghana, Stock Prices Ghana, GSE Prices, GSE Companies, Ghana Equities, Fluid Finance, Fluid Terra, Fluid Terra Finance" />
-    <meta name="author" content="Fluid Finance" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://finance.fluidterra.com/" />
+    <!-- Page metadata. Everything between the seo markers is managed: scripts/prerender.mjs writes
+         each route's tags here at build time, the Pages Functions rewrite them for articles and
+         threads, and src/lib/seo.ts swaps them on navigation. Edit the copy in src/lib/seo-routes.ts. -->
+    <!-- seo:start -->
+    <title data-seo>Fluid Finance: Ghana stock prices, markets news and research</title>
+    <meta data-seo name="description" content="Ghana Stock Exchange share prices, top gainers and losers, cedi exchange rates, fuel pump prices and independent market research for investors in Ghana." />
+    <meta data-seo name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <link data-seo rel="canonical" href="https://finance.fluidterra.com/" />
+    <meta data-seo property="og:site_name" content="Fluid Finance" />
+    <meta data-seo property="og:locale" content="en_GH" />
+    <meta data-seo property="og:type" content="website" />
+    <meta data-seo property="og:url" content="https://finance.fluidterra.com/" />
+    <meta data-seo property="og:title" content="Fluid Finance: Ghana stock prices, markets news and research" />
+    <meta data-seo property="og:description" content="Ghana Stock Exchange share prices, top gainers and losers, cedi exchange rates, fuel pump prices and independent market research for investors in Ghana." />
+    <meta data-seo property="og:image" content="https://finance.fluidterra.com/og/default.png" />
+    <meta data-seo property="og:image:width" content="1200" />
+    <meta data-seo property="og:image:height" content="630" />
+    <meta data-seo property="og:image:alt" content="Fluid Finance: Ghana&#39;s markets, in focus" />
+    <meta data-seo name="twitter:card" content="summary_large_image" />
+    <meta data-seo name="twitter:site" content="@FluidFinanceX" />
+    <meta data-seo name="twitter:title" content="Fluid Finance: Ghana stock prices, markets news and research" />
+    <meta data-seo name="twitter:description" content="Ghana Stock Exchange share prices, top gainers and losers, cedi exchange rates, fuel pump prices and independent market research for investors in Ghana." />
+    <meta data-seo name="twitter:image" content="https://finance.fluidterra.com/og/default.png" />
+    <meta data-seo name="twitter:image:alt" content="Fluid Finance: Ghana&#39;s markets, in focus" />
+    <script data-seo type="application/ld+json">{"@context":"https://schema.org","@type":"NewsMediaOrganization","@id":"https://finance.fluidterra.com/#organization","name":"Fluid Finance","url":"https://finance.fluidterra.com/","logo":{"@type":"ImageObject","url":"https://finance.fluidterra.com/icons/icon-512.png","width":512,"height":512},"image":"https://finance.fluidterra.com/og/default.png","email":"info@fluidterra.com","areaServed":{"@type":"Country","name":"Ghana"},"sameAs":["https://x.com/FluidFinanceX","https://www.instagram.com/fluidfinanceonline","https://www.tiktok.com/@fluid_finance"],"parentOrganization":{"@type":"Organization","name":"Fluid Terra","url":"https://fluidterra.com"}}</script>
+    <script data-seo type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://finance.fluidterra.com/#website","name":"Fluid Finance","url":"https://finance.fluidterra.com/","inLanguage":"en-GH","publisher":{"@id":"https://finance.fluidterra.com/#organization"}}</script>
+    <!-- seo:end -->
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://finance.fluidterra.com/" />
-    <meta property="og:title" content="Fluid Finance | Ghana Stock Exchange (GSE) Data, Stocks & Market Insights" />
-    <meta property="og:description"
-        content="Track Ghana Stock Exchange (GSE) stocks, market performance, financial data, listed companies, historical prices, and investment insights on Fluid Finance by Fluid Terra." />
-    <meta property="og:image" content="https://finance.fluidterra.com/logo/og-card.png" />
-    <meta property="og:image:type" content="image/png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Fluid Finance" />
-    <meta property="og:site_name" content="Fluid Finance" />
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Fluid Finance | Ghana Stock Exchange" />
-    <meta name="twitter:description"
-        content="Real-time Ghana Stock Exchange data, listed companies, market insights and investment tools." />
-    <meta name="twitter:image" content="https://finance.fluidterra.com/logo/og-card.png" />
-    <meta name="twitter:image:alt" content="Fluid Finance | Ghana Stock Exchange (GSE)" />
-
-    <!-- Additional SEO -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212" />
     <meta name="geo.region" content="GH" />
     <meta name="geo.placename" content="Accra" />
-    <meta name="language" content="English" />
-    <meta name="revisit-after" content="7 days" />
-    <meta name="distribution" content="global" />
 
-    <!-- Organization Schema -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Fluid Terra",
-        "url": "https://finance.fluidterra.com",
-        "logo": "https://finance.fluidterra.com/logo/og-card.png",
-        "sameAs": [
-            "https://linkedin.com/company/fluidterra",
-            "https://x.com/fluidterra"
-        ]
-    }
-    </script>
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
 
-    <!-- WebSite Structured Data -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Fluid Finance",
-        "alternateName": "Fluid Terra Finance",
-        "url": "https://finance.fluidterra.com/",
-        "description": "Ghana Stock Exchange market data, listed companies, stock prices and financial insights.",
-        "publisher": {
-            "@type": "Organization",
-            "name": "Fluid Terra",
-            "url": "https://fluidterra.com"
-        },
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://finance.fluidterra.com/search?q={search_term_string}",
-            "query-input": "required name=search_term_string"
-        }
-    }
-    </script>
+    <!-- Data origins: the Fluid Finance editorial API and the GSE live-quote feed (src/lib/gse.ts). -->
+    <link rel="preconnect" href="https://api.finance.fluidterra.com" crossorigin />
+    <link rel="preconnect" href="https://dev.kwayisi.org" crossorigin />
 
-    <!-- Editorial UI typography; Poppins retained for share renderers. -->
+    <!-- Editorial UI typography; Poppins retained for share renderers. display=swap keeps text visible while fonts load. -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap"

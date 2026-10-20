@@ -4,6 +4,11 @@ import './index.css'
 import App from './App.tsx'
 import { ThemeProvider } from '@/lib/theme'
 import { AuthProvider } from '@/lib/auth'
+import { interceptLinkClicks, normaliseLegacyUrl } from '@/lib/navigation'
+
+// Old `/#/…` links (share cards, emails, the portal, bookmarks) become their paths before the first render.
+normaliseLegacyUrl()
+interceptLinkClicks()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { ExternalLink, LogOut, Save } from "lucide-react";
 import { normaliseUsername, useAuth } from "@/lib/auth";
 import { ROLE_LABELS, updateOwnProfile } from "@/lib/community";
-import { openLogin, profileHref } from "@/lib/navigation";
+import { navigate, openLogin, profileHref } from "@/lib/navigation";
 import { Notice, PrimaryButton, SecondaryButton, TextArea, TextField } from "@/components/ui/form";
 import { PageIntro } from "@/components/ui/page-intro";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -17,9 +17,8 @@ export default function SettingsPage() {
     const [busy, setBusy] = useState(false);
     const [message, setMessage] = useState<{ tone: "error" | "success"; text: string } | null>(null);
 
-    useEffect(() => { document.title = "Account settings · Fluid Finance"; }, []);
     useEffect(() => {
-        if (!loading && !user) openLogin("#/settings");
+        if (!loading && !user) openLogin("/settings");
     }, [loading, user]);
     useEffect(() => {
         if (!profile) return;
@@ -115,7 +114,7 @@ export default function SettingsPage() {
                             <div className="flex items-center justify-between gap-4 border-b border-ink/[0.19] py-3"><dt className="news-label mb-0">Password</dt><dd><button type="button" onClick={() => void sendReset()} className="text-sm font-bold text-fluid-cyan-ink hover:underline">Send reset link</button></dd></div>
                         </dl>
                         <div className="news-form-actions mt-6">
-                            <SecondaryButton onClick={() => { void signOut().then(() => { window.location.hash = "#/"; }); }}><LogOut size={16} aria-hidden="true" /> Sign out</SecondaryButton>
+                            <SecondaryButton onClick={() => { void signOut().then(() => { navigate("/"); }); }}><LogOut size={16} aria-hidden="true" /> Sign out</SecondaryButton>
                         </div>
                     </section>
                 </div>

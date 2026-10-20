@@ -31,10 +31,10 @@ const PRESS = [
 ];
 
 const LEARN = [
-    { href: "#/learning-center", title: "Learning Center", note: "Courses and guidance from BoG, SEC and the Ghana Securities Institute.", icon: GraduationCap },
-    { href: "#/market-education", title: "Market Education", note: "GSE releases, filings, notices and brochures explained.", icon: BookOpen },
-    { href: "#/business-news", title: "Business & Economy", note: "Today's movers and the Ghanaian business press.", icon: Newspaper },
-    { href: "#/help-center", title: "Help Center", note: "Opening an account, minimums, withdrawals and verification.", icon: LifeBuoy },
+    { href: "/learning-center", title: "Learning Center", note: "Courses and guidance from BoG, SEC and the Ghana Securities Institute.", icon: GraduationCap },
+    { href: "/market-education", title: "Market Education", note: "GSE releases, filings, notices and brochures explained.", icon: BookOpen },
+    { href: "/business-news", title: "Business & Economy", note: "Today's movers and the Ghanaian business press.", icon: Newspaper },
+    { href: "/help-center", title: "Help Center", note: "Opening an account, minimums, withdrawals and verification.", icon: LifeBuoy },
 ];
 
 const pct = (value: number) => `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
@@ -87,7 +87,7 @@ export default function HomePage() {
                 </div>
                 <div className="news-page-heading">
                     <h1>Today<span className="text-fluid-cyan-ink">.</span></h1>
-                    <div className="news-topic-links"><a href="#/gse-live">Equities</a><a href="#/fx">Currencies</a><a href="#/fuel">Energy</a><a href="#/market-trends">Week in review <ArrowRight size={14} aria-hidden="true" /></a></div>
+                    <div className="news-topic-links"><a href="/gse-live">Equities</a><a href="/fx">Currencies</a><a href="/fuel">Energy</a><a href="/market-trends">Week in review <ArrowRight size={14} aria-hidden="true" /></a></div>
                 </div>
                 <div className="news-session" aria-label="Market session">
                     <span className="inline-flex items-center gap-2 font-semibold"><span className={cn("h-1.5 w-1.5 rounded-full", market.open ? "bg-fluid-green" : "bg-ink/50")} aria-hidden="true" />GSE {market.open ? "open" : "closed"}</span>
@@ -100,7 +100,7 @@ export default function HomePage() {
 
                 <section id="latest" className="news-top-grid" aria-label="Top of the day">
                     <article className="news-lead">
-                        <a href="#/gse-live" className="group">
+                        <a href="/gse-live" className="group">
                             <h2 className="news-lead-headline group-hover:underline">{wrapHeadline}</h2>
                             <p className="news-lead-summary">{market.stocks.length ? `${breadth.advancers.length} stocks advance and ${breadth.decliners.length} decline across ${market.stocks.length} listings, with ${formatCompact(breadth.volume)} shares traded.` : "Follow Ghana's listed companies, compare the session's movers and explore the data behind the market."}</p>
                         </a>
@@ -110,10 +110,10 @@ export default function HomePage() {
                             <p className="text-[11px] text-ink/60">{composite.some((point) => !point.recorded) ? "Includes illustrative backfill; not the official GSE index." : "Based on locally recorded quotes; not the official GSE index."}</p>
                         </div>
                         <RelatedBox title="Inside the session">
-                            {breadth.gainers[0] && <RelatedLink href={`#/stock/${breadth.gainers[0].symbol}`}>{breadth.gainers[0].company} leads gainers at {formatCedis(breadth.gainers[0].price)}</RelatedLink>}
-                            {breadth.losers[0] && <RelatedLink href={`#/stock/${breadth.losers[0].symbol}`}>{breadth.losers[0].company} is the day's biggest faller</RelatedLink>}
-                            {!breadth.gainers[0] && !breadth.losers[0] && <RelatedLink href="#/gse-live">Explore all listed companies</RelatedLink>}
-                            <RelatedLink href="#/market-trends">The week in review: closing prices and market trends</RelatedLink>
+                            {breadth.gainers[0] && <RelatedLink href={`/stock/${breadth.gainers[0].symbol}`}>{breadth.gainers[0].company} leads gainers at {formatCedis(breadth.gainers[0].price)}</RelatedLink>}
+                            {breadth.losers[0] && <RelatedLink href={`/stock/${breadth.losers[0].symbol}`}>{breadth.losers[0].company} is the day's biggest faller</RelatedLink>}
+                            {!breadth.gainers[0] && !breadth.losers[0] && <RelatedLink href="/gse-live">Explore all listed companies</RelatedLink>}
+                            <RelatedLink href="/market-trends">The week in review: closing prices and market trends</RelatedLink>
                         </RelatedBox>
                     </article>
                     <div className="news-research">
@@ -127,33 +127,33 @@ export default function HomePage() {
                             <div className="mt-4"><UserChip author={lead.author} size="sm" meta={formatRelative(lead.published_at ?? lead.created_at)} /></div>
                             <p className="mt-3 text-xs text-ink/60">{categoryLabel(lead.category)}</p>
                         </article> : <>
-                            <a href="#/market-education" className="group block"><h3 className="news-story-headline group-hover:underline">Understand the market behind the numbers.</h3><p className="mt-3 text-sm leading-relaxed text-ink/70">Explore exchange notices, company filings and the essentials of investing on the Ghana Stock Exchange.</p><span className="news-text-link mt-4">Explore market education <ArrowRight size={15} aria-hidden="true" /></span></a>
+                            <a href="/market-education" className="group block"><h3 className="news-story-headline group-hover:underline">Understand the market behind the numbers.</h3><p className="mt-3 text-sm leading-relaxed text-ink/70">Explore exchange notices, company filings and the essentials of investing on the Ghana Stock Exchange.</p><span className="news-text-link mt-4">Explore market education <ArrowRight size={15} aria-hidden="true" /></span></a>
                             <div className="news-research-note"><BookOpen size={20} className="text-fluid-cyan-ink" aria-hidden="true" /><p>Research articles appear here as the Fluid Finance team publishes.</p></div>
                         </>}
                         {rest.slice(0, 2).map((article) => <a key={article.id} href={articleHref(article.slug)} className="news-secondary-story"><h3>{article.title}</h3><span>{formatRelative(article.published_at ?? article.created_at)}</span></a>)}
-                        <a href="#/articles" className="news-text-link mt-6">All research <ArrowRight size={15} aria-hidden="true" /></a>
+                        <a href="/articles" className="news-text-link mt-6">All research <ArrowRight size={15} aria-hidden="true" /></a>
                     </div>
                     <aside className="news-latest">
                         <h2 className="news-column-title">The latest</h2>
-                        {latest.length ? <ol className="news-latest-list">{latest.slice(0, 5).map((item) => <li key={item.key}><a href={item.href}><span>{formatRelative(item.at)} · {item.kind}</span><h3>{item.title}</h3></a></li>)}</ol> : <div className="news-latest-empty"><p>Follow the conversation on Ghana's markets.</p><a href="#/forum" className="news-text-link">Explore discussions <ArrowRight size={14} aria-hidden="true" /></a></div>}
-                        {spotlight && <a href={`#/stock/${spotlight.symbol}`} className="news-spotlight"><div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">In focus</h3><ArrowRight size={14} aria-hidden="true" /></div><div className="mt-4 flex items-center gap-3"><TickerLogo symbol={spotlight.symbol} size={32} /><div><p className="font-bold">{spotlight.symbol}</p><p className="text-xs text-ink/60">{spotlight.company}</p></div></div><div className="mt-4 flex items-baseline justify-between gap-2"><span className="text-2xl font-bold tabular-nums">{formatCedis(spotlight.price)}</span><span className={cn("flex items-center gap-1 text-sm font-semibold", spotlight.change >= 0 ? "text-fluid-green" : "text-fluid-rose")}>{spotlight.change >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}{pct(spotlight.changePercent)}</span></div><Sparkline points={sliceRange(getSeries(spotlight.symbol, spotlight.price), "1M").map((point) => point.close)} positive={spotlight.change >= 0} flat={spotlight.change === 0} width={240} height={48} className="mt-3 w-full" /><p className="mt-1 text-[11px] text-ink/60">Trend includes illustrative backfill</p></a>}
-                        <a href="#/business-news" className="news-text-link mt-5">Business & economy <ArrowRight size={14} aria-hidden="true" /></a>
+                        {latest.length ? <ol className="news-latest-list">{latest.slice(0, 5).map((item) => <li key={item.key}><a href={item.href}><span>{formatRelative(item.at)} · {item.kind}</span><h3>{item.title}</h3></a></li>)}</ol> : <div className="news-latest-empty"><p>Follow the conversation on Ghana's markets.</p><a href="/forum" className="news-text-link">Explore discussions <ArrowRight size={14} aria-hidden="true" /></a></div>}
+                        {spotlight && <a href={`/stock/${spotlight.symbol}`} className="news-spotlight"><div className="flex items-center justify-between gap-2"><h3 className="text-sm font-semibold">In focus</h3><ArrowRight size={14} aria-hidden="true" /></div><div className="mt-4 flex items-center gap-3"><TickerLogo symbol={spotlight.symbol} size={32} /><div><p className="font-bold">{spotlight.symbol}</p><p className="text-xs text-ink/60">{spotlight.company}</p></div></div><div className="mt-4 flex items-baseline justify-between gap-2"><span className="text-2xl font-bold tabular-nums">{formatCedis(spotlight.price)}</span><span className={cn("flex items-center gap-1 text-sm font-semibold", spotlight.change >= 0 ? "text-fluid-green" : "text-fluid-rose")}>{spotlight.change >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}{pct(spotlight.changePercent)}</span></div><Sparkline points={sliceRange(getSeries(spotlight.symbol, spotlight.price), "1M").map((point) => point.close)} positive={spotlight.change >= 0} flat={spotlight.change === 0} width={240} height={48} className="mt-3 w-full" /><p className="mt-1 text-[11px] text-ink/60">Trend includes illustrative backfill</p></a>}
+                        <a href="/business-news" className="news-text-link mt-5">Business & economy <ArrowRight size={14} aria-hidden="true" /></a>
                     </aside>
                 </section>
 
                 {/* Markets band */}
-                <Band id="markets" label="Markets" links={[["GSE Live", "#/gse-live"], ["Heatmap", "#/gse-live/heatmap"], ["Trends", "#/market-trends"], ["Fuel", "#/fuel"], ["FX", "#/fx"]]}>
+                <Band id="markets" label="Markets" links={[["GSE Live", "/gse-live"], ["Heatmap", "/gse-live/heatmap"], ["Trends", "/market-trends"], ["Fuel", "/fuel"], ["FX", "/fx"]]}>
                     <div className="grid gap-px bg-ink/[0.08] lg:grid-cols-[1fr_1fr_1fr_1.1fr]">
                         <MoverList title="Top gainers" stocks={breadth.gainers} tone="up" onShare={() => setShare("gainers")} />
                         <MoverList title="Top losers" stocks={breadth.losers} tone="down" onShare={() => setShare("losers")} />
                         <MoverList title="Most active" stocks={breadth.active} tone="neutral" onShare={() => setShare("active")} />
                         <div className="grid gap-px bg-ink/[0.08]">
-                            <RailCard href="#/fx" icon={Landmark} title="Cedi rates">
+                            <RailCard href="/fx" icon={Landmark} title="Cedi rates">
                                 {fx.length === 0 ? <p className="text-xs text-ink/45">Desk rates publish here once recorded.</p> : (
                                     <ul className="font-mono text-xs">{fx.filter((rate) => rate.quote_currency === "GHS").slice(0, 4).map((rate) => <li key={rate.id} className="flex justify-between py-0.5"><span className="text-ink/60">{rate.base_currency}/GHS</span><span className="tabular-nums text-ink">{Number(rate.mid).toFixed(2)}</span></li>)}</ul>
                                 )}
                             </RailCard>
-                            <RailCard href="#/fuel" icon={Fuel} title={fuel ? `Pump prices · ${formatFuelDate(fuel.report_date)}` : "Pump prices"}>
+                            <RailCard href="/fuel" icon={Fuel} title={fuel ? `Pump prices · ${formatFuelDate(fuel.report_date)}` : "Pump prices"}>
                                 {!fuel ? <p className="text-xs text-ink/45">The Fluid Pump Report appears here when published.</p> : (
                                     <ul className="font-mono text-xs">{(["petrol", "diesel"] as const).map((type) => { const now = averageFuelPrice(fuel.prices, type); const change = priorFuel ? fuelPriceChange(now, averageFuelPrice(priorFuel.prices, type)) : null; return <li key={type} className="flex justify-between gap-3 py-0.5"><span className="capitalize text-ink/60">Avg {type}</span><span className="ml-auto tabular-nums text-ink">GHS {formatFuelPrice(now)}</span><span className={cn("w-14 text-right tabular-nums", change === null || change === 0 ? "text-ink/40" : change > 0 ? "text-fluid-rose" : "text-fluid-green")}>{formatFuelChange(change)}</span></li>; })}</ul>
                                 )}
@@ -165,7 +165,7 @@ export default function HomePage() {
                 <EditorialSections articles={articles} stocks={market.stocks} loading={market.loading} />
 
                 {/* Community band */}
-                <Band id="community" label="Community" links={[["Forum", "#/forum"], ["Articles", "#/articles"], ...categories.map((category) => [category.name, forumCategoryHref(category.slug)] as [string, string])]}>
+                <Band id="community" label="Community" links={[["Forum", "/forum"], ["Articles", "/articles"], ...categories.map((category) => [category.name, forumCategoryHref(category.slug)] as [string, string])]}>
                     <div className="grid gap-6 p-5 lg:grid-cols-[1.4fr_1fr] md:p-6">
                         <div>
                             {threads.length === 0 ? (
@@ -182,7 +182,7 @@ export default function HomePage() {
                             
                             <h3 className="mt-3 text-xl font-bold leading-tight text-ink font-poppins">Join the Fluid Finance community</h3>
                             <p className="mt-2 text-sm leading-relaxed text-ink/60">Comment on research, start discussions and keep a public profile for your market views. Nothing here is investment advice.</p>
-                            {user ? <a href="#/forum/new" className="mt-4 inline-flex min-h-[2.75rem] items-center gap-2 rounded-none bg-fluid-cyan px-4 text-sm font-semibold text-fluid-action-ink hover:bg-fluid-cyan-hover">Start a discussion <ArrowRight size={15} /></a> : <a href="#/register" className="mt-4 inline-flex min-h-[2.75rem] items-center gap-2 rounded-none bg-fluid-cyan px-4 text-sm font-semibold text-fluid-action-ink hover:bg-fluid-cyan-hover">Create an account <ArrowRight size={15} /></a>}
+                            {user ? <a href="/forum/new" className="mt-4 inline-flex min-h-[2.75rem] items-center gap-2 rounded-none bg-fluid-cyan px-4 text-sm font-semibold text-fluid-action-ink hover:bg-fluid-cyan-hover">Start a discussion <ArrowRight size={15} /></a> : <a href="/register" className="mt-4 inline-flex min-h-[2.75rem] items-center gap-2 rounded-none bg-fluid-cyan px-4 text-sm font-semibold text-fluid-action-ink hover:bg-fluid-cyan-hover">Create an account <ArrowRight size={15} /></a>}
                         </div>
                     </div>
                 </Band>
@@ -193,7 +193,7 @@ export default function HomePage() {
                 </Band>
 
                 {/* Press + Learn */}
-                <Band id="learn" label="Learn & follow" links={[["Learning Center", "#/learning-center"], ["Market Education", "#/market-education"], ["Help", "#/help-center"]]}>
+                <Band id="learn" label="Learn & follow" links={[["Learning Center", "/learning-center"], ["Market Education", "/market-education"], ["Help", "/help-center"]]}>
                     <div className="grid gap-px bg-ink/[0.08] sm:grid-cols-2 lg:grid-cols-4">
                         {LEARN.map((item) => (
                             <a key={item.href} href={item.href} className="group bg-canvas p-5 transition-colors hover:bg-ink/[0.02]">
@@ -251,7 +251,7 @@ function MoverList({ title, stocks, tone, onShare }: { title: string; stocks: St
             {stocks.length === 0 ? <p className="px-4 pb-4 text-xs text-ink/40">{"No data yet"}</p> : (
                 <ul>
                     {stocks.map((stock, index) => (
-                        <li key={stock.symbol}><a href={`#/stock/${stock.symbol}`} className="flex items-center gap-2.5 px-4 py-2 text-sm hover:bg-ink/[0.03]"><span className="w-4 font-mono text-[11px] text-ink/30">{index + 1}</span><TickerLogo symbol={stock.symbol} size={22} /><span className="min-w-0 flex-1 truncate font-semibold text-ink">{stock.symbol}</span><span className="font-mono text-xs tabular-nums text-ink/70">{formatCedis(stock.price)}</span><span className={cn("w-16 text-right font-mono text-xs tabular-nums", stock.change > 0 ? "text-fluid-green" : stock.change < 0 ? "text-fluid-rose" : "text-ink/40")}>{pct(stock.changePercent)}</span></a></li>
+                        <li key={stock.symbol}><a href={`/stock/${stock.symbol}`} className="flex items-center gap-2.5 px-4 py-2 text-sm hover:bg-ink/[0.03]"><span className="w-4 font-mono text-[11px] text-ink/30">{index + 1}</span><TickerLogo symbol={stock.symbol} size={22} /><span className="min-w-0 flex-1 truncate font-semibold text-ink">{stock.symbol}</span><span className="font-mono text-xs tabular-nums text-ink/70">{formatCedis(stock.price)}</span><span className={cn("w-16 text-right font-mono text-xs tabular-nums", stock.change > 0 ? "text-fluid-green" : stock.change < 0 ? "text-fluid-rose" : "text-ink/40")}>{pct(stock.changePercent)}</span></a></li>
                     ))}
                 </ul>
             )}

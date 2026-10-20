@@ -15,7 +15,6 @@ export default function NewThreadPage({ categorySlug }: { categorySlug: string |
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
 
-    useEffect(() => { document.title = "Start a discussion · Fluid Finance"; }, []);
     useEffect(() => {
         if (!loading && !user) openLogin(newThreadHref(categorySlug));
     }, [loading, user, categorySlug]);

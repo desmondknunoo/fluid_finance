@@ -10,6 +10,8 @@ import { PostComposer } from "@/components/community/post-composer";
 import { PostList, ReportForm } from "@/components/community/post-list";
 import { UserChip } from "@/components/community/user-chip";
 import { reportContent } from "@/lib/community";
+import { useSeo } from "@/lib/seo";
+import { notFoundMeta, threadMeta } from "@/lib/seo-routes";
 
 export default function ThreadPage({ id }: { id: string }) {
     const { user } = useAuth();
@@ -27,7 +29,6 @@ export default function ThreadPage({ id }: { id: string }) {
             .then(async (found) => {
                 if (cancelled) return;
                 setThread(found);
-                document.title = found ? `${found.title} · Fluid Finance forum` : "Discussion not found · Fluid Finance";
                 if (found) setReplies(await listReplies(found.id));
             })
             .catch((caught) => { if (!cancelled) setError(caught instanceof Error ? caught.message : "Could not load this discussion."); });
@@ -41,12 +42,14 @@ export default function ThreadPage({ id }: { id: string }) {
         setThread((current) => current ? { ...current, reply_count: current.reply_count + 1, last_reply_at: created.created_at } : current);
     }, [user, thread]);
 
+    useSeo(thread ? threadMeta(thread) : thread === null ? notFoundMeta(`/forum/t/${id}`, "Discussion") : null);
+
     if (error) return <main className="page-container news-page"><Notice tone="error" className="mt-8">{error}</Notice></main>;
     if (thread === undefined) return <main className="page-container news-page"><p className="news-loading">Loading discussion…</p></main>;
     if (thread === null || thread.deleted_at) {
         return (
             <main className="page-container news-page">
-                <PageIntro eyebrow="Community" title="Discussion not available" description={<>It may have been removed. <a href="#/forum" className="text-fluid-cyan-ink underline">Back to the forum</a>.</>} />
+                <PageIntro eyebrow="Community" title="Discussion not available" description={<>It may have been removed. <a href="/forum" className="text-fluid-cyan-ink underline">Back to the forum</a>.</>} />
             </main>
         );
     }

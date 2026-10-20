@@ -6,6 +6,8 @@ import { threadHref } from "@/lib/navigation";
 import { Notice } from "@/components/ui/form";
 import { PageIntro } from "@/components/ui/page-intro";
 import { Avatar, RolePill } from "@/components/community/user-chip";
+import { useSeo } from "@/lib/seo";
+import { notFoundMeta, profileMeta } from "@/lib/seo-routes";
 
 export default function ProfilePage({ username }: { username: string }) {
     const { user } = useAuth();
@@ -22,19 +24,20 @@ export default function ProfilePage({ username }: { username: string }) {
             .then(async (found) => {
                 if (cancelled) return;
                 setProfile(found);
-                document.title = found ? `${found.display_name} (@${found.username}) · Fluid Finance` : "Member not found · Fluid Finance";
                 if (found) setActivity(await listMemberActivity(found.username));
             })
             .catch((caught) => { if (!cancelled) setError(caught instanceof Error ? caught.message : "Could not load this profile."); });
         return () => { cancelled = true; };
     }, [username]);
 
+    useSeo(profile ? profileMeta(profile) : profile === null ? notFoundMeta(`/u/${username}`, "Member") : null);
+
     if (error) return <main className="page-container news-page"><Notice tone="error" className="mt-8">{error}</Notice></main>;
     if (profile === undefined) return <main className="page-container news-page"><p className="news-loading">Loading profile…</p></main>;
     if (profile === null) {
         return (
             <main className="page-container news-page">
-                <PageIntro eyebrow="Members" title={`No member called @${username}`} description={<>They may have changed their username. <a href="#/forum" className="text-fluid-cyan-ink underline">Browse the forum</a>.</>} />
+                <PageIntro eyebrow="Members" title={`No member called @${username}`} description={<>They may have changed their username. <a href="/forum" className="text-fluid-cyan-ink underline">Browse the forum</a>.</>} />
             </main>
         );
     }
@@ -59,7 +62,7 @@ export default function ProfilePage({ username }: { username: string }) {
                     </div>
                     <div className="flex flex-col gap-4">
                         <p className="news-byline inline-flex items-center gap-2"><CalendarDays size={13} aria-hidden="true" /> Member since <strong>{formatLongDate(profile.created_at)}</strong></p>
-                        {own && <a href="#/settings" className="news-button-secondary news-button-secondary--sm self-start"><Settings size={14} aria-hidden="true" /> Edit profile</a>}
+                        {own && <a href="/settings" className="news-button-secondary news-button-secondary--sm self-start"><Settings size={14} aria-hidden="true" /> Edit profile</a>}
                     </div>
                 </div>
             </header>

@@ -206,7 +206,7 @@ body { margin: 0; }
 .news-nav-link { padding: 14px 19px; font-size: 13px; font-weight: 700; white-space: nowrap; }
 .news-nav-link:first-child { padding-left: 0; }
 .news-nav-link:hover, .news-nav-link[aria-current] { color: rgb(var(--cyan-ink)); text-decoration: underline; text-underline-offset: 6px; }
-.news-masthead a[href='#/register'] { border-radius: 0; }
+.news-masthead a[href='/register'] { border-radius: 0; }
 .news-masthead button { font-family: inherit; }
 .news-masthead button[aria-label^='Switch to'] { border: 1px solid var(--news-rule); border-radius: 0; min-width: 40px; min-height: 40px; }
 .quote-tape { border-top: 0; border-bottom: 1px solid var(--news-rule); background: var(--news-subtle); }

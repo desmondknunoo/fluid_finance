@@ -26,7 +26,6 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
     const recovery = false;
 
     useEffect(() => {
-        document.title = `${COPY[mode].title} · Fluid Finance`;
         setError("");
         setDone(null);
         submitted.current = false;
@@ -86,12 +85,12 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
 
             <div className="mx-auto max-w-md">
                 {done === "reset-sent" ? (
-                    <Done title="Email on its way" body="If an account exists for that address you will receive a password reset link shortly. The link opens a page to choose a new password, then brings you back here." link={{ href: "#/login", label: "Back to sign in" }} />
+                    <Done title="Email on its way" body="If an account exists for that address you will receive a password reset link shortly. The link opens a page to choose a new password, then brings you back here." link={{ href: "/login", label: "Back to sign in" }} />
                 ) : done === "registered" && registration ? (
                     <Done title="Account created" body={[
                         registration.verificationSent ? "Check your inbox for a verification link. Confirm your email before commenting or posting." : "Confirm your email before commenting or posting.",
                         ...registration.warnings,
-                    ].join(" ")} link={{ href: "#/settings", label: "Open account settings" }} />
+                    ].join(" ")} link={{ href: "/settings", label: "Open account settings" }} />
                 ) : (
                     <form onSubmit={submit} className="news-form" noValidate>
                         {mode !== "reset-password" && (
@@ -118,15 +117,15 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
                         <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-ink/[0.68]">
                             {mode === "login" && (
                                 <>
-                                    <a href="#/register" className="font-bold text-fluid-cyan-ink hover:underline">Create an account</a>
-                                    <a href="#/reset-password" className="hover:text-ink hover:underline">Forgot password?</a>
+                                    <a href="/register" className="font-bold text-fluid-cyan-ink hover:underline">Create an account</a>
+                                    <a href="/reset-password" className="hover:text-ink hover:underline">Forgot password?</a>
                                 </>
                             )}
-                            {mode === "register" && <span>Already a member? <a href="#/login" className="font-bold text-fluid-cyan-ink hover:underline">Sign in</a></span>}
-                            {mode === "reset-password" && !recovery && <a href="#/login" className="hover:text-ink hover:underline">Back to sign in</a>}
+                            {mode === "register" && <span>Already a member? <a href="/login" className="font-bold text-fluid-cyan-ink hover:underline">Sign in</a></span>}
+                            {mode === "reset-password" && !recovery && <a href="/login" className="hover:text-ink hover:underline">Back to sign in</a>}
                         </div>
                         {mode === "register" && (
-                            <p className="news-byline">By creating an account you agree to the <a href="#/terms-of-service" className="underline hover:text-ink">Terms of Service</a> and <a href="#/privacy-policy" className="underline hover:text-ink">Privacy Policy</a>. Nothing on Fluid Finance is investment advice.</p>
+                            <p className="news-byline">By creating an account you agree to the <a href="/terms-of-service" className="underline hover:text-ink">Terms of Service</a> and <a href="/privacy-policy" className="underline hover:text-ink">Privacy Policy</a>. Nothing on Fluid Finance is investment advice.</p>
                         )}
                     </form>
                 )}
