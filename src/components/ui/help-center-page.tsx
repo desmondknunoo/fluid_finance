@@ -1,4 +1,4 @@
-import { ChevronDown, MessageCircle, Search, Video, FileText, Mail } from "lucide-react";
+import { BookOpen, ChevronDown, GraduationCap, LineChart, Mail, MessageCircle, Search } from "lucide-react";
 import { PageIntro } from "@/components/ui/page-intro";
 import { HELP_FAQS } from "@/lib/help-faqs";
 
@@ -7,28 +7,32 @@ function HelpCenterPage() {
 
     const supportTopics = [
         {
-            icon: Search,
-            title: "Getting Started",
-            description: "Everything you need to know about opening an account, making your first trade, and understanding the platform.",
-            articles: "15 articles"
+            icon: GraduationCap,
+            title: "Learning Center",
+            description: "Courses, training and official resources for understanding the Ghana Stock Exchange and investing.",
+            label: "Start learning",
+            href: "/learning-center",
         },
         {
-            icon: FileText,
-            title: "Trading Guide",
-            description: "Comprehensive guides on technical analysis, fundamental analysis, and trading strategies.",
-            articles: "23 articles"
+            icon: BookOpen,
+            title: "Market Education",
+            description: "Explainers on reading company data, market moves, the cedi and the economy.",
+            label: "Read the explainers",
+            href: "/market-education",
         },
         {
-            icon: Video,
-            title: "Video Tutorials",
-            description: "Step-by-step video guides for all platform features and investment concepts.",
-            articles: "8 videos"
+            icon: LineChart,
+            title: "Market Data",
+            description: "Live prices, company pages, the heatmap and the weekly market review.",
+            label: "Open the market board",
+            href: "/gse-live",
         },
         {
             icon: MessageCircle,
             title: "Community",
-            description: "Connect with other investors, ask questions, and share your experiences.",
-            articles: "Active forum"
+            description: "Ask questions and discuss markets, money and personal finance with other members.",
+            label: "Visit the forum",
+            href: "/forum",
         }
     ];
 
@@ -37,7 +41,7 @@ function HelpCenterPage() {
             <PageIntro
                 eyebrow="Support"
                 title="Help Center"
-                description="Find answers to common questions, get help with trading, and connect with our support team."
+                description="Answers about what Fluid Finance offers, where its data comes from and how to reach our team."
             />
 
             <div className="relative max-w-2xl">
@@ -58,14 +62,14 @@ function HelpCenterPage() {
                 </header>
                 <div className="news-tiles news-tiles--4 pt-4">
                     {supportTopics.map((topic) => (
-                        <article key={topic.title} className="news-tile">
+                        <a key={topic.title} href={topic.href} className="news-tile">
                             <h3 className="flex items-start gap-2">
                                 <topic.icon size={20} className="mt-0.5 shrink-0 text-fluid-cyan-ink" aria-hidden="true" />
                                 <span>{topic.title}</span>
                             </h3>
-                            <p className="news-byline !mt-2">{topic.articles}</p>
                             <p>{topic.description}</p>
-                        </article>
+                            <p className="news-byline !mt-3 font-semibold text-fluid-cyan-ink">{topic.label}</p>
+                        </a>
                     ))}
                 </div>
             </section>
@@ -100,7 +104,7 @@ function HelpCenterPage() {
                 </header>
                 <div className="py-6">
                     <p className="news-standfirst">
-                        Our support team is here to help you succeed. Get in touch with our experts.
+                        Questions about the site, your community account, our research or market data? Email the Fluid Finance team. For accounts, payments or orders, contact support in the Fluid app.
                     </p>
                     <a href="mailto:info@fluidterra.com" className="news-button mt-6">
                         Contact Support

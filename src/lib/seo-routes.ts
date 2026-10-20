@@ -324,10 +324,10 @@ export const STATIC_PAGES: Record<string, StaticPage> = {
         crumbs: [["Market education", "/market-education"]],
     },
     "/help-center": {
-        title: suffix("Help Center: questions about investing on the GSE"),
-        description: "Answers to common questions about investing on the Ghana Stock Exchange with Fluid Finance: getting started, minimums, verification and market data.",
+        title: suffix("Help Center: Fluid Finance questions and answers"),
+        description: "What Fluid Finance offers, where its Ghana Stock Exchange, fuel and FX data comes from, what a free account does, and where trading actually happens.",
         heading: "Help Center",
-        intro: "Find answers to common questions, get help with trading and connect with our support team.",
+        intro: "Answers about what Fluid Finance offers, where its data comes from and how to reach our team.",
         crumbs: [["Help center", "/help-center"]],
         jsonLd: () => [{
             "@context": "https://schema.org",
