@@ -26,7 +26,7 @@ export function SocialFeed() {
     return (
         <div ref={container}>
             <p className="border-b border-ink/[0.08] px-5 py-3 text-sm text-ink/65">Recent posts directly from our social accounts. If a feed is unavailable, open the account to see its latest posts.</p>
-            <div className="grid gap-px bg-ink/[0.08] lg:grid-cols-2">
+            <div className="grid max-w-4xl gap-px bg-ink/[0.08] md:grid-cols-2">
                 {FEED_LINKS.map((social) => {
                     const Icon = SOCIAL_ICONS[social.key];
                     return (
@@ -42,7 +42,7 @@ export function SocialFeed() {
                                 referrerPolicy="strict-origin-when-cross-origin"
                                 loading="lazy"
                                 scrolling="no"
-                                className="block h-[720px] w-full border-0 bg-white"
+                                className="block h-[440px] w-full border-0 bg-white"
                             /> : visible ? <iframe
                                 key={`${social.key}-${resolved}`}
                                 title={`Latest Fluid Finance posts on ${social.label}`}
@@ -51,7 +51,7 @@ export function SocialFeed() {
                                 referrerPolicy="strict-origin-when-cross-origin"
                                 loading="lazy"
                                 scrolling="no"
-                                className="block h-[720px] w-full border-0 bg-white"
+                                className="block h-[440px] w-full border-0 bg-white"
                             /> : <div className="px-5 py-8 text-sm text-ink/65">Feed loads when this section is in view.</div>}
                             <a href={social.href} target="_blank" rel="noreferrer noopener" className="news-text-link flex items-center gap-2 px-5 py-4">Open {social.label} <ArrowUpRight size={13} aria-hidden="true" /></a>
                         </section>
@@ -65,5 +65,5 @@ export function SocialFeed() {
 /** TikTok's official creator widget runs in an opaque frame, separate from the site session. */
 function embedDocument(social: Social): string {
     const markup = `<blockquote class="tiktok-embed" cite="${social.href}" data-unique-id="fluid_finance" data-embed-type="creator" style="max-width:100%;min-width:288px;margin:0"><section><a target="_blank" rel="noopener noreferrer" href="${social.href}">@fluid_finance on TikTok</a></section></blockquote><script async src="https://www.tiktok.com/embed.js"></script>`;
-    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>html,body{margin:0;padding:0;background:#fff;overflow:hidden;font:14px/1.6 Arial,sans-serif}a{color:#005c70}iframe{max-width:100%;height:700px!important;border:0}</style></head><body>${markup}</body></html>`;
+    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>html,body{margin:0;padding:0;background:#fff;overflow:hidden;font:14px/1.6 Arial,sans-serif}a{color:#005c70}iframe{max-width:100%;height:430px!important;border:0}</style></head><body>${markup}</body></html>`;
 }
