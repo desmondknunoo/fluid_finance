@@ -328,7 +328,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                                     >
                                                         <td>
                                                             <div className="flex items-center gap-3">
-                                                                <TickerLogo symbol={stock.symbol} size={24} />
+                                                                <TickerLogo symbol={stock.symbol} size={36} />
                                                                 <span className="font-bold text-ink">{stock.symbol}</span>
                                                             </div>
                                                             <span className="mt-1 block max-w-[180px] truncate text-xs text-ink/[0.68] md:hidden">{stock.company}</span>
@@ -392,8 +392,11 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                             heatmapTileClass(stock.change, stock.changePercent),
                                         )}
                                     >
-                                        <div className="truncate text-sm font-bold">{stock.symbol}</div>
-                                        <div className="mt-1 text-xs">
+                                        <div className="flex min-w-0 items-center gap-2">
+                                            <TickerLogo symbol={stock.symbol} size={28} />
+                                            <span className="truncate text-sm font-bold">{stock.symbol}</span>
+                                        </div>
+                                        <div className="mt-2 text-xs">
                                             {stock.changePercent > 0 ? "+" : ""}{stock.changePercent.toFixed(2)}%
                                         </div>
                                         <div className="mt-2 truncate text-xs">{formatCedis(stock.price)}</div>
