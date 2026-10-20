@@ -1,213 +1,158 @@
-"use client";
+import type { MouseEvent } from "react";
+import { PageIntro } from "@/components/ui/page-intro";
 
-import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
+const slug = (title: string) => title.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+/** The app routes on the hash, so in-page links scroll directly instead of rewriting it. */
+function jumpTo(id: string) {
+    return (event: MouseEvent<HTMLAnchorElement>) => {
+        event.preventDefault();
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+}
 
 function TermsOfServicePage() {
-    const fadeUpVariants = {
-        hidden: { opacity: 0, y: 30 },
-        visible: (i: number) => ({
-            opacity: 1,
-            y: 0,
-            transition: {
-                duration: 1,
-                delay: 0.5 + i * 0.1,
-                ease: [0.25, 0.4, 0.25, 1] as any,
-            },
-        }),
-    };
+    const sections = [
+        {
+            title: "Acceptance of Terms",
+            content: (
+                <>
+                    <p>
+                        By accessing or using the Fluid Finance platform, you agree to be bound by these Terms of Service. If you do not agree to all the terms and conditions, you may not access the platform.
+                    </p>
+                    <p>
+                        These terms apply to all users of the platform, including without limitation users who are browsers, vendors, customers, traders, and/or contributors of content.
+                    </p>
+                </>
+            )
+        },
+        {
+            title: "User Accounts",
+            content: (
+                <>
+                    <p>
+                        To use certain features of the platform, you must register for an account. You agree to:
+                    </p>
+                    <ul className="list-disc">
+                        <li>Provide accurate, current, and complete information when registering</li>
+                        <li>Maintain and update your information to keep it accurate and complete</li>
+                        <li>Maintain the security of your account credentials</li>
+                        <li>Be responsible for all activities that occur under your account</li>
+                        <li>Notify us immediately of any unauthorized use of your account</li>
+                    </ul>
+                    <h3>Eligibility:</h3>
+                    <p>You must be at least 18 years old and reside in a jurisdiction where trading financial instruments is permitted.</p>
+                </>
+            )
+        },
+        {
+            title: "Financial Data & Market Information",
+            content: (
+                <>
+                    <p>
+                        Our platform provides real-time and historical financial data from the Ghana Stock Exchange and other sources. You agree that:
+                    </p>
+                    <ul className="list-disc">
+                        <li>All market data is provided "as is" and may contain errors or delays</li>
+                        <li>Trading decisions are your own responsibility</li>
+                        <li>We are not a broker-dealer or investment advisor</li>
+                        <li>Market data is for informational purposes only</li>
+                    </ul>
+                </>
+            )
+        },
+        {
+            title: "Trading & Investment Risks",
+            content: (
+                <>
+                    <p>
+                        Trading financial instruments involves substantial risk of loss. You acknowledge and understand that:
+                    </p>
+                    <ul className="list-disc">
+                        <li>Past performance does not guarantee future results</li>
+                        <li>You may lose some or all of your invested capital</li>
+                        <li>You should not invest money you cannot afford to lose</li>
+                        <li>Market conditions can change rapidly</li>
+                    </ul>
+                    <p>
+                        <strong className="text-ink">Disclaimer:</strong> Nothing on this platform constitutes investment advice, a recommendation to buy or sell, or solicitation of any kind. You must do your own research and consult with qualified professionals.
+                    </p>
+                </>
+            )
+        },
+        {
+            title: "Payment & Billing",
+            content: (
+                <>
+                    <p>
+                        Some features of our platform may require payment. By providing payment information, you authorize us to charge applicable fees.
+                    </p>
+                    <ul className="list-disc">
+                        <li>All fees are non-refundable unless otherwise specified</li>
+                        <li>We reserve the right to change our fees at any time</li>
+                        <li>You are responsible for all applicable taxes</li>
+                    </ul>
+                </>
+            )
+        },
+        {
+            title: "Termination",
+            content: (
+                <>
+                    <p>
+                        We may terminate or suspend your account immediately, without prior notice or liability, for any reason, including without limitation if you breach these Terms of Service.
+                    </p>
+                    <p>
+                        Upon termination, your right to use the platform will immediately cease.
+                    </p>
+                </>
+            )
+        },
+        {
+            title: "Governing Law",
+            content: (
+                <>
+                    <p>
+                        These Terms shall be governed by and construed in accordance with the laws of Ghana, without regard to its conflict of law provisions.
+                    </p>
+                    <p>
+                        Any legal suit, action, or proceeding arising out of or related to these Terms or the platform shall be instituted exclusively in the competent courts of Ghana.
+                    </p>
+                </>
+            )
+        }
+    ];
 
     return (
-        <div className="relative min-h-screen w-full overflow-hidden bg-canvas">
-            <div className="absolute inset-0 bg-gradient-to-br from-ink/[0.05] via-transparent to-ink/[0.05] blur-3xl" />
+        <main className="page-container news-page">
+            <PageIntro
+                eyebrow="Legal"
+                title="Terms of Service"
+                description="Please read these terms carefully before using our financial platform."
+            />
 
-            <div className="page-container relative z-10 py-12 sm:py-16 md:py-20">
-                <div className="max-w-4xl mx-auto">
-                    <motion.div
-                        custom={0}
-                        variants={fadeUpVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="text-center mb-12"
-                    >
-                        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 tracking-tight font-poppins">
-                            <span className="bg-clip-text text-transparent bg-gradient-to-b from-ink to-ink/80">
-                                Terms of Service
-                           </span>
-                        </h1>
-                        <p className="text-lg text-ink/60 max-w-2xl mx-auto leading-relaxed">
-                            Please read these terms carefully before using our financial platform.
-                        </p>
-                    </motion.div>
+            <div className="news-columns news-columns--main">
+                <article className="news-prose">
+                    {sections.map((section) => (
+                        <section key={section.title} id={slug(section.title)} aria-labelledby={`${slug(section.title)}-heading`}>
+                            <h2 id={`${slug(section.title)}-heading`}>{section.title}</h2>
+                            {section.content}
+                        </section>
+                    ))}
+                </article>
 
-                    <div className="space-y-8">
-                        <motion.div
-                            custom={1}
-                            variants={fadeUpVariants}
-                            initial="hidden"
-                            animate="visible"
-                        >
-                            <Card className="bg-ink/[0.02] border border-ink/[0.08] backdrop-blur-sm">
-                                <CardContent className="p-8">
-                                    <h2 className="text-2xl font-bold mb-6 font-poppins">Acceptance of Terms</h2>
-                                    <div className="space-y-4 text-ink/70 leading-relaxed">
-                                        <p>
-                                            By accessing or using the Fluid Finance platform, you agree to be bound by these Terms of Service. If you do not agree to all the terms and conditions, you may not access the platform.
-                                        </p>
-                                        <p>
-                                            These terms apply to all users of the platform, including without limitation users who are browsers, vendors, customers, traders, and/or contributors of content.
-                                        </p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-
-                        <motion.div
-                            custom={2}
-                            variants={fadeUpVariants}
-                            initial="hidden"
-                            animate="visible"
-                        >
-                            <Card className="bg-ink/[0.02] border border-ink/[0.08] backdrop-blur-sm">
-                                <CardContent className="p-8">
-                                    <h2 className="text-2xl font-bold mb-6 font-poppins">User Accounts</h2>
-                                    <div className="space-y-4 text-ink/70 leading-relaxed">
-                                        <p>
-                                            To use certain features of the platform, you must register for an account. You agree to:
-                                        </p>
-                                        <ul className="list-disc list-inside space-y-2 ml-4">
-                                            <li>Provide accurate, current, and complete information when registering</li>
-                                            <li>Maintain and update your information to keep it accurate and complete</li>
-                                            <li>Maintain the security of your account credentials</li>
-                                            <li>Be responsible for all activities that occur under your account</li>
-                                            <li>Notify us immediately of any unauthorized use of your account</li>
-                                        </ul>
-                                        <p className="mt-4 font-semibold">Eligibility:</p>
-                                        <p>You must be at least 18 years old and reside in a jurisdiction where trading financial instruments is permitted.</p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-
-                        <motion.div
-                            custom={3}
-                            variants={fadeUpVariants}
-                            initial="hidden"
-                            animate="visible"
-                        >
-                            <Card className="bg-ink/[0.02] border border-ink/[0.08] backdrop-blur-sm">
-                                <CardContent className="p-8">
-                                    <h2 className="text-2xl font-bold mb-6 font-poppins">Financial Data & Market Information</h2>
-                                    <div className="space-y-4 text-ink/70 leading-relaxed">
-                                        <p>
-                                            Our platform provides real-time and historical financial data from the Ghana Stock Exchange and other sources. You agree that:
-                                        </p>
-                                        <ul className="list-disc list-inside space-y-2 ml-4">
-                                            <li>All market data is provided "as is" and may contain errors or delays</li>
-                                            <li>Trading decisions are your own responsibility</li>
-                                            <li>We are not a broker-dealer or investment advisor</li>
-                                            <li>Market data is for informational purposes only</li>
-                                        </ul>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-
-                        <motion.div
-                            custom={4}
-                            variants={fadeUpVariants}
-                            initial="hidden"
-                            animate="visible"
-                        >
-                            <Card className="bg-ink/[0.02] border border-ink/[0.08] backdrop-blur-sm">
-                                <CardContent className="p-8">
-                                    <h2 className="text-2xl font-bold mb-6 font-poppins">Trading & Investment Risks</h2>
-                                    <div className="space-y-4 text-ink/70 leading-relaxed">
-                                        <p>
-                                            Trading financial instruments involves substantial risk of loss. You acknowledge and understand that:
-                                        </p>
-                                        <ul className="list-disc list-inside space-y-2 ml-4">
-                                            <li>Past performance does not guarantee future results</li>
-                                            <li>You may lose some or all of your invested capital</li>
-                                            <li>You should not invest money you cannot afford to lose</li>
-                                            <li>Market conditions can change rapidly</li>
-                                        </ul>
-                                        <p className="mt-4">
-                                            <strong className="text-ink">Disclaimer:</strong> Nothing on this platform constitutes investment advice, a recommendation to buy or sell, or solicitation of any kind. You must do your own research and consult with qualified professionals.
-                                        </p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-
-                        <motion.div
-                            custom={5}
-                            variants={fadeUpVariants}
-                            initial="hidden"
-                            animate="visible"
-                        >
-                            <Card className="bg-ink/[0.02] border border-ink/[0.08] backdrop-blur-sm">
-                                <CardContent className="p-8">
-                                    <h2 className="text-2xl font-bold mb-6 font-poppins">Payment & Billing</h2>
-                                    <div className="space-y-4 text-ink/70 leading-relaxed">
-                                        <p>
-                                            Some features of our platform may require payment. By providing payment information, you authorize us to charge applicable fees.
-                                        </p>
-                                        <ul className="list-disc list-inside space-y-2 ml-4">
-                                            <li>All fees are non-refundable unless otherwise specified</li>
-                                            <li>We reserve the right to change our fees at any time</li>
-                                            <li>You are responsible for all applicable taxes</li>
-                                        </ul>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-
-                        <motion.div
-                            custom={6}
-                            variants={fadeUpVariants}
-                            initial="hidden"
-                            animate="visible"
-                        >
-                            <Card className="bg-gradient-to-br from-ink/[0.05] to-transparent border border-ink/[0.1]">
-                                <CardContent className="p-8">
-                                    <h2 className="text-2xl font-bold mb-6 font-poppins">Termination</h2>
-                                    <div className="space-y-4 text-ink/70 leading-relaxed">
-                                        <p>
-                                            We may terminate or suspend your account immediately, without prior notice or liability, for any reason, including without limitation if you breach these Terms of Service.
-                                        </p>
-                                        <p>
-                                            Upon termination, your right to use the platform will immediately cease.
-                                        </p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-
-                        <motion.div
-                            custom={7}
-                            variants={fadeUpVariants}
-                            initial="hidden"
-                            animate="visible"
-                        >
-                            <Card className="bg-ink/[0.02] border border-ink/[0.08] backdrop-blur-sm">
-                                <CardContent className="p-8">
-                                    <h2 className="text-2xl font-bold mb-6 font-poppins">Governing Law</h2>
-                                    <div className="space-y-4 text-ink/70 leading-relaxed">
-                                        <p>
-                                            These Terms shall be governed by and construed in accordance with the laws of Ghana, without regard to its conflict of law provisions.
-                                        </p>
-                                        <p>
-                                            Any legal suit, action, or proceeding arising out of or related to these Terms or the platform shall be instituted exclusively in the competent courts of Ghana.
-                                        </p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-                    </div>
-                </div>
+                <aside className="news-rail" aria-label="Contents">
+                    <h2 className="news-subhead">Contents</h2>
+                    <ul className="news-list text-sm">
+                        {sections.map((section) => (
+                            <li key={section.title}>
+                                <a href={`#${slug(section.title)}`} onClick={jumpTo(slug(section.title))} className="font-semibold hover:underline">{section.title}</a>
+                            </li>
+                        ))}
+                    </ul>
+                </aside>
             </div>
-        </div>
+        </main>
     );
 }
 

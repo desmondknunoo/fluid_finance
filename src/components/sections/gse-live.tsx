@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
 import { Loader2, RotateCw, Search, TrendingDown, TrendingUp, LayoutGrid, Rows3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TickerLogo } from "@/components/stock/ticker-logo";
-import { StockCard } from "@/components/stock/stock-card";
 import { Sparkline } from "@/components/stock/price-chart";
+import { Notice } from "@/components/ui/form";
 import { heatmapTileClass } from "@/lib/heatmap-style";
 import {
     formatCedis,
@@ -31,25 +30,28 @@ const REFRESH_MS = 30_000;
 
 type SortKey = "symbol" | "company" | "price" | "change" | "changePercent" | "volume";
 
+const COLUMNS: [SortKey, string, boolean][] = [
+    // key, label, numeric
+    ["symbol", "Symbol", false],
+    ["company", "Name", false],
+    ["price", "Price", true],
+    ["change", "Change", true],
+    ["changePercent", "% Change", true],
+    ["volume", "Volume", true],
+];
+
 function Stat({ label, value, tone }: { label: string; value: string; tone?: "up" | "down" }) {
     return (
-        <div className="rounded-2xl border border-ink/[0.08] bg-ink/[0.03] px-5 py-4">
-            <div className="text-[10px] font-semibold uppercase tracking-widest text-ink/40">{label}</div>
-            <div
-                className={cn(
-                    "mt-1.5 font-mono text-2xl font-bold",
-                    tone === "up" ? "text-emerald-400" : tone === "down" ? "text-rose-400" : "text-ink",
-                )}
-            >
-                {value}
-            </div>
+        <div className="news-stat">
+            <dt>{label}</dt>
+            <dd className={tone === "up" ? "news-up" : tone === "down" ? "news-down" : undefined}>{value}</dd>
         </div>
     );
 }
 
 /**
- * The market floor of the landing page: every listed company, readable as a
- * table, a heatmap of cards, or a heatmap, alongside session stats and movers.
+ * The market floor: every listed company, readable as a sortable board or a heatmap,
+ * under a session strip and the day's breadth figures. Expects to sit inside a page container.
  */
 export function GseLive({ view }: { view: ViewMode | null }) {
     const [stocks, setStocks] = useState<Stock[]>([]);
@@ -147,345 +149,261 @@ export function GseLive({ view }: { view: ViewMode | null }) {
     };
 
     const marketOpen = isMarketOpen();
+    const noMatch = <p className="news-empty">No stocks match “{query}”.</p>;
 
     return (
-        <section id={GSE_LIVE_SECTION} className="relative scroll-mt-24 bg-canvas py-14 sm:py-20 md:py-24">
-            <div className="page-container">
-                <motion.div
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4 }}
+        <section id={GSE_LIVE_SECTION} className="news-section scroll-mt-24">
+            <header className="news-section-header">
+                <h2>GSE Live</h2>
+                <span>
+                    All {stocks.length || "—"} equities on the Ghana Stock Exchange, refreshed every
+                    30 seconds. Select any ticker for its full price history.
+                </span>
+                <button
+                    type="button"
+                    onClick={() => load(true)}
+                    className="news-button-quiet news-button-quiet--sm"
                 >
-                    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-                        <div>
-                            <h2 className="text-3xl font-bold md:text-4xl">GSE Live</h2>
-                            <p className="mt-2 max-w-2xl text-sm text-ink/40">
-                                All {stocks.length || "—"} equities on the Ghana Stock Exchange, refreshed every
-                                30 seconds. Select any ticker for its full price history.
-                            </p>
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => load(true)}
-                            className="inline-flex items-center gap-2 rounded-full border border-ink/[0.08] bg-ink/[0.03] px-4 py-2 text-xs font-semibold uppercase tracking-widest text-ink/60 transition-colors hover:border-ink/25 hover:text-ink"
-                        >
-                            <RotateCw size={14} className={refreshing ? "animate-spin" : undefined} />
-                            Refresh
-                        </button>
-                    </div>
+                    <RotateCw size={14} className={refreshing ? "animate-spin" : undefined} aria-hidden="true" />
+                    Refresh
+                </button>
+            </header>
 
-                    {/* Market status */}
-                    <div className="grid gap-4 rounded-2xl border border-ink/[0.08] bg-ink/[0.03] px-6 py-5 sm:grid-cols-3">
-                        <div>
-                            <div className="text-[10px] font-semibold uppercase tracking-widest text-ink/40">
-                                Ghana Stock Exchange
-                            </div>
-                            <div
-                                className={cn(
-                                    "mt-1.5 flex items-center gap-2 text-sm font-bold uppercase tracking-widest",
-                                    marketOpen ? "text-emerald-400" : "text-red-500",
-                                )}
+            {/* Market status */}
+            <div className="news-session -mt-px" aria-label="Market status">
+                <span className="inline-flex items-center gap-2 font-semibold">
+                    <span
+                        className={cn("h-1.5 w-1.5", marketOpen ? "animate-pulse bg-fluid-green" : "bg-fluid-rose")}
+                        aria-hidden="true"
+                    />
+                    <span className="text-ink/[0.68]">Ghana Stock Exchange</span>
+                    <strong className={marketOpen ? "text-fluid-green" : "text-fluid-rose"}>{marketOpen ? "Market open" : "Market closed"}</strong>
+                </span>
+                <span>Trading hours <strong>10:00 – 15:00 GMT</strong></span>
+                <span>
+                    Last update{" "}
+                    <strong>
+                        {updatedAt
+                            ? updatedAt.toLocaleTimeString("en-GB", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  second: "2-digit",
+                                  timeZone: "UTC",
+                              })
+                            : "—"}
+                    </strong>
+                </span>
+            </div>
+
+            {/* Stats */}
+            <dl className="news-stats -mt-px">
+                <Stat label="Total volume" value={formatCompact(stats.volume)} />
+                <Stat label="Total value" value={`₵${formatCompact(stats.value)}`} />
+                <Stat label="Gainers" value={String(stats.advancers)} tone="up" />
+                <Stat label="Losers" value={String(stats.decliners)} tone="down" />
+                <Stat label="Unchanged" value={String(stats.unchanged)} />
+            </dl>
+
+            {/* View toggle + search, sharing one hairline. */}
+            <div className="mt-6 flex flex-col gap-3 border-b border-ink/[0.19] md:flex-row md:items-end md:justify-between">
+                <div className="flex gap-1" role="group" aria-label="View">
+                    {VIEW_MODES.map((key) => {
+                        const Icon = VIEW_ICONS[key];
+                        return (
+                            <button
+                                key={key}
+                                type="button"
+                                onClick={() => { setMode(key); openGseLive(key); }}
+                                aria-pressed={mode === key}
+                                aria-current={mode === key ? "true" : undefined}
+                                className="news-tab inline-flex items-center gap-2 uppercase"
                             >
-                                <span
-                                    className={cn(
-                                        "h-2 w-2 rounded-full",
-                                        marketOpen ? "animate-pulse bg-emerald-400" : "bg-red-500",
-                                    )}
-                                />
-                                {marketOpen ? "Market open" : "Market closed"}
-                            </div>
-                        </div>
-                        <div>
-                            <div className="text-[10px] font-semibold uppercase tracking-widest text-ink/40">
-                                Trading hours
-                            </div>
-                            <div className="mt-1.5 font-mono text-sm text-ink">10:00 – 15:00 GMT</div>
-                        </div>
-                        <div>
-                            <div className="text-[10px] font-semibold uppercase tracking-widest text-ink/40">
-                                Last update
-                            </div>
-                            <div className="mt-1.5 font-mono text-sm text-ink">
-                                {updatedAt
-                                    ? updatedAt.toLocaleTimeString("en-GB", {
-                                          hour: "2-digit",
-                                          minute: "2-digit",
-                                          second: "2-digit",
-                                          timeZone: "UTC",
-                                      })
-                                    : "—"}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Stats */}
-                    <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
-                        <Stat label="Total volume" value={formatCompact(stats.volume)} />
-                        <Stat label="Total value" value={`₵${formatCompact(stats.value)}`} />
-                        <Stat label="Gainers" value={String(stats.advancers)} tone="up" />
-                        <Stat label="Losers" value={String(stats.decliners)} tone="down" />
-                        <Stat label="Unchanged" value={String(stats.unchanged)} />
-                    </div>
-                {/* View toggle + search */}
-                <div className="mt-8 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="inline-flex rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-1">
-                        {VIEW_MODES.map((key) => {
-                            const Icon = VIEW_ICONS[key];
-                            return (
-                                <button
-                                    key={key}
-                                    type="button"
-                                    onClick={() => { setMode(key); openGseLive(key); }}
-                                    aria-pressed={mode === key}
-                                    className={cn(
-                                        "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold uppercase tracking-widest transition-colors",
-                                        mode === key
-                                            ? "bg-ink/[0.12] text-ink"
-                                            : "text-ink/40 hover:text-ink/70",
-                                    )}
-                                >
-                                    <Icon size={14} />
-                                    {key}
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <div className="relative flex-1 lg:w-72">
-                            <Search
-                                size={16}
-                                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink/30"
-                            />
-                            <input
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Search stocks…"
-                                aria-label="Search stocks"
-                                className="w-full rounded-xl border border-ink/[0.08] bg-ink/[0.03] py-2.5 pl-11 pr-4 text-sm text-ink placeholder:text-ink/30 focus:border-fluid-cyan/60 focus:outline-none"
-                            />
-                        </div>
-                        <span className="whitespace-nowrap text-xs text-ink/40">
-                            {filtered.length} stocks
-                        </span>
-                    </div>
+                                <Icon size={14} aria-hidden="true" />
+                                {key}
+                            </button>
+                        );
+                    })}
                 </div>
 
-                {loading && (
-                    <div className="flex min-h-[400px] items-center justify-center">
-                        <Loader2 className="h-8 w-8 animate-spin text-ink/40" />
+                <div className="flex items-center gap-3 pb-3">
+                    <div className="flex flex-1 items-center border border-ink/[0.19] focus-within:border-ink md:w-72">
+                        <Search size={15} className="ml-3 shrink-0 text-ink/[0.68]" aria-hidden="true" />
+                        <input
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder="Search stocks…"
+                            aria-label="Search stocks"
+                            className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-ink placeholder:text-ink/40 focus:outline-none"
+                        />
                     </div>
-                )}
+                    <span className="news-byline news-mono whitespace-nowrap">
+                        {filtered.length} stocks
+                    </span>
+                </div>
+            </div>
 
-                {error && !loading && (
-                    <div className="flex min-h-[300px] items-center justify-center text-ink/40">{error}</div>
-                )}
+            {loading && (
+                <div className="news-loading flex min-h-[320px] items-center justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+                    <span className="sr-only">Loading market data</span>
+                </div>
+            )}
 
-                {!loading && !error && (
-                    <div className="mt-6 min-w-0">
-                        <div className="min-w-0">
-                            {mode === "table" && (
-                                <>
-                                {/* Mobile: stacked cards with a sort control, since a
-                                    six-column table can only scroll sideways here. */}
-                                <div className="md:hidden">
-                                    <div className="mb-3 flex items-center justify-end gap-2">
-                                        <label htmlFor="gse-sort" className="text-[11px] uppercase tracking-widest text-ink/40">
-                                            Sort
-                                        </label>
-                                        <select
-                                            id="gse-sort"
-                                            value={`${sort}:${descending ? "desc" : "asc"}`}
-                                            onChange={(e) => {
-                                                const [key, dir] = e.target.value.split(":") as [SortKey, "asc" | "desc"];
-                                                setSort(key);
-                                                setDescending(dir === "desc");
-                                            }}
-                                            className="rounded-lg border border-ink/[0.08] bg-ink/[0.03] px-3 py-1.5 text-xs text-ink focus:border-fluid-cyan/60 focus:outline-none"
-                                        >
-                                            <option value="symbol:asc">Symbol A–Z</option>
-                                            <option value="symbol:desc">Symbol Z–A</option>
-                                            <option value="changePercent:desc">% Change ▼</option>
-                                            <option value="changePercent:asc">% Change ▲</option>
-                                            <option value="price:desc">Price ▼</option>
-                                            <option value="price:asc">Price ▲</option>
-                                            <option value="volume:desc">Volume ▼</option>
-                                        </select>
-                                    </div>
-                                    {filtered.length === 0 ? (
-                                        <p className="py-10 text-center text-ink/40">No stocks match “{query}”.</p>
-                                    ) : (
-                                        <div className="flex flex-col gap-2">
-                                            {filtered.map((stock) => (
-                                                <StockCard key={stock.symbol} stock={stock} onSelect={openStock} />
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
+            {error && !loading && (
+                <Notice tone="error" className="mt-6">{error}</Notice>
+            )}
 
-                                {/* Desktop / tablet: the full sortable table. */}
-                                <div className="hidden overflow-hidden rounded-2xl border border-ink/[0.08] bg-ink/[0.03] md:block">
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full min-w-[720px] text-left">
-                                            <thead>
-                                                <tr className="border-b border-ink/[0.08] bg-ink/[0.01]">
-                                                    {(
-                                                        [
-                                                            ["symbol", "Symbol", "text-left"],
-                                                            ["company", "Name", "text-left"],
-                                                            ["price", "Price", "text-right"],
-                                                            ["change", "Change", "text-right"],
-                                                            ["changePercent", "% Change", "text-right"],
-                                                            ["volume", "Volume", "text-right"],
-                                                        ] as [SortKey, string, string][]
-                                                    ).map(([key, label, align]) => (
-                                                        <th
-                                                            key={key}
-                                                            className={cn(
-                                                                "px-4 py-4 text-[10px] font-semibold uppercase tracking-widest text-ink/40 md:px-6",
-                                                                align,
-                                                            )}
+            {!loading && !error && (
+                <div className="mt-6 min-w-0">
+                    {mode === "table" && (
+                        <>
+                            {/* Narrow screens: a sort control, since the column headers scroll out of view. */}
+                            <div className="mb-4 md:hidden">
+                                <label htmlFor="gse-sort" className="news-label">
+                                    Sort
+                                </label>
+                                <select
+                                    id="gse-sort"
+                                    value={`${sort}:${descending ? "desc" : "asc"}`}
+                                    onChange={(e) => {
+                                        const [key, dir] = e.target.value.split(":") as [SortKey, "asc" | "desc"];
+                                        setSort(key);
+                                        setDescending(dir === "desc");
+                                    }}
+                                    className="news-select"
+                                >
+                                    <option value="symbol:asc">Symbol A–Z</option>
+                                    <option value="symbol:desc">Symbol Z–A</option>
+                                    <option value="changePercent:desc">% Change ▼</option>
+                                    <option value="changePercent:asc">% Change ▲</option>
+                                    <option value="price:desc">Price ▼</option>
+                                    <option value="price:asc">Price ▲</option>
+                                    <option value="volume:desc">Volume ▼</option>
+                                </select>
+                            </div>
+
+                            {filtered.length === 0 ? noMatch : (
+                                <div className="news-table-wrap">
+                                    <table className="news-table min-w-[640px]">
+                                        <thead>
+                                            <tr>
+                                                {COLUMNS.map(([key, label, numeric]) => (
+                                                    <th
+                                                        key={key}
+                                                        scope="col"
+                                                        aria-sort={sort === key ? (descending ? "descending" : "ascending") : "none"}
+                                                        className={cn(numeric && "num", key === "company" && "hidden md:table-cell")}
+                                                    >
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => toggleSort(key)}
+                                                            className={cn("uppercase transition-colors hover:text-ink", sort === key && "text-fluid-cyan-ink")}
                                                         >
-                                                            <button
-                                                                onClick={() => toggleSort(key)}
-                                                                className="transition-colors hover:text-ink"
-                                                            >
-                                                                {label}
-                                                                {sort === key && (descending ? " ↓" : " ↑")}
-                                                            </button>
-                                                        </th>
-                                                    ))}
-                                                    <th className="hidden px-4 py-4 text-[10px] font-semibold uppercase tracking-widest text-ink/40 md:table-cell md:px-6">
-                                                        1M
+                                                            {label}
+                                                            {sort === key && (descending ? " ↓" : " ↑")}
+                                                        </button>
                                                     </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {filtered.length === 0 ? (
-                                                    <tr>
-                                                        <td colSpan={7} className="px-6 py-10 text-center text-ink/40">
-                                                            No stocks match “{query}”.
+                                                ))}
+                                                <th scope="col" className="hidden lg:table-cell num">
+                                                    1M
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filtered.map((stock) => {
+                                                const positive = stock.change >= 0;
+                                                const tone = stock.change === 0 ? "text-ink/[0.68]" : positive ? "news-up" : "news-down";
+                                                return (
+                                                    <tr
+                                                        key={stock.symbol}
+                                                        onClick={() => openStock(stock.symbol)}
+                                                        tabIndex={0}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === "Enter" || e.key === " ") {
+                                                                e.preventDefault();
+                                                                openStock(stock.symbol);
+                                                            }
+                                                        }}
+                                                        className="cursor-pointer focus:bg-ink/[0.055] focus:outline-none"
+                                                    >
+                                                        <td>
+                                                            <div className="flex items-center gap-3">
+                                                                <TickerLogo symbol={stock.symbol} size={24} />
+                                                                <span className="font-bold text-ink">{stock.symbol}</span>
+                                                            </div>
+                                                            <span className="mt-1 block max-w-[180px] truncate text-xs text-ink/[0.68] md:hidden">{stock.company}</span>
+                                                        </td>
+                                                        <td className="hidden max-w-[220px] truncate text-ink/[0.68] md:table-cell">
+                                                            {stock.company}
+                                                        </td>
+                                                        <td className="num font-semibold text-ink">
+                                                            {formatCedis(stock.price)}
+                                                        </td>
+                                                        <td className={cn("num", tone)}>
+                                                            {positive ? "+" : ""}
+                                                            {stock.change.toFixed(2)}
+                                                        </td>
+                                                        <td className="num">
+                                                            <span className={cn("inline-flex items-center gap-1 font-semibold", tone)}>
+                                                                {stock.change !== 0 &&
+                                                                    (positive ? (
+                                                                        <TrendingUp size={13} aria-hidden="true" />
+                                                                    ) : (
+                                                                        <TrendingDown size={13} aria-hidden="true" />
+                                                                    ))}
+                                                                {positive ? "+" : ""}
+                                                                {stock.changePercent.toFixed(2)}%
+                                                            </span>
+                                                        </td>
+                                                        <td className="num text-ink/[0.68]">
+                                                            {stock.volume.toLocaleString()}
+                                                        </td>
+                                                        <td className="hidden lg:table-cell">
+                                                            <Sparkline
+                                                                points={sparks.get(stock.symbol) ?? []}
+                                                                positive={positive}
+                                                                flat={stock.change === 0}
+                                                                width={72}
+                                                                height={24}
+                                                                className="ml-auto"
+                                                            />
                                                         </td>
                                                     </tr>
-                                                ) : (
-                                                    filtered.map((stock) => {
-                                                        const positive = stock.change >= 0;
-                                                        return (
-                                                            <tr
-                                                                key={stock.symbol}
-                                                                onClick={() => openStock(stock.symbol)}
-                                                                tabIndex={0}
-                                                                onKeyDown={(e) => {
-                                                                    if (e.key === "Enter" || e.key === " ") {
-                                                                        e.preventDefault();
-                                                                        openStock(stock.symbol);
-                                                                    }
-                                                                }}
-                                                                className="cursor-pointer border-b border-ink/[0.04] transition-colors last:border-0 hover:bg-ink/[0.03] focus:bg-ink/[0.05] focus:outline-none"
-                                                            >
-                                                                <td className="px-4 py-3.5 md:px-6">
-                                                                    <div className="flex items-center gap-3">
-                                                                        <TickerLogo symbol={stock.symbol} size={30} />
-                                                                        <span className="font-bold text-ink">
-                                                                            {stock.symbol}
-                                                                        </span>
-                                                                    </div>
-                                                                </td>
-                                                                <td className="max-w-[220px] truncate px-4 py-3.5 text-sm text-ink/60 md:px-6">
-                                                                    {stock.company}
-                                                                </td>
-                                                                <td className="px-4 py-3.5 text-right font-mono text-ink md:px-6">
-                                                                    {formatCedis(stock.price)}
-                                                                </td>
-                                                                <td
-                                                                    className={cn(
-                                                                        "px-4 py-3.5 text-right font-mono md:px-6",
-                                                                        stock.change === 0
-                                                                            ? "text-ink/40"
-                                                                            : positive
-                                                                              ? "text-emerald-400"
-                                                                              : "text-rose-400",
-                                                                    )}
-                                                                >
-                                                                    {positive ? "+" : ""}
-                                                                    {stock.change.toFixed(2)}
-                                                                </td>
-                                                                <td className="px-4 py-3.5 text-right md:px-6">
-                                                                    <span
-                                                                        className={cn(
-                                                                            "inline-flex items-center gap-1 font-mono text-sm",
-                                                                            stock.change === 0
-                                                                                ? "text-ink/40"
-                                                                                : positive
-                                                                                  ? "text-emerald-400"
-                                                                                  : "text-rose-400",
-                                                                        )}
-                                                                    >
-                                                                        {stock.change !== 0 &&
-                                                                            (positive ? (
-                                                                                <TrendingUp size={13} />
-                                                                            ) : (
-                                                                                <TrendingDown size={13} />
-                                                                            ))}
-                                                                        {positive ? "+" : ""}
-                                                                        {stock.changePercent.toFixed(2)}%
-                                                                    </span>
-                                                                </td>
-                                                                <td className="px-4 py-3.5 text-right font-mono text-ink/60 md:px-6">
-                                                                    {stock.volume.toLocaleString()}
-                                                                </td>
-                                                                <td className="hidden px-4 py-3.5 md:table-cell md:px-6">
-                                                                    <Sparkline
-                                                                        points={sparks.get(stock.symbol) ?? []}
-                                                                        positive={positive}
-                                                                        flat={stock.change === 0}
-                                                                        width={72}
-                                                                        height={24}
-                                                                    />
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    })
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                </>
-                            )}
-
-                            {mode === "heatmap" && (
-                                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-6">
-                                    {filtered.length === 0 ? (
-                                        <p className="col-span-full py-10 text-center text-ink/60">
-                                            No stocks match “{query}”.
-                                        </p>
-                                    ) : gridStocks.map((stock) => (
-                                        <button
-                                            key={stock.symbol}
-                                            type="button"
-                                            onClick={() => openStock(stock.symbol)}
-                                            title={`${stock.symbol} · ${stock.company}`}
-                                            className={cn(
-                                                "min-w-0 rounded-lg p-3 text-left transition-shadow hover:ring-2 hover:ring-inset hover:ring-current/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fluid-cyan",
-                                                heatmapTileClass(stock.change, stock.changePercent),
-                                            )}
-                                        >
-                                            <div className="truncate text-sm font-bold">{stock.symbol}</div>
-                                            <div className="mt-1 text-xs">
-                                                {stock.changePercent > 0 ? "+" : ""}{stock.changePercent.toFixed(2)}%
-                                            </div>
-                                            <div className="mt-2 truncate text-xs">{formatCedis(stock.price)}</div>
-                                        </button>
-                                    ))}
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
                                 </div>
                             )}
+                        </>
+                    )}
 
-                        </div>
-                    </div>
-                )}
-            </motion.div>
-        </div>
-    </section>
+                    {mode === "heatmap" && (
+                        filtered.length === 0 ? noMatch : (
+                            <div className="grid grid-cols-2 gap-px border border-ink/[0.19] bg-ink/[0.19] sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-6">
+                                {gridStocks.map((stock) => (
+                                    <button
+                                        key={stock.symbol}
+                                        type="button"
+                                        onClick={() => openStock(stock.symbol)}
+                                        title={`${stock.symbol} · ${stock.company}`}
+                                        className={cn(
+                                            "min-w-0 p-3 text-left news-mono hover:ring-2 hover:ring-inset hover:ring-current/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-fluid-cyan",
+                                            heatmapTileClass(stock.change, stock.changePercent),
+                                        )}
+                                    >
+                                        <div className="truncate text-sm font-bold">{stock.symbol}</div>
+                                        <div className="mt-1 text-xs">
+                                            {stock.changePercent > 0 ? "+" : ""}{stock.changePercent.toFixed(2)}%
+                                        </div>
+                                        <div className="mt-2 truncate text-xs">{formatCedis(stock.price)}</div>
+                                    </button>
+                                ))}
+                            </div>
+                        )
+                    )}
+                </div>
+            )}
+        </section>
     );
 }

@@ -1,13 +1,11 @@
 import { HOME_SECTIONS, type HomeSection } from '@/lib/content-media';
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowRight, Clock3 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { ARTICLE_CATEGORIES, categoryLabel, formatLongDate, listPublishedArticles, type Article, type ArticleCategory } from "@/lib/community";
 import { articleHref } from "@/lib/navigation";
-import { Notice } from "@/components/ui/form";
+import { EmptyState, Notice } from "@/components/ui/form";
 import { PageIntro } from "@/components/ui/page-intro";
 import { UserChip } from "@/components/community/user-chip";
-import { cn } from "@/lib/utils";
 
 export default function ArticlesPage() {
     const opinion = window.location.hash.split("?")[0] === "#/opinion";
@@ -30,28 +28,33 @@ export default function ArticlesPage() {
     const [lead, ...rest] = useMemo(() => articles ?? [], [articles]);
 
     return (
-        <main className="page-container py-10 sm:py-16">
+        <main className="page-container news-page">
             <PageIntro eyebrow={opinion ? "Independent perspectives" : "Research desk"} title={opinion ? "Fluid Finance Opinion" : section ? HOME_SECTIONS.find(([id])=>id===section)?.[1] : "Articles & market notes"} description={opinion ? "Commentary, arguments and perspectives on markets, business and the economy. Each piece reflects its author’s views and passes editorial review before publication." : "Analysis from the Fluid Finance research team on the GSE, the cedi, fuel and the wider economy. Sign in to join the discussion under each piece."} />
 
-            <div className="mb-8 flex flex-wrap gap-2" role="tablist" aria-label="Article categories">
-                <FilterChip active={category === null} onClick={() => setCategory(null)}>All</FilterChip>
-                {ARTICLE_CATEGORIES.map((item) => <FilterChip key={item.id} active={category === item.id} onClick={() => setCategory(item.id)}>{item.label}</FilterChip>)}
+            <div className="news-tabs" role="tablist" aria-label="Article categories">
+                <FilterTab active={category === null} onClick={() => setCategory(null)}>All</FilterTab>
+                {ARTICLE_CATEGORIES.map((item) => <FilterTab key={item.id} active={category === item.id} onClick={() => setCategory(item.id)}>{item.label}</FilterTab>)}
             </div>
 
             {error ? <Notice tone="error">{error}</Notice> : articles === null ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">{[0, 1, 2].map((index) => <div key={index} className="h-64 animate-pulse rounded-2xl bg-ink/[0.04]" />)}</div>
+                <div className="news-tiles" aria-hidden="true">{[0, 1, 2].map((index) => <div key={index} className="news-skeleton h-56" />)}</div>
             ) : articles.length === 0 ? (
-                <div className="rounded-2xl border border-ink/[0.08] bg-ink/[0.02] px-6 py-16 text-center">
-                    <p className="text-lg font-semibold text-ink">Nothing published here yet</p>
-                    <p className="mt-2 text-sm text-ink/50">The research team is writing. Check back soon or <a href="#/forum" className="text-fluid-cyan-ink underline">start a discussion</a>.</p>
-                </div>
+                <EmptyState title="Nothing published here yet">
+                    The research team is writing. Check back soon or <a href="#/forum" className="text-fluid-cyan-ink underline">start a discussion</a>.
+                </EmptyState>
             ) : (
                 <>
-                    {lead && <LeadCard article={lead} />}
+                    {lead && <LeadStory article={lead} />}
                     {rest.length > 0 && (
-                        <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {rest.map((article, index) => <ArticleCard key={article.id} article={article} delay={index * 0.04} />)}
-                        </div>
+                        <section className="news-section" aria-label="More research">
+                            <header className="news-section-header">
+                                <h2>More from the desk</h2>
+                                <span>{rest.length} {rest.length === 1 ? "story" : "stories"}</span>
+                            </header>
+                            <div className="news-tiles mt-5">
+                                {rest.map((article) => <StoryTile key={article.id} article={article} />)}
+                            </div>
+                        </section>
                     )}
                 </>
             )}
@@ -59,71 +62,61 @@ export default function ArticlesPage() {
     );
 }
 
-function FilterChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: string }) {
+function FilterTab({ active, onClick, children }: { active: boolean; onClick: () => void; children: string }) {
     return (
-        <button type="button" role="tab" aria-selected={active} onClick={onClick} className={cn("min-h-[2.5rem] rounded-full border px-4 text-xs font-semibold uppercase tracking-wider transition-colors", active ? "border-fluid-cyan/40 bg-fluid-cyan/10 text-fluid-cyan-ink" : "border-ink/[0.1] text-ink/50 hover:border-ink/25 hover:text-ink")}>
+        <button type="button" role="tab" aria-selected={active} onClick={onClick} className="news-tab">
             {children}
         </button>
     );
 }
 
-function Meta({ article }: { article: Article }) {
+function Kicker({ article }: { article: Article }) {
     return (
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink/40">
-            <span className="font-semibold uppercase tracking-widest text-fluid-cyan-ink">{categoryLabel(article.category)}</span>
-            <span>{formatLongDate(article.published_at)}</span>
+        <span className="news-kicker">
+            <span className="text-fluid-cyan-ink">{categoryLabel(article.category)}</span>
+            <span aria-hidden="true">·</span>
+            {formatLongDate(article.published_at)}
+        </span>
+    );
+}
+
+function LeadStory({ article }: { article: Article }) {
+    const body = (
+        <div>
+            <Kicker article={article} />
+            <a href={articleHref(article.slug)} className="group mt-4 block">
+                <h2 className="news-headline-lg text-ink group-hover:underline underline-offset-4">{article.title}</h2>
+            </a>
+            {article.excerpt && <p className="news-standfirst mt-4">{article.excerpt}</p>}
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+                <UserChip author={article.author} size="sm" />
+                <a href={articleHref(article.slug)} className="news-text-link">Read the story <ArrowRight size={14} aria-hidden="true" /></a>
+            </div>
         </div>
     );
-}
-
-function LeadCard({ article }: { article: Article }) {
+    if (!article.cover_url) return <article aria-label="Lead story">{body}</article>;
     return (
-        <motion.a
-            href={articleHref(article.slug)}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="group grid overflow-hidden rounded-2xl border border-ink/[0.08] bg-ink/[0.02] transition-colors hover:border-ink/20 md:grid-cols-[1.2fr_1fr]"
-        >
-            <div className="order-2 flex flex-col justify-between p-6 sm:p-8 md:order-1">
-                <div>
-                    <Meta article={article} />
-                    <h2 className="mt-4 text-2xl font-bold tracking-tight text-ink font-poppins sm:text-3xl group-hover:text-fluid-cyan-ink transition-colors">{article.title}</h2>
-                    {article.excerpt && <p className="mt-4 line-clamp-3 leading-relaxed text-ink/60">{article.excerpt}</p>}
+        <article className="news-columns news-columns--main" aria-label="Lead story">
+            {body}
+            <a href={articleHref(article.slug)} aria-hidden="true" tabIndex={-1} className="block">
+                <div className="aspect-[16/10] overflow-hidden bg-ink/[0.055]">
+                    <img src={article.cover_url} alt="" className="h-full w-full object-cover" />
                 </div>
-                <div className="mt-6 flex items-center justify-between gap-4">
-                    <UserChip author={article.author} size="sm" />
-                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-fluid-cyan-ink">Read <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" /></span>
-                </div>
-            </div>
-            <div className="order-1 min-h-48 bg-gradient-to-br from-fluid-cyan/20 via-fluid-teal/10 to-fluid-violet/20 md:order-2">
-                {article.cover_url && <img src={article.cover_url} alt="" className="h-full w-full object-cover" />}
-            </div>
-        </motion.a>
+            </a>
+        </article>
     );
 }
 
-function ArticleCard({ article, delay }: { article: Article; delay: number }) {
+function StoryTile({ article }: { article: Article }) {
     return (
-        <motion.a
-            href={articleHref(article.slug)}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay }}
-            className="group flex flex-col overflow-hidden rounded-2xl border border-ink/[0.08] bg-ink/[0.02] transition-colors hover:border-ink/20"
-        >
-            <div className="h-36 bg-gradient-to-br from-fluid-cyan/15 via-transparent to-fluid-violet/15">
-                {article.cover_url && <img src={article.cover_url} alt="" className="h-full w-full object-cover" />}
-            </div>
-            <div className="flex flex-1 flex-col p-5">
-                <Meta article={article} />
-                <h3 className="mt-3 text-lg font-bold leading-snug text-ink font-poppins group-hover:text-fluid-cyan-ink transition-colors">{article.title}</h3>
-                {article.excerpt && <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-ink/55">{article.excerpt}</p>}
-                <div className="mt-auto flex items-center justify-between gap-3 pt-5">
-                    <UserChip author={article.author} size="sm" />
-                    <span className="inline-flex items-center gap-1 text-xs text-ink/40"><Clock3 size={12} aria-hidden="true" /> Read</span>
-                </div>
-            </div>
-        </motion.a>
+        <article className="news-tile">
+            <a href={articleHref(article.slug)} className="block">
+                {article.cover_url && <div className="news-tile-image"><img src={article.cover_url} alt="" loading="lazy" /></div>}
+                <Kicker article={article} />
+                <h3 className="mt-2 text-ink">{article.title}</h3>
+            </a>
+            {article.excerpt && <p className="line-clamp-3">{article.excerpt}</p>}
+            <div className="news-byline"><UserChip author={article.author} size="sm" /></div>
+        </article>
     );
 }

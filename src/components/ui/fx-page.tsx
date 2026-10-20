@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeftRight, Landmark } from "lucide-react";
+import { ArrowLeftRight } from "lucide-react";
 import { formatLongDate, listFxHistory, listLatestFxRates, type FxRate } from "@/lib/community";
-import { inputClass, Notice, panelClass } from "@/components/ui/form";
+import { EmptyState, Notice, SelectField, TextField } from "@/components/ui/form";
 import { PageIntro } from "@/components/ui/page-intro";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ const CURRENCY_NAMES: Record<string, string> = {
 };
 
 const formatRate = (value: number | null, digits = 4) => value === null ? "—" : value.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: digits });
+const formatShortDate = (date: string) => new Date(`${date}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 
 /** Public exchange rates and a converter driven by the latest mid rates the operations team enters. */
 export default function FxPage() {
@@ -67,88 +68,104 @@ export default function FxPage() {
     const converted = conversion && Number.isFinite(parsedAmount) ? parsedAmount * conversion.rate : null;
 
     return (
-        <main className="page-container py-10 sm:py-16">
+        <main className="page-container news-page">
             <PageIntro eyebrow="Currency desk" title="Exchange rates" description="Indicative cedi exchange rates recorded by the Fluid Finance operations team. Bank and forex bureau rates differ; confirm before you transact." />
 
             {error ? <Notice tone="error">{error}</Notice> : rates === null ? (
-                <div className="h-72 animate-pulse rounded-2xl bg-ink/[0.04]" />
+                <div className="news-skeleton h-72" aria-busy="true" />
             ) : rates.length === 0 ? (
-                <div className={`${panelClass} px-6 py-16 text-center`}>
-                    <Landmark size={24} className="mx-auto mb-3 text-ink/30" aria-hidden="true" />
-                    <p className="text-lg font-semibold text-ink">No rates published yet</p>
-                    <p className="mt-2 text-sm text-ink/50">Rates will appear here once the team records them.</p>
-                </div>
+                <EmptyState title="No rates published yet">Rates will appear here once the team records them.</EmptyState>
             ) : (
-                <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
-                    <section className={`${panelClass} overflow-hidden`} aria-labelledby="rates-heading">
-                        <div className="border-b border-ink/[0.08] px-5 py-4 sm:px-6">
-                            <h2 id="rates-heading" className="text-lg font-bold text-ink font-poppins">Latest rates</h2>
-                            <p className="mt-1 text-xs text-ink/40">Most recent entry per currency pair.</p>
-                        </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full min-w-[34rem] text-left text-sm">
-                                <thead>
-                                    <tr className="border-b border-ink/[0.08] text-[11px] font-semibold uppercase tracking-wider text-ink/40">
-                                        <th className="px-5 py-3 sm:px-6">Pair</th><th className="px-4 py-3 text-right">Buy</th><th className="px-4 py-3 text-right">Sell</th><th className="px-4 py-3 text-right">Mid</th><th className="px-4 py-3 text-right">As of</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {rates.map((rate) => (
-                                        <tr key={rate.id} onClick={() => { setFrom(rate.base_currency); setTo(rate.quote_currency); }} className={cn("cursor-pointer border-b border-ink/[0.05] transition-colors last:border-0 hover:bg-ink/[0.03]", rate.base_currency === from && rate.quote_currency === to && "bg-fluid-cyan/[0.06]")}>
-                                            <th scope="row" className="px-5 py-3 font-medium text-ink sm:px-6">
-                                                <span className="font-mono">{rate.base_currency}/{rate.quote_currency}</span>
-                                                <span className="block text-xs font-normal text-ink/40">{CURRENCY_NAMES[rate.base_currency] ?? rate.base_currency} → {CURRENCY_NAMES[rate.quote_currency] ?? rate.quote_currency}</span>
-                                            </th>
-                                            <td className="px-4 py-3 text-right font-mono tabular-nums text-ink/70">{formatRate(rate.buy === null ? null : Number(rate.buy))}</td>
-                                            <td className="px-4 py-3 text-right font-mono tabular-nums text-ink/70">{formatRate(rate.sell === null ? null : Number(rate.sell))}</td>
-                                            <td className="px-4 py-3 text-right font-mono tabular-nums font-semibold text-ink">{formatRate(Number(rate.mid))}</td>
-                                            <td className="px-4 py-3 text-right text-xs text-ink/50">{new Date(`${rate.rate_date}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-
-                    <div className="space-y-6">
-                        <section className={`${panelClass} p-5`} aria-labelledby="converter-heading">
-                            <h2 id="converter-heading" className="flex items-center gap-2 text-lg font-bold text-ink font-poppins"><ArrowLeftRight size={18} className="text-fluid-cyan-ink" aria-hidden="true" /> Convert</h2>
-                            <label className="mt-4 block text-sm font-medium text-ink/70">Amount
-                                <input value={amount} onChange={(event) => setAmount(event.target.value)} inputMode="decimal" className={`${inputClass} mt-1.5 font-mono`} />
-                            </label>
-                            <div className="mt-3 grid grid-cols-[1fr_auto_1fr] items-end gap-2">
-                                <label className="block text-sm font-medium text-ink/70">From
-                                    <select value={from} onChange={(event) => setFrom(event.target.value)} className={`${inputClass} mt-1.5`}>{currencies.map((code) => <option key={code} value={code}>{code}</option>)}</select>
-                                </label>
-                                <button type="button" onClick={() => { setFrom(to); setTo(from); }} aria-label="Swap currencies" className="mb-1 grid h-10 w-10 place-items-center rounded-xl border border-ink/[0.14] text-ink/60 hover:bg-ink/[0.05]"><ArrowLeftRight size={15} /></button>
-                                <label className="block text-sm font-medium text-ink/70">To
-                                    <select value={to} onChange={(event) => setTo(event.target.value)} className={`${inputClass} mt-1.5`}>{currencies.map((code) => <option key={code} value={code}>{code}</option>)}</select>
-                                </label>
+                <>
+                    <div className="news-columns news-columns--main">
+                        <section aria-labelledby="converter-heading">
+                            <h2 id="converter-heading" className="news-subhead flex items-center gap-2"><ArrowLeftRight size={16} className="text-fluid-cyan-ink" aria-hidden="true" /> Convert</h2>
+                            <div className="news-form">
+                                <TextField label="Amount" value={amount} onChange={(event) => setAmount(event.target.value)} inputMode="decimal" className="news-mono" />
+                                <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-3">
+                                    <SelectField label="From" value={from} onChange={(event) => setFrom(event.target.value)}>
+                                        {currencies.map((code) => <option key={code} value={code}>{code}</option>)}
+                                    </SelectField>
+                                    <button type="button" onClick={() => { setFrom(to); setTo(from); }} aria-label="Swap currencies" title="Swap currencies" className="news-icon-button h-[42px] w-[42px]"><ArrowLeftRight size={15} aria-hidden="true" /></button>
+                                    <SelectField label="To" value={to} onChange={(event) => setTo(event.target.value)}>
+                                        {currencies.map((code) => <option key={code} value={code}>{code}</option>)}
+                                    </SelectField>
+                                </div>
                             </div>
-                            <div className="mt-5 rounded-xl bg-ink/[0.04] p-4" aria-live="polite">
+                            <div className="mt-6 border-t border-ink/[0.19] pt-4" aria-live="polite">
                                 {converted === null ? (
-                                    <p className="text-sm text-ink/50">No rate available for {from}/{to} yet.</p>
+                                    <p className="text-sm text-ink/[0.68]">No rate available for {from}/{to} yet.</p>
                                 ) : (
                                     <>
-                                        <p className="font-mono text-2xl font-bold text-ink">{converted.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-base text-ink/50">{to}</span></p>
-                                        <p className="mt-1 text-xs text-ink/50">1 {from} = {formatRate(conversion!.rate, 6)} {to}{conversion!.via ? ` via ${conversion!.via}` : ""}{conversion!.date ? ` · ${formatLongDate(conversion!.date)}` : ""}</p>
+                                        <div className="news-stat">
+                                            <span>{amount || "0"} {from} in {to}</span>
+                                            <strong>{converted.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-base font-semibold text-ink/[0.68]">{to}</span></strong>
+                                        </div>
+                                        <p className="news-byline mt-3">1 {from} = <strong className="news-mono">{formatRate(conversion!.rate, 6)} {to}</strong>{conversion!.via ? ` via ${conversion!.via}` : ""}{conversion!.date ? ` · ${formatLongDate(conversion!.date)}` : ""}</p>
                                     </>
                                 )}
                             </div>
                         </section>
 
-                        {history.length > 1 && (
-                            <section className={`${panelClass} p-5`} aria-labelledby="history-heading">
-                                <h2 id="history-heading" className="text-sm font-semibold uppercase tracking-wider text-ink/50">{history[0].base_currency}/{history[0].quote_currency} · last {history.length} entries</h2>
-                                <ul className="mt-3 divide-y divide-ink/[0.06]">
-                                    {history.map((rate) => (
-                                        <li key={rate.id} className="flex items-center justify-between py-2 text-sm"><span className="text-ink/60">{new Date(`${rate.rate_date}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span><span className="font-mono tabular-nums text-ink">{formatRate(Number(rate.mid))}</span></li>
-                                    ))}
-                                </ul>
-                            </section>
-                        )}
+                        <aside aria-labelledby="history-heading">
+                            <h2 id="history-heading" className="news-subhead">
+                                {history.length > 1 ? `${history[0].base_currency}/${history[0].quote_currency} · last ${history.length} entries` : `${from}/${to} history`}
+                            </h2>
+                            {history.length > 1 ? (
+                                <div className="news-table-wrap">
+                                    <table className="news-table">
+                                        <thead>
+                                            <tr><th scope="col">Date</th><th scope="col" className="num">Mid</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            {history.map((rate) => (
+                                                <tr key={rate.id}>
+                                                    <td className="text-ink/[0.68]">{formatShortDate(rate.rate_date)}</td>
+                                                    <td className="num text-ink">{formatRate(Number(rate.mid))}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <p className="news-byline">Earlier entries for this pair appear here once the desk records more than one rate.</p>
+                            )}
+                        </aside>
                     </div>
-                </div>
+
+                    <section className="news-section" aria-labelledby="rates-heading">
+                        <header className="news-section-header">
+                            <h2 id="rates-heading">Latest rates</h2>
+                            <span>Most recent entry per currency pair. Select a row to convert it.</span>
+                        </header>
+                        <div className="news-table-wrap">
+                            <table className="news-table min-w-[34rem]">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Pair</th><th scope="col" className="num">Buy</th><th scope="col" className="num">Sell</th><th scope="col" className="num">Mid</th><th scope="col" className="num">As of</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {rates.map((rate) => {
+                                        const selected = rate.base_currency === from && rate.quote_currency === to;
+                                        return (
+                                            <tr key={rate.id} onClick={() => { setFrom(rate.base_currency); setTo(rate.quote_currency); }} className={cn("cursor-pointer", selected && "bg-fluid-cyan/10")}>
+                                                <th scope="row" className="font-medium text-ink">
+                                                    <span className={cn("news-mono font-bold", selected && "text-fluid-cyan-ink")}>{rate.base_currency}/{rate.quote_currency}</span>
+                                                    <span className="block text-xs font-normal text-ink/[0.68]">{CURRENCY_NAMES[rate.base_currency] ?? rate.base_currency} → {CURRENCY_NAMES[rate.quote_currency] ?? rate.quote_currency}</span>
+                                                </th>
+                                                <td className="num text-ink/[0.68]">{formatRate(rate.buy === null ? null : Number(rate.buy))}</td>
+                                                <td className="num text-ink/[0.68]">{formatRate(rate.sell === null ? null : Number(rate.sell))}</td>
+                                                <td className="num font-semibold text-ink">{formatRate(Number(rate.mid))}</td>
+                                                <td className="num text-xs text-ink/[0.68]">{formatShortDate(rate.rate_date)}</td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </>
             )}
         </main>
     );

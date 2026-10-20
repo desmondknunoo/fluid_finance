@@ -3,7 +3,7 @@ import { ArrowLeft, Send } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { createThread, listForumCategories, type ForumCategory } from "@/lib/community";
 import { forumCategoryHref, newThreadHref, openLogin, openThread } from "@/lib/navigation";
-import { inputClass, Notice, panelClass, PrimaryButton, TextArea, TextField } from "@/components/ui/form";
+import { Notice, PrimaryButton, SelectField, TextArea, TextField } from "@/components/ui/form";
 import { PageIntro } from "@/components/ui/page-intro";
 
 export default function NewThreadPage({ categorySlug }: { categorySlug: string | null }) {
@@ -26,7 +26,7 @@ export default function NewThreadPage({ categorySlug }: { categorySlug: string |
         }).catch((caught) => setError(caught instanceof Error ? caught.message : "Could not load categories."));
     }, [categorySlug]);
 
-    if (loading || !user) return <main className="page-container py-16 text-ink/50">Loading…</main>;
+    if (loading || !user) return <main className="page-container news-page"><p className="news-loading">Loading…</p></main>;
 
     const submit = async (event: FormEvent) => {
         event.preventDefault();
@@ -44,21 +44,22 @@ export default function NewThreadPage({ categorySlug }: { categorySlug: string |
     };
 
     return (
-        <main className="page-container py-10 sm:py-16">
+        <main className="page-container news-page">
             <div className="mx-auto max-w-3xl">
-                <a href={forumCategoryHref(categorySlug)} className="inline-flex items-center gap-1.5 text-sm text-ink/50 hover:text-ink"><ArrowLeft size={15} aria-hidden="true" /> Back to the forum</a>
-                <PageIntro className="mt-6" eyebrow="Community" title="Start a discussion" description="Ask a question or share a view. Posts are public; keep them factual and avoid personal financial details." />
-                <form onSubmit={submit} className={`${panelClass} grid gap-5 p-6 sm:p-8`}>
-                    <label className="block">
-                        <span className="mb-1.5 block text-sm font-medium text-ink/70">Category</span>
-                        <select value={categoryId} onChange={(event) => setCategoryId(event.target.value)} required className={inputClass}>
-                            {categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-                        </select>
-                    </label>
+                <PageIntro
+                    eyebrow="Community"
+                    title="Start a discussion"
+                    description="Ask a question or share a view. Posts are public; keep them factual and avoid personal financial details."
+                    action={<a href={forumCategoryHref(categorySlug)} className="news-button-quiet news-button-quiet--sm"><ArrowLeft size={14} aria-hidden="true" /> Back to the forum</a>}
+                />
+                <form onSubmit={submit} className="news-form">
+                    <SelectField label="Category" value={categoryId} onChange={(event) => setCategoryId(event.target.value)} required>
+                        {categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                    </SelectField>
                     <TextField label="Title" value={title} onChange={(event) => setTitle(event.target.value)} maxLength={160} required placeholder="A clear, specific title" hint={`${title.length}/160`} />
                     <TextArea label="Opening post" value={body} onChange={(event) => setBody(event.target.value)} maxLength={10000} rows={8} required placeholder="Give context, numbers and sources where you can. **bold**, *italic* and [links](https://…) are supported." hint={`${body.length.toLocaleString()}/10,000`} />
                     {error && <Notice tone="error">{error}</Notice>}
-                    <div className="flex justify-end">
+                    <div className="news-form-actions">
                         <PrimaryButton type="submit" loading={busy} disabled={!title.trim() || !body.trim() || !categoryId}><Send size={15} aria-hidden="true" /> Post discussion</PrimaryButton>
                     </div>
                 </form>

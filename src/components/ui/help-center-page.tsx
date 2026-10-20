@@ -1,23 +1,7 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
-import { HelpCircle, MessageCircle, Search, Video, FileText, Mail } from "lucide-react";
+import { ChevronDown, MessageCircle, Search, Video, FileText, Mail } from "lucide-react";
+import { PageIntro } from "@/components/ui/page-intro";
 
 function HelpCenterPage() {
-    const fadeUpVariants = {
-        hidden: { opacity: 0, y: 30 },
-        visible: (i: number) => ({
-            opacity: 1,
-            y: 0,
-            transition: {
-                duration: 1,
-                delay: 0.5 + i * 0.1,
-                ease: [0.25, 0.4, 0.25, 1] as any,
-            },
-        }),
-    };
-
     const faqs = [
         {
             question: "How do I open a stock account and start trading on the GSE?",
@@ -69,139 +53,81 @@ function HelpCenterPage() {
     ];
 
     return (
-        <div className="relative min-h-screen w-full overflow-hidden bg-canvas">
-            <div className="absolute inset-0 bg-gradient-to-br from-ink/[0.05] via-transparent to-ink/[0.05] blur-3xl" />
+        <main className="page-container news-page">
+            <PageIntro
+                eyebrow="Support"
+                title="Help Center"
+                description="Find answers to common questions, get help with trading, and connect with our support team."
+            />
 
-            <div className="page-container relative z-10 py-12 sm:py-16 md:py-20">
-                <div className="max-w-6xl mx-auto">
-                    <motion.div
-                        custom={0}
-                        variants={fadeUpVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="text-center mb-12"
-                    >
-                        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 tracking-tight font-poppins">
-                            <span className="bg-clip-text text-transparent bg-gradient-to-b from-ink to-ink/80">
-                                Help Center
-                            </span>
-                        </h1>
-                        <p className="text-xl text-ink/60 max-w-2xl mx-auto leading-relaxed">
-                            Find answers to common questions, get help with trading, and connect with our support team.
-                        </p>
-                    </motion.div>
-
-                    <motion.div
-                        custom={1}
-                        variants={fadeUpVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="mb-16"
-                    >
-                        <div className="relative max-w-2xl mx-auto">
-                            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-ink/40" />
-                            <input
-                                type="text"
-                                placeholder="Search for help..."
-                                className="w-full pl-12 pr-4 py-4 bg-ink/[0.02] border border-ink/[0.08] rounded-xl focus:border-fluid-cyan/60 focus:outline-none text-lg"
-                            />
-                        </div>
-                    </motion.div>
-
-                    <motion.div
-                        custom={2}
-                        variants={fadeUpVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20"
-                    >
-                        {supportTopics.map((topic) => (
-                            <Card
-                                key={topic.title}
-                                className="bg-ink/[0.02] border border-ink/[0.08] hover:bg-ink/[0.04] transition-all duration-300 cursor-pointer group"
-                            >
-                                <CardContent className="p-8">
-                                    <div className="flex items-center gap-4 mb-4">
-                                        <div className="p-3 rounded-lg bg-ink/[0.05]">
-                                            <topic.icon className="h-6 w-6 text-ink/60 group-hover:text-ink transition-colors" />
-                                        </div>
-                                        <div>
-                                            <h3 className="text-xl font-bold mb-2 font-poppins group-hover:text-ink transition-colors">
-                                                {topic.title}
-                                            </h3>
-                                            <p className="text-sm text-ink/60">
-                                                {topic.articles}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <p className="text-sm text-ink/70 leading-relaxed">
-                                        {topic.description}
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </motion.div>
-
-                    <motion.div
-                        custom={3}
-                        variants={fadeUpVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="mb-20"
-                    >
-                        <h2 className="text-3xl font-bold mb-8 text-left font-poppins">Frequently Asked Questions</h2>
-                        <div className="space-y-4">
-                            {faqs.map((faq, index) => (
-                                <Card
-                                    key={index}
-                                    className="bg-ink/[0.02] border border-ink/[0.08] hover:border-ink/20 transition-colors"
-                                >
-                                    <CardContent className="p-6">
-                                        <div className="flex items-start gap-4">
-                                            <div className="p-2 rounded-lg bg-ink/[0.05]">
-                                                <HelpCircle className="h-5 w-5 text-ink/40 shrink-0" />
-                                            </div>
-                                            <div>
-                                                <h3 className="text-lg font-semibold mb-2 font-poppins">
-                                                    {faq.question}
-                                                </h3>
-                                                <p className="text-ink/60 leading-relaxed">
-                                                    {faq.answer}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    </motion.div>
-
-                    <motion.div
-                        custom={4}
-                        variants={fadeUpVariants}
-                        initial="hidden"
-                        animate="visible"
-                    >
-                        <div className="bg-gradient-to-br from-ink/[0.05] to-transparent border border-ink/[0.1] rounded-2xl p-8 md:p-12">
-                            <div className="text-center">
-                                <div className="flex items-center justify-center gap-4 mb-4">
-                                    <div className="p-3 rounded-lg bg-ink/[0.05]">
-                                        <Mail className="h-6 w-6 text-ink/60" />
-                                    </div>
-                                    <h2 className="text-3xl font-bold font-poppins">Still Need Help?</h2>
-                                </div>
-                                <p className="text-lg text-ink/60 mb-8 max-w-2xl mx-auto">
-                                    Our support team is here to help you succeed. Get in touch with our experts.
-                                </p>
-                                <a href="mailto:info@fluidterra.com" className="inline-block px-8 py-4 bg-fluid-cyan text-fluid-action-ink font-semibold rounded-xl shadow-glow hover:bg-fluid-cyan-hover hover:shadow-glow-lg transition-all">
-                                    Contact Support
-                                </a>
-                            </div>
-                        </div>
-                    </motion.div>
-                </div>
+            <div className="relative max-w-2xl">
+                <label htmlFor="help-search" className="sr-only">Search for help</label>
+                <Search size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink/[0.68]" aria-hidden="true" />
+                <input
+                    id="help-search"
+                    type="text"
+                    placeholder="Search for help..."
+                    className="news-input news-input--icon"
+                />
             </div>
-        </div>
+
+            <section className="news-section" aria-labelledby="help-topics">
+                <header className="news-section-header">
+                    <h2 id="help-topics">Browse by topic</h2>
+                    <span>Guides, tutorials and the community</span>
+                </header>
+                <div className="news-tiles news-tiles--4 pt-4">
+                    {supportTopics.map((topic) => (
+                        <article key={topic.title} className="news-tile">
+                            <h3 className="flex items-start gap-2">
+                                <topic.icon size={20} className="mt-0.5 shrink-0 text-fluid-cyan-ink" aria-hidden="true" />
+                                <span>{topic.title}</span>
+                            </h3>
+                            <p className="news-byline !mt-2">{topic.articles}</p>
+                            <p>{topic.description}</p>
+                        </article>
+                    ))}
+                </div>
+            </section>
+
+            <section className="news-section" aria-labelledby="help-faq">
+                <header className="news-section-header">
+                    <h2 id="help-faq">Frequently Asked Questions</h2>
+                </header>
+                <ul className="news-list mt-5 max-w-[70ch]">
+                    {faqs.map((faq, index) => (
+                        <li key={index}>
+                            <details className="group">
+                                <summary className="flex cursor-pointer list-none items-start justify-between gap-4 font-poppins text-[16px] font-semibold leading-snug [&::-webkit-details-marker]:hidden">
+                                    <span>{faq.question}</span>
+                                    <ChevronDown size={18} className="mt-0.5 shrink-0 text-ink/[0.68] transition-transform group-open:rotate-180" aria-hidden="true" />
+                                </summary>
+                                <p className="mt-3 text-sm leading-relaxed text-ink/[0.68]">
+                                    {faq.answer}
+                                </p>
+                            </details>
+                        </li>
+                    ))}
+                </ul>
+            </section>
+
+            <section className="news-section" aria-labelledby="help-contact">
+                <header className="news-section-header">
+                    <h2 id="help-contact" className="flex items-center gap-2">
+                        <Mail size={20} aria-hidden="true" />
+                        Still Need Help?
+                    </h2>
+                </header>
+                <div className="py-6">
+                    <p className="news-standfirst">
+                        Our support team is here to help you succeed. Get in touch with our experts.
+                    </p>
+                    <a href="mailto:info@fluidterra.com" className="news-button mt-6">
+                        Contact Support
+                    </a>
+                </div>
+            </section>
+        </main>
     );
 }
 

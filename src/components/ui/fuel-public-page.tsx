@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Fuel, Share2, TrendingDown, TrendingUp } from "lucide-react";
+import { Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { averageFuelPrice, formatFuelChange, formatFuelDate, formatFuelPrice, fuelPriceChange, fuelRowChange, FUEL_TYPES, type FuelReport, type FuelType } from "@/lib/fuel-prices";
 import { listPublicFuelReports } from "@/lib/community";
 import { FuelShareSheet } from "@/components/stock/fuel-share-sheet";
-import { Notice, panelClass } from "@/components/ui/form";
+import { EmptyState, Notice } from "@/components/ui/form";
 import { PageIntro } from "@/components/ui/page-intro";
 import { cn } from "@/lib/utils";
 
@@ -41,99 +41,123 @@ export default function FuelPublicPage() {
     }, [report, sortBy]);
 
     return (
-        <main className="page-container py-10 sm:py-16">
+        <main className="page-container news-page">
             <PageIntro
                 eyebrow="Fluid Pump Report"
                 title="Fuel prices across Ghana"
                 description="Pump prices by oil marketing company, recorded by the Fluid Finance team. Prices are in GHS per litre and may change at the pump."
-                action={report && <button type="button" onClick={() => setSharing(report)} className="inline-flex min-h-[2.75rem] items-center gap-2 rounded-xl border border-ink/[0.14] px-4 text-sm font-medium text-ink/80 hover:bg-ink/[0.05]"><Share2 size={15} aria-hidden="true" /> Share report</button>}
+                action={report && <button type="button" onClick={() => setSharing(report)} aria-label="Share report" title="Share report" className="news-icon-button h-10 w-10"><Share2 size={16} aria-hidden="true" /></button>}
             />
 
             {error ? <Notice tone="error">{error}</Notice> : reports === null ? (
-                <div className="h-72 animate-pulse rounded-2xl bg-ink/[0.04]" />
+                <div className="news-skeleton h-72" aria-busy="true" />
             ) : !report ? (
-                <div className={`${panelClass} px-6 py-16 text-center`}>
-                    <Fuel size={24} className="mx-auto mb-3 text-ink/30" aria-hidden="true" />
-                    <p className="text-lg font-semibold text-ink">No pump report published yet</p>
-                    <p className="mt-2 text-sm text-ink/50">The first report will appear here as soon as the team records it.</p>
-                </div>
+                <EmptyState title="No pump report published yet">The first report will appear here as soon as the team records it.</EmptyState>
             ) : (
-                <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
-                    <section className={`${panelClass} overflow-hidden`} aria-labelledby="report-heading">
-                        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-ink/[0.08] px-5 py-4 sm:px-6">
-                            <div>
-                                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/40">Report date</p>
-                                <h2 id="report-heading" className="mt-1 text-xl font-bold text-ink font-poppins">{formatFuelDate(report.report_date)}</h2>
-                            </div>
-                            <div className="grid grid-cols-2 gap-6 text-right">
-                                {FUEL_TYPES.map((type) => <Average key={type} label={type} value={averageFuelPrice(report.prices, type)} prior={previous ? averageFuelPrice(previous.prices, type) : null} />)}
+                <>
+                    {/* Edition picker: every published report, newest first. */}
+                    <div className="news-tabs" role="tablist" aria-label="Report edition">
+                        {reports.map((item) => (
+                            <button key={item.id} type="button" role="tab" onClick={() => setSelectedId(item.id)} aria-selected={item.id === report.id} aria-current={item.id === report.id ? "true" : undefined} className="news-tab">
+                                {formatFuelDate(item.report_date)}
+                            </button>
+                        ))}
+                    </div>
+
+                    <section aria-labelledby="report-heading">
+                        <p className="news-kicker">Report date</p>
+                        <h2 id="report-heading" className="news-headline mt-2">{formatFuelDate(report.report_date)}</h2>
+
+                        <div className="news-stats mt-6">
+                            {FUEL_TYPES.map((type) => <Average key={type} label={type} value={averageFuelPrice(report.prices, type)} prior={previous ? averageFuelPrice(previous.prices, type) : null} />)}
+                            <div className="news-stat">
+                                <span>Companies</span>
+                                <strong>{report.prices.length}</strong>
                             </div>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full min-w-[40rem] text-left text-sm">
+
+                        <div className="news-table-wrap mt-6">
+                            <table className="news-table min-w-[40rem]">
                                 <caption className="sr-only">Fuel prices in GHS per litre for {formatFuelDate(report.report_date)}</caption>
                                 <thead>
-                                    <tr className="border-b border-ink/[0.08] text-[11px] font-semibold uppercase tracking-wider text-ink/40">
-                                        <SortHeader active={sortBy === "name"} onClick={() => setSortBy("name")} className="px-5 py-3 sm:px-6">OMC</SortHeader>
-                                        {FUEL_TYPES.map((type) => <SortHeader key={type} active={sortBy === type} onClick={() => setSortBy(type)} className="px-4 py-3 text-right">{type}</SortHeader>)}
-                                        {FUEL_TYPES.map((type) => <th key={`${type}-change`} scope="col" className="px-4 py-3 text-right sm:last:pr-6" title={previous ? `Compared with ${formatFuelDate(previous.report_date)}` : undefined}>{type} %</th>)}
+                                    <tr>
+                                        <SortHeader active={sortBy === "name"} onClick={() => setSortBy("name")}>OMC</SortHeader>
+                                        {FUEL_TYPES.map((type) => <SortHeader key={type} active={sortBy === type} onClick={() => setSortBy(type)} className="num">{type}</SortHeader>)}
+                                        {FUEL_TYPES.map((type) => <th key={`${type}-change`} scope="col" className="num" title={previous ? `Compared with ${formatFuelDate(previous.report_date)}` : undefined}>{type} %</th>)}
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {rows.map((row) => (
-                                        <tr key={row.name} className="border-b border-ink/[0.05] last:border-0">
-                                            <th scope="row" className="px-5 py-3 font-medium text-ink sm:px-6">
+                                        <tr key={row.name}>
+                                            <th scope="row" className="font-medium text-ink">
                                                 <span className="flex items-center gap-3">
-                                                    {row.logo_url ? <img src={row.logo_url} alt="" className="h-8 w-8 rounded-md bg-white object-contain" /> : <span className="grid h-8 w-8 place-items-center rounded-md bg-ink/[0.06] text-xs font-bold text-ink/50">{row.name.slice(0, 2).toUpperCase()}</span>}
+                                                    {row.logo_url ? <img src={row.logo_url} alt="" className="h-6 w-6 shrink-0 border border-ink/[0.19] bg-white object-contain" /> : <span className="grid h-6 w-6 shrink-0 place-items-center border border-ink/[0.19] bg-ink/[0.055] text-[10px] font-bold text-ink/[0.68]">{row.name.slice(0, 2).toUpperCase()}</span>}
                                                     {row.name}
                                                 </span>
                                             </th>
-                                            {FUEL_TYPES.map((type) => <td key={type} className={cn("px-4 py-3 text-right font-mono tabular-nums", row[type] === null ? "text-ink/30" : "text-ink")}>{formatFuelPrice(row[type])}</td>)}
-                                            {(() => { const change = fuelRowChange(row, previous); return FUEL_TYPES.map((type) => <td key={`${type}-change`} className="px-4 py-3 text-right sm:last:pr-6"><ChangeValue value={change[type]} /></td>); })()}
+                                            {FUEL_TYPES.map((type) => <td key={type} className={cn("num", row[type] === null ? "text-ink/40" : "font-semibold text-ink")}>{formatFuelPrice(row[type])}</td>)}
+                                            {(() => { const change = fuelRowChange(row, previous); return FUEL_TYPES.map((type) => <td key={`${type}-change`} className="num"><ChangeValue value={change[type]} /></td>); })()}
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
-                        <p className="border-t border-ink/[0.08] px-5 py-3 text-xs text-ink/40 sm:px-6">Recorded {new Date(report.created_at).toLocaleString("en-GB", { timeZone: "Africa/Accra", dateStyle: "medium", timeStyle: "short" })} GMT · {report.prices.length} OMCs · {previous ? `Petrol % and diesel % compare with ${formatFuelDate(previous.report_date)}` : "No earlier report to compare"} · Click a column to sort.</p>
+                        <p className="news-byline mt-3">Recorded {new Date(report.created_at).toLocaleString("en-GB", { timeZone: "Africa/Accra", dateStyle: "medium", timeStyle: "short" })} GMT · {report.prices.length} OMCs · {previous ? `Petrol % and diesel % compare with ${formatFuelDate(previous.report_date)}` : "No earlier report to compare"} · Click a column to sort.</p>
                     </section>
 
-                    <aside className={`${panelClass} p-5`} aria-labelledby="history-heading">
-                        <h2 id="history-heading" className="text-sm font-semibold uppercase tracking-wider text-ink/50">Earlier reports</h2>
-                        <ul className="mt-3 divide-y divide-ink/[0.06]">
-                            {reports.map((item) => (
-                                <li key={item.id}>
-                                    <button type="button" onClick={() => setSelectedId(item.id)} aria-current={item.id === report.id ? "true" : undefined} className={cn("flex w-full items-center justify-between gap-3 py-2.5 text-left text-sm transition-colors", item.id === report.id ? "text-fluid-cyan-ink" : "text-ink/70 hover:text-ink")}>
-                                        <span>{formatFuelDate(item.report_date)}</span>
-                                        <span className="font-mono text-xs text-ink/40">{formatFuelPrice(averageFuelPrice(item.prices, "petrol"))}</span>
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                        <p className="mt-4 text-xs leading-relaxed text-ink/40">Average petrol price shown. Prices are gathered from OMC published boards and may differ at individual stations.</p>
-                    </aside>
-                </div>
+                    <section className="news-section" aria-labelledby="history-heading">
+                        <header className="news-section-header">
+                            <h2 id="history-heading">Earlier reports</h2>
+                            <span>Average petrol price shown. Prices are gathered from OMC published boards and may differ at individual stations.</span>
+                        </header>
+                        <div className="news-table-wrap">
+                            <table className="news-table">
+                                <thead>
+                                    <tr><th scope="col">Report</th><th scope="col" className="num">Avg petrol</th><th scope="col" className="num">Avg diesel</th><th scope="col" className="num">OMCs</th></tr>
+                                </thead>
+                                <tbody>
+                                    {reports.map((item) => (
+                                        <tr key={item.id} className={cn(item.id === report.id && "bg-fluid-cyan/10")}>
+                                            <th scope="row" className="font-medium">
+                                                <button type="button" onClick={() => setSelectedId(item.id)} aria-current={item.id === report.id ? "true" : undefined} className={cn("text-left hover:underline", item.id === report.id ? "text-fluid-cyan-ink" : "text-ink")}>
+                                                    {formatFuelDate(item.report_date)}
+                                                </button>
+                                            </th>
+                                            <td className="num text-ink">{formatFuelPrice(averageFuelPrice(item.prices, "petrol"))}</td>
+                                            <td className="num text-ink">{formatFuelPrice(averageFuelPrice(item.prices, "diesel"))}</td>
+                                            <td className="num text-ink/[0.68]">{item.prices.length}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </>
             )}
             {sharing && <FuelShareSheet report={sharing} previous={reports?.[reports.findIndex((item) => item.id === sharing.id) + 1] ?? null} onClose={() => setSharing(null)} />}
         </main>
     );
 }
 
-const changeTone = (value: number | null) => value === null || value === 0 ? "text-ink/40" : value > 0 ? "text-rose-400" : "text-emerald-400";
+/**
+ * Pump prices read the opposite way to equities: a rise costs the motorist, so increases take the
+ * rose pill and decreases the green one.
+ */
+const changePill = (value: number | null) => value === null || value === 0 ? "news-pill--neutral" : value > 0 ? "news-pill--down" : "news-pill--up";
 
 /** One fuel's % change for an OMC against the previous report. */
 function ChangeValue({ value }: { value: number | null }) {
-    return <span className={cn("font-mono tabular-nums", changeTone(value))}>{formatFuelChange(value)}</span>;
+    return <span className={cn("news-pill news-mono", changePill(value))}>{formatFuelChange(value)}</span>;
 }
 
 function Average({ label, value, prior }: { label: string; value: number | null; prior: number | null }) {
     const delta = fuelPriceChange(value, prior);
     return (
-        <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-ink/40">Avg {label}</p>
-            <p className="mt-0.5 font-mono text-lg font-bold text-ink">{formatFuelPrice(value)}</p>
+        <div className="news-stat">
+            <span>Avg {label} · GHS/L</span>
+            <strong>{formatFuelPrice(value)}</strong>
             {delta !== null && delta !== 0 && (
-                <p className={cn("inline-flex items-center gap-0.5 text-xs font-semibold", delta > 0 ? "text-rose-400" : "text-emerald-400")}>
+                <p className={cn("mt-2 inline-flex items-center gap-1 text-xs font-semibold news-mono", delta > 0 ? "news-down" : "news-up")}>
                     {delta > 0 ? <TrendingUp size={12} aria-hidden="true" /> : <TrendingDown size={12} aria-hidden="true" />}{formatFuelChange(delta)}
                 </p>
             )}

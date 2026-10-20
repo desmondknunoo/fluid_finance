@@ -1,9 +1,17 @@
 import { useEffect,useState } from 'react';
-import { ArrowRight,Bookmark,Trash2 } from 'lucide-react';
+import { ArrowRight,Trash2 } from 'lucide-react';
 import { savedArticles,removeSaved,type SavedArticle } from '@/lib/saved-reading';
 import { articleHref } from '@/lib/navigation';
+import { EmptyState,Notice } from '@/components/ui/form';
+import { PageIntro } from '@/components/ui/page-intro';
 export default function SavedReadingPage(){
  const[items,setItems]=useState<SavedArticle[]>(savedArticles);const[error,setError]=useState('');
  useEffect(()=>{const sync=()=>setItems(savedArticles());window.addEventListener('fluid:saved-reading',sync);return()=>window.removeEventListener('fluid:saved-reading',sync);},[]);
- return <main className="page-container py-12"><h1 className="font-poppins text-4xl font-bold">Saved for later</h1><p className="mt-4 max-w-2xl text-sm leading-relaxed text-ink/70">Public articles saved on this device are available as text copies offline after the site has loaded online. Videos, external websites, live quotes and comments require a connection. Saved copies may differ from the latest published version.</p>{error&&<p role="alert" className="mt-4 text-fluid-rose">{error}</p>}{!items.length?<div className="my-12 border-y border-ink/20 py-12"><Bookmark size={28}/><h2 className="mt-4 text-2xl font-bold font-poppins">Keep something worth coming back to.</h2><p className="mt-3 text-sm text-ink/70">Open a published article and choose “Save for offline.”</p><a href="#/articles" className="news-text-link mt-5">Explore research <ArrowRight size={15}/></a></div>:<ul className="mt-10 divide-y divide-ink/20">{items.map(({article,savedAt})=><li key={article.id} className="flex items-start justify-between gap-6 py-6"><div><a href={articleHref(article.slug)}><h2 className="font-poppins text-2xl font-semibold hover:underline">{article.title}</h2></a><p className="mt-2 text-xs text-ink/70">Saved {new Date(savedAt).toLocaleString()}</p></div><button type="button" aria-label={`Remove saved ${article.title}`} className="grid min-h-11 min-w-11 place-items-center" onClick={()=>{try{removeSaved(article.slug);}catch{setError('Could not remove this saved copy.');}}}><Trash2 size={16}/></button></li>)}</ul>}</main>;
+ return <main className="page-container news-page">
+  <PageIntro eyebrow="Offline reading" title="Saved for later" description="Public articles saved on this device are available as text copies offline after the site has loaded online. Videos, external websites, live quotes and comments require a connection. Saved copies may differ from the latest published version."/>
+  {error&&<Notice tone="error" className="mb-6">{error}</Notice>}
+  {!items.length
+   ?<EmptyState title="Keep something worth coming back to." action={<a href="#/articles" className="news-text-link">Explore research <ArrowRight size={15} aria-hidden="true"/></a>}>Open a published article and choose “Save for offline.”</EmptyState>
+   :<ul className="news-list">{items.map(({article,savedAt})=><li key={article.id} className="flex items-start justify-between gap-6"><div className="min-w-0"><a href={articleHref(article.slug)} className="group block"><h2 className="news-headline-sm text-ink group-hover:underline underline-offset-4">{article.title}</h2></a><p className="news-byline mt-1">Saved {new Date(savedAt).toLocaleString()}</p></div><button type="button" aria-label={`Remove saved ${article.title}`} className="news-icon-button shrink-0" onClick={()=>{try{removeSaved(article.slug);}catch{setError('Could not remove this saved copy.');}}}><Trash2 size={16} aria-hidden="true"/></button></li>)}</ul>}
+ </main>;
 }

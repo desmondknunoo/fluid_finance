@@ -8,7 +8,7 @@ const OPTIONS: { mode: ThemeMode; label: string; Icon: typeof Sun }[] = [
     { mode: "dark", label: "Dark", Icon: Moon },
 ];
 
-/** Three-way segmented control: light, system (the default), dark. */
+/** Three-way segmented control: light, system (the default), dark. Square cells behind one hairline. */
 export function ThemeToggle({ className }: { className?: string }) {
     const { mode, setMode } = useTheme();
 
@@ -16,10 +16,7 @@ export function ThemeToggle({ className }: { className?: string }) {
         <div
             role="radiogroup"
             aria-label="Colour scheme"
-            className={cn(
-                "inline-flex items-center gap-0.5 rounded-full border border-ink/[0.08] bg-ink/[0.03] p-0.5",
-                className,
-            )}
+            className={cn("inline-flex items-stretch border border-ink/[0.19] divide-x divide-ink/[0.19]", className)}
         >
             {OPTIONS.map(({ mode: value, label, Icon }) => (
                 <button
@@ -31,20 +28,18 @@ export function ThemeToggle({ className }: { className?: string }) {
                     title={`${label} theme`}
                     onClick={() => setMode(value)}
                     className={cn(
-                        "rounded-full p-1.5 transition-colors",
-                        mode === value
-                            ? "bg-ink/[0.12] text-ink"
-                            : "text-ink/40 hover:text-ink/70",
+                        "grid h-10 w-10 place-items-center transition-colors",
+                        mode === value ? "bg-ink/[0.055] text-fluid-cyan-ink" : "text-ink/[0.68] hover:text-ink",
                     )}
                 >
-                    <Icon size={15} />
+                    <Icon size={16} aria-hidden="true" />
                 </button>
             ))}
         </div>
     );
 }
 
-/** Compact single-button variant for tight headers. */
+/** Compact single-button variant for the masthead: a 40px square with a hairline border. */
 export function ThemeToggleButton({ className }: { className?: string }) {
     const { resolved, toggle } = useTheme();
 
@@ -53,12 +48,9 @@ export function ThemeToggleButton({ className }: { className?: string }) {
             type="button"
             onClick={toggle}
             aria-label={resolved === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-            className={cn(
-                "rounded-full p-2 text-ink/70 transition-colors hover:bg-ink/[0.06] hover:text-ink",
-                className,
-            )}
+            className={cn("news-icon-button h-10 w-10 text-ink", className)}
         >
-            {resolved === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            {resolved === "dark" ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
         </button>
     );
 }

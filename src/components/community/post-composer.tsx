@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { LogIn, Send } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { openLogin } from "@/lib/navigation";
-import { inputClass, Notice, PrimaryButton, SecondaryButton } from "@/components/ui/form";
+import { Notice, PrimaryButton, QuietButton, SecondaryButton, TextArea } from "@/components/ui/form";
 import { Avatar } from "@/components/community/user-chip";
 import { cn } from "@/lib/utils";
 
@@ -28,9 +28,9 @@ export function PostComposer({ onSubmit, placeholder, submitLabel = "Post", onCa
 
     if (!user) {
         return (
-            <div className={cn("flex flex-col items-start gap-3 rounded-2xl border border-dashed border-ink/[0.14] p-5 sm:flex-row sm:items-center sm:justify-between", compact && "p-4")}>
-                <p className="text-sm text-ink/60">Join the conversation — sign in or create a free Fluid Finance account.</p>
-                <SecondaryButton onClick={() => openLogin()} className="shrink-0"><LogIn size={16} /> Sign in to post</SecondaryButton>
+            <div className={cn("flex flex-col items-start gap-3 border-y border-ink/[0.19] py-4 sm:flex-row sm:items-center sm:justify-between", compact && "py-3")}>
+                <p className="text-sm text-ink/[0.68]">Join the conversation — sign in or create a free Fluid Finance account.</p>
+                <SecondaryButton size="sm" onClick={() => openLogin()} className="shrink-0"><LogIn size={15} aria-hidden="true" /> Sign in to post</SecondaryButton>
             </div>
         );
     }
@@ -52,26 +52,23 @@ export function PostComposer({ onSubmit, placeholder, submitLabel = "Post", onCa
     };
 
     return (
-        <form onSubmit={submit} className={cn("flex gap-3", compact ? "items-start" : "items-start")}>
-            {profile && !compact && <Avatar author={profile} className="mt-1 hidden sm:grid" />}
+        <form onSubmit={submit} className="flex items-start gap-3">
+            {profile && !compact && <Avatar author={profile} className="mt-6 hidden sm:grid" />}
             <div className="min-w-0 flex-1">
-                <textarea
+                <TextArea
+                    label={`Your ${submitLabel.toLowerCase()}`}
                     value={body}
                     onChange={(event) => { setBody(event.target.value); setError(""); }}
                     placeholder={placeholder}
                     maxLength={maxLength}
                     autoFocus={autoFocus}
                     rows={compact ? 2 : 3}
-                    aria-label={placeholder}
-                    className={cn(inputClass, "resize-y leading-relaxed", compact ? "min-h-[4.5rem]" : "min-h-[6rem]")}
+                    hint={<span className="news-mono">{body.length.toLocaleString()} / {maxLength.toLocaleString()}</span>}
                 />
                 {error && <Notice tone="error" className="mt-3">{error}</Notice>}
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                    <span className="text-xs text-ink/40 tabular-nums">{body.length.toLocaleString()} / {maxLength.toLocaleString()}</span>
-                    <div className="flex items-center gap-2">
-                        {onCancel && <SecondaryButton onClick={onCancel} className="min-h-[2.5rem]">Cancel</SecondaryButton>}
-                        <PrimaryButton type="submit" loading={busy} disabled={!body.trim()} className="min-h-[2.5rem]"><Send size={15} /> {submitLabel}</PrimaryButton>
-                    </div>
+                <div className="news-form-actions mt-3">
+                    {onCancel && <QuietButton size="sm" onClick={onCancel}>Cancel</QuietButton>}
+                    <PrimaryButton type="submit" size="sm" loading={busy} disabled={!body.trim()}><Send size={14} aria-hidden="true" /> {submitLabel}</PrimaryButton>
                 </div>
             </div>
         </form>

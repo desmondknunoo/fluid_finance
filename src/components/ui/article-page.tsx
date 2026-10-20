@@ -2,11 +2,12 @@ import { ApprovedMedia } from '@/components/media/approved-media';
 import { safeExternalUrl } from '@/lib/content-media';
 import { savedArticle, saveForReading, isSaved, cacheReadingShell } from '@/lib/saved-reading';
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Check, Clock3, Link2, MessageSquare } from "lucide-react";
+import { ArrowLeft, Check, Clock3, Link2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { addArticleComment, categoryLabel, formatLongDate, getArticleBySlug, listArticleComments, readingMinutes, type Article, type ArticleComment } from "@/lib/community";
 import { RichText } from "@/lib/markdown";
-import { Notice } from "@/components/ui/form";
+import { Notice, QuietButton } from "@/components/ui/form";
+import { PageIntro } from "@/components/ui/page-intro";
 import { PostComposer } from "@/components/community/post-composer";
 import { PostList } from "@/components/community/post-list";
 import { UserChip } from "@/components/community/user-chip";
@@ -53,13 +54,12 @@ export default function ArticlePage({ slug }: { slug: string }) {
         }
     };
 
-    if (error) return <main className="page-container py-16"><Notice tone="error">{error}</Notice></main>;
-    if (article === undefined) return <main className="page-container py-16 text-ink/50">Loading article…</main>;
+    if (error) return <main className="page-container news-page"><Notice tone="error" className="mt-8">{error}</Notice></main>;
+    if (article === undefined) return <main className="page-container news-page"><p className="news-loading">Loading article…</p></main>;
     if (article === null) {
         return (
-            <main className="page-container py-16 text-center">
-                <h1 className="text-3xl font-bold text-ink font-poppins">Article not found</h1>
-                <p className="mt-3 text-ink/60">It may have been unpublished. <a href="#/articles" className="text-fluid-cyan-ink underline">See all articles</a>.</p>
+            <main className="page-container news-page">
+                <PageIntro eyebrow="Research desk" title="Article not found" description={<>It may have been unpublished. <a href="#/articles" className="text-fluid-cyan-ink underline">See all articles</a>.</>} />
             </main>
         );
     }
@@ -67,59 +67,71 @@ export default function ArticlePage({ slug }: { slug: string }) {
     const visibleComments = comments.filter((comment) => !comment.deleted_at).length;
 
     return (
-        <main className="page-container py-8 sm:py-12">
-            <article className="mx-auto max-w-3xl">
-                <a href="#/articles" className="inline-flex items-center gap-1.5 text-sm text-ink/50 hover:text-ink"><ArrowLeft size={15} aria-hidden="true" /> All articles</a>
-                <header className="mt-6">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-fluid-cyan-ink">{categoryLabel(article.category)}</p>
-                    <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink font-poppins sm:text-4xl md:text-5xl [text-wrap:balance]">{article.title}</h1>
-                    {article.excerpt && <p className="mt-5 text-lg leading-relaxed text-ink/60">{article.excerpt}</p>}
-                    <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-y border-ink/[0.08] py-4">
+        <main className="page-container news-page">
+            <article className="mx-auto max-w-4xl pt-6">
+                <a href="#/articles" className="news-text-link"><ArrowLeft size={14} aria-hidden="true" /> All articles</a>
+                <header className="mt-6 border-b-[3px] border-ink pb-5">
+                    <p className="news-kicker">
+                        <span className="text-fluid-cyan-ink">{categoryLabel(article.category)}</span>
+                        <span aria-hidden="true">·</span>
+                        {formatLongDate(article.published_at)}
+                    </p>
+                    <h1 className="news-headline-lg mt-4 text-ink">{article.title}</h1>
+                    {article.excerpt && <p className="news-standfirst mt-5">{article.excerpt}</p>}
+                    <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-ink/[0.19] pt-4">
                         <UserChip author={article.author} meta={`${formatLongDate(article.published_at)} · ${readingMinutes(article.body)} min read`} />
-                        <div className="flex items-center gap-2 text-xs text-ink/50">
-                            <span className="inline-flex items-center gap-1"><Clock3 size={13} aria-hidden="true" /> Updated {formatLongDate(article.updated_at)}</span>
-                            <button type="button" onClick={() => void copyLink()} className="inline-flex min-h-[2.25rem] items-center gap-1.5 rounded-lg border border-ink/[0.1] px-2.5 font-medium text-ink/70 hover:bg-ink/[0.05]">
+                        <div className="flex flex-wrap items-center gap-3">
+                            <span className="news-byline inline-flex items-center gap-1.5"><Clock3 size={12} aria-hidden="true" /> Updated {formatLongDate(article.updated_at)}</span>
+                            <QuietButton size="sm" onClick={() => void copyLink()}>
                                 {copied ? <Check size={13} aria-hidden="true" /> : <Link2 size={13} aria-hidden="true" />} {copied ? "Copied" : "Copy link"}
-                            </button>
+                            </QuietButton>
                         </div>
                     </div>
                 </header>
 
-                {article.cover_url && <img src={article.cover_url} alt="" className="mt-8 w-full rounded-2xl border border-ink/[0.08] object-cover" />}
+                {article.cover_url && (
+                    <figure className="mt-8 border border-ink/[0.19] bg-ink/[0.055]">
+                        <img src={article.cover_url} alt="" className="block w-full object-cover" />
+                    </figure>
+                )}
 
-                {offlineCopy&&<p role="status" className="mt-6 border-y border-ink/20 py-4 text-sm">Showing the copy saved on this device. Connect to check the latest version.</p>}
+                {offlineCopy&&<Notice className="mt-6">Showing the copy saved on this device. Connect to check the latest version.</Notice>}
                 {article.media_kind && ['video','audio','live'].includes(article.media_kind) && <div className="mt-8"><ApprovedMedia url={article.external_url} title={article.title} cover={article.cover_url}/></div>}
                 {safeExternalUrl(article.external_url) && <a href={safeExternalUrl(article.external_url)!} target="_blank" rel="noreferrer noopener" className="news-text-link mt-6">Open original source ↗</a>}
-                <div className="mt-6"><button type="button" onClick={()=>{try{saveForReading(article);setSaved(true);setSaveError('');void cacheReadingShell().catch(()=>setSaveError('Article saved; offline app files could not be cached. Reconnect and try saving again.'));}catch(caught){setSaveError(caught instanceof Error?caught.message:'Could not save.');}}} className="min-h-11 border border-ink/20 px-4 text-sm font-semibold">{saved?'Saved on this device · save latest copy':'Save for offline'}</button>{saveError&&<p role="alert" className="mt-2 text-sm text-fluid-rose">{saveError}</p>}</div>
-                <RichText source={article.body} className="mt-8 text-base sm:text-[17px]" />
+                <div className="mt-6">
+                    <QuietButton onClick={()=>{try{saveForReading(article);setSaved(true);setSaveError('');void cacheReadingShell().catch(()=>setSaveError('Article saved; offline app files could not be cached. Reconnect and try saving again.'));}catch(caught){setSaveError(caught instanceof Error?caught.message:'Could not save.');}}}>{saved?'Saved on this device · save latest copy':'Save for offline'}</QuietButton>
+                    {saveError&&<p role="alert" className="news-field-error">{saveError}</p>}
+                </div>
+                <RichText source={article.body} className="news-prose mt-8" />
 
                 {article.tags.length > 0 && (
                     <ul className="mt-10 flex flex-wrap gap-2" aria-label="Tags">
-                        {article.tags.map((tag) => <li key={tag} className="rounded-full border border-ink/[0.1] px-3 py-1 text-xs text-ink/60">#{tag}</li>)}
+                        {article.tags.map((tag) => <li key={tag} className="news-pill news-pill--neutral">#{tag}</li>)}
                     </ul>
                 )}
 
-                <p className="mt-10 rounded-xl border border-ink/[0.08] bg-ink/[0.02] px-4 py-3 text-xs leading-relaxed text-ink/50">
+                <p className="news-byline mt-10 max-w-[70ch] border-t border-ink/[0.19] pt-4">
                     Fluid Finance publishes market information and education. This article is not investment advice; investing carries risk of loss.
                 </p>
 
-                {!offlineCopy&&<section className="mt-14" aria-labelledby="comments-heading">
-                    <div className="mb-6 flex items-center gap-3">
-                        <MessageSquare size={20} className="text-fluid-cyan-ink" aria-hidden="true" />
-                        <h2 id="comments-heading" className="text-2xl font-bold text-ink font-poppins">{visibleComments} {visibleComments === 1 ? "comment" : "comments"}</h2>
-                    </div>
-                    <div className="mb-8">
+                {!offlineCopy&&<section className="news-section" aria-labelledby="comments-heading">
+                    <header className="news-section-header">
+                        <h2 id="comments-heading">{visibleComments} {visibleComments === 1 ? "comment" : "comments"}</h2>
+                    </header>
+                    <div className="mt-6">
                         <PostComposer placeholder="Share your view on this article…" submitLabel="Comment" onSubmit={(body) => post(body)} />
                     </div>
-                    <PostList
-                        posts={comments}
-                        table="article_comments"
-                        reportTarget="article_comment"
-                        onReply={(body, parentId) => post(body, parentId)}
-                        onEdited={(id, body) => setComments((current) => current.map((comment) => comment.id === id ? { ...comment, body, edited_at: new Date().toISOString() } : comment))}
-                        replyPlaceholder="Write a reply…"
-                        emptyTitle="No comments yet"
-                    />
+                    <div className="mt-8">
+                        <PostList
+                            posts={comments}
+                            table="article_comments"
+                            reportTarget="article_comment"
+                            onReply={(body, parentId) => post(body, parentId)}
+                            onEdited={(id, body) => setComments((current) => current.map((comment) => comment.id === id ? { ...comment, body, edited_at: new Date().toISOString() } : comment))}
+                            replyPlaceholder="Write a reply…"
+                            emptyTitle="No comments yet"
+                        />
+                    </div>
                 </section>}
             </article>
         </main>

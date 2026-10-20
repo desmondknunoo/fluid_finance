@@ -1,22 +1,7 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { FileText, Video, Table2, Bell, BookOpen, GraduationCap } from "lucide-react";
+import { FileText, Video, Table2, Bell, BookOpen, GraduationCap, ArrowUpRight } from "lucide-react";
+import { PageIntro } from "@/components/ui/page-intro";
 
 function MarketEducationPage() {
-    const fadeUpVariants = {
-        hidden: { opacity: 0, y: 30 },
-        visible: (i: number) => ({
-            opacity: 1,
-            y: 0,
-            transition: {
-                duration: 1,
-                delay: 0.5 + i * 0.1,
-                ease: [0.25, 0.4, 0.25, 1] as any,
-            },
-        }),
-    };
-
     const educationalArticles = [
         {
             category: "Press Release",
@@ -75,75 +60,44 @@ function MarketEducationPage() {
     ];
 
     return (
-        <div className="relative min-h-screen w-full overflow-hidden bg-canvas">
-            <div className="absolute inset-0 bg-gradient-to-br from-ink/[0.05] via-transparent to-ink/[0.05] blur-3xl" />
+        <main className="page-container news-page">
+            <PageIntro
+                eyebrow="Market Education"
+                title="Market Education"
+                description="Master financial markets, economic indicators, and investment strategies through expert insights and comprehensive educational resources."
+            />
 
-            <div className="page-container relative z-10 py-12 sm:py-16 md:py-20">
-                <div className="max-w-6xl mx-auto">
-                    <motion.div
-                        custom={0}
-                        variants={fadeUpVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="text-center mb-16"
-                    >
-                        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 tracking-tight font-poppins">
-                            <span className="bg-clip-text text-transparent bg-gradient-to-b from-ink to-ink/80">
-                                Market Education
-                            </span>
-                        </h1>
-                        <p className="text-xl text-ink/60 max-w-2xl mx-auto leading-relaxed">
-                            Master financial markets, economic indicators, and investment strategies through expert insights and comprehensive educational resources.
-                        </p>
-                    </motion.div>
-
-                    <motion.div
-                        custom={2}
-                        variants={fadeUpVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="mb-20"
-                    >
-                        <h2 className="text-3xl font-bold mb-8 text-left font-poppins">Recent Educational Articles</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {educationalArticles.map((article, index) => (
-                                <motion.a
-                                    key={article.title}
-                                    href={article.link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    custom={index}
-                                    variants={fadeUpVariants}
-                                    initial="hidden"
-                                    animate="visible"
-                                    className="block p-8 rounded-3xl bg-ink/[0.02] border border-ink/[0.08] hover:border-ink/20 transition-all cursor-pointer group"
-                                >
-                                    <div className="flex items-start gap-4 mb-6">
-                                        <div className="p-3 rounded-lg bg-ink/[0.05]">
-                                            <article.icon size={32} className="text-ink/20" />
-                                        </div>
-                                    </div>
-                                    <span className="text-xs font-bold uppercase tracking-widest text-ink/30 mb-4 block group-hover:text-ink/60 transition-colors">
-                                        {article.category}
-                                    </span>
-                                    <h3 className="text-xl font-bold text-ink mb-4 leading-tight group-hover:translate-x-1 transition-transform">
-                                        {article.title}
-                                    </h3>
-                                    <p className="text-sm text-ink/60 mb-2">
-                                        By {article.author}
-                                    </p>
-                                    <div className="flex items-center justify-between text-xs text-ink/20">
-                                        <span>{article.date}</span>
-                                        <span>{article.readTime}</span>
-                                    </div>
-                                </motion.a>
-                            ))}
-                        </div>
-                    </motion.div>
-
+            <section className="news-section !mt-0" aria-labelledby="education-recent">
+                <header className="news-section-header">
+                    <h2 id="education-recent">Recent Educational Articles</h2>
+                    <span>From the Ghana Stock Exchange</span>
+                </header>
+                <div className="news-tiles news-tiles--2 pt-4">
+                    {educationalArticles.map((article) => (
+                        <a
+                            key={article.title}
+                            href={article.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="news-tile"
+                        >
+                            <p className="news-kicker !mt-0">{article.category}</p>
+                            <h3 className="mt-2 flex items-start gap-2">
+                                <article.icon size={20} className="mt-0.5 shrink-0 text-fluid-cyan-ink" aria-hidden="true" />
+                                <span>{article.title}</span>
+                            </h3>
+                            <p>By {article.author}</p>
+                            <p className="news-byline !mt-2 inline-flex flex-wrap items-center gap-x-2">
+                                <span>{article.date}</span>
+                                <span aria-hidden="true">·</span>
+                                <span>{article.readTime}</span>
+                                <ArrowUpRight size={12} aria-hidden="true" />
+                            </p>
+                        </a>
+                    ))}
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
     );
 }
 

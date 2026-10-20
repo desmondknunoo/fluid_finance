@@ -1,22 +1,7 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { TrendingUp, GraduationCap, FileText, BookOpen } from "lucide-react";
+import { TrendingUp, GraduationCap, FileText, BookOpen, ArrowUpRight } from "lucide-react";
+import { PageIntro } from "@/components/ui/page-intro";
 
 function LearningCenterPage() {
-    const fadeUpVariants = {
-        hidden: { opacity: 0, y: 30 },
-        visible: (i: number) => ({
-            opacity: 1,
-            y: 0,
-            transition: {
-                duration: 1,
-                delay: 0.5 + i * 0.1,
-                ease: [0.25, 0.4, 0.25, 1] as any,
-            },
-        }),
-    };
-
     const featuredArticles = [
         {
             category: "Training",
@@ -76,71 +61,59 @@ function LearningCenterPage() {
         }
     ];
 
+    // Topic groups in order of first appearance, so the page reads as a run of sections.
+    const groups = featuredArticles.reduce<{ category: string; items: typeof featuredArticles }[]>((acc, article) => {
+        const group = acc.find((entry) => entry.category === article.category);
+        if (group) group.items.push(article);
+        else acc.push({ category: article.category, items: [article] });
+        return acc;
+    }, []);
+
     return (
-        <div className="relative min-h-screen w-full overflow-hidden bg-canvas">
-            <div className="absolute inset-0 bg-gradient-to-br from-ink/[0.05] via-transparent to-ink/[0.05] blur-3xl" />
+        <main className="page-container news-page">
+            <PageIntro
+                eyebrow="Learning Center"
+                title="Learning Center"
+                description="Expert analysis, educational content, and courses to help you navigate the Ghana Stock Exchange with confidence."
+            />
 
-            <div className="page-container relative z-10 py-12 sm:py-16 md:py-20">
-                <div className="max-w-6xl mx-auto">
-                    <motion.div
-                        custom={0}
-                        variants={fadeUpVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="text-center mb-16"
-                    >
-                        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 tracking-tight font-poppins">
-                            <span className="bg-clip-text text-transparent bg-gradient-to-b from-ink to-ink/80">
-                                Learning Center
-                            </span>
-                        </h1>
-                        <p className="text-xl text-ink/60 max-w-2xl mx-auto leading-relaxed">
-                            Expert analysis, educational content, and courses to help you navigate the Ghana Stock Exchange with confidence.
-                        </p>
-                    </motion.div>
+            <section className="news-section !mt-0" aria-labelledby="learning-courses">
+                <header className="news-section-header">
+                    <h2 id="learning-courses">Courses and Learning</h2>
+                    <span>{featuredArticles.length} resources from Ghana's regulators and institutes</span>
+                </header>
 
-                    <motion.div
-                        custom={1}
-                        variants={fadeUpVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="mb-20"
-                    >
-                        <h2 className="text-3xl font-bold mb-8 text-left font-poppins">Courses and Learning</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {featuredArticles.map((article, index) => (
-                                <motion.a
-                                    key={article.title}
-                                    href={article.link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    custom={index}
-                                    variants={fadeUpVariants}
-                                    initial="hidden"
-                                    animate="visible"
-                                    className="block p-8 rounded-3xl bg-ink/[0.02] border border-ink/[0.08] hover:border-ink/20 transition-all cursor-pointer group"
-                                >
-                                    <div className="flex items-center gap-4 mb-6">
-                                        <div className="p-3 rounded-lg bg-ink/[0.05]">
-                                            <article.icon className="h-6 w-6 text-ink/60" />
-                                        </div>
-                                        <span className="text-xs font-bold uppercase tracking-widest text-ink/30 mb-4 block group-hover:text-ink/60 transition-colors">
-                                            {article.category}
-                                        </span>
-                                    </div>
-                                    <h3 className="text-xl font-bold text-ink mb-4 leading-tight group-hover:translate-x-1 transition-transform">
-                                        {article.title}
-                                    </h3>
-                                    <p className="text-sm text-ink/40 mb-6 leading-relaxed">
-                                        {article.snippet}
-                                    </p>
-                                </motion.a>
-                            ))}
+                {groups.map((group) => (
+                    <div key={group.category} className="mt-8" role="group" aria-labelledby={`learning-${group.category.toLowerCase()}`}>
+                        <h3 id={`learning-${group.category.toLowerCase()}`} className="news-subhead flex items-baseline justify-between gap-4">
+                            {group.category}
+                            <span className="news-byline font-sans font-normal">{group.items.length} {group.items.length === 1 ? "resource" : "resources"}</span>
+                        </h3>
+                        <div className="news-tiles">
+                        {group.items.map((article) => (
+                            <a
+                                key={article.title}
+                                href={article.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="news-tile"
+                            >
+                                <h4 className="font-poppins text-[20px] font-semibold leading-tight tracking-[-.01em] flex items-start gap-2">
+                                    <article.icon size={20} className="mt-0.5 shrink-0 text-fluid-cyan-ink" aria-hidden="true" />
+                                    <span>{article.title}</span>
+                                </h4>
+                                <p>{article.snippet}</p>
+                                <span className="news-byline mt-3 inline-flex items-center gap-1">
+                                    {new URL(article.link).hostname.replace(/^www\./, "")}
+                                    <ArrowUpRight size={12} aria-hidden="true" />
+                                </span>
+                            </a>
+                        ))}
                         </div>
-                    </motion.div>
-                </div>
-            </div>
-        </div>
+                    </div>
+                ))}
+            </section>
+        </main>
     );
 }
 

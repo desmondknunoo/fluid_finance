@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Download, Loader2, Share2, TrendingDown, TrendingUp } from "lucide-react";
+import { Download, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { formatCedis, metaFor, getAllStocks, type Stock } from "@/lib/gse";
 import { recordAll } from "@/lib/history";
 import { getStockPriceHistory, listCloseDates } from "@/lib/closes";
@@ -12,6 +11,9 @@ import { TickerLogo } from "@/components/stock/ticker-logo";
 import { HistoricalPrices } from "@/components/stock/historical-prices";
 import { WeeklyTrendsShareSheet } from "@/components/stock/weekly-trends-share-sheet";
 import type { WeeklyTrendCardInput } from "@/lib/weekly-trends-share-card";
+import { Notice, SecondaryButton, SelectField, TextField } from "@/components/ui/form";
+import { PageIntro } from "@/components/ui/page-intro";
+import { cn } from "@/lib/utils";
 
 interface WeeklyChange {
     stock: Stock;
@@ -268,292 +270,87 @@ export default function MarketTrendsPage() {
         });
     };
 
+    const showReview = !loading && !error && (topGainers.length > 0 || topLosers.length > 0);
+
     return (
-        <div className="relative min-h-screen w-full overflow-hidden bg-canvas">
-            <div className="absolute inset-0 bg-gradient-to-br from-ink/[0.05] via-transparent to-ink/[0.05] blur-3xl" />
+        <main className="page-container news-page">
+            <PageIntro
+                eyebrow="Week in review"
+                title="Market Trends"
+                description="Weekly winners and losers on the Ghana Stock Exchange, measured week-over-week."
+            />
 
-            <div className="page-container relative z-10 py-12 sm:py-16 md:py-20">
-                <div className="max-w-6xl mx-auto">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="text-center mb-16"
+            {/* Week in Review */}
+            {showReview && (
+                <section className="news-section" aria-labelledby="review-heading">
+                    <header className="news-section-header">
+                        <h2 id="review-heading">Week in Review</h2>
+                        {rangeLabel && <span>{rangeLabel.w1} / {rangeLabel.w2}</span>}
+                    </header>
+                    <div className="news-columns news-columns--2 mt-6">
+                        {topGainers.length > 0 && (
+                            <MoverBoard title="Top Gainers" tone="up" items={topGainers} onShare={() => openShareSheet("gainers")} />
+                        )}
+                        {topLosers.length > 0 && (
+                            <MoverBoard title="Top Losers" tone="down" items={topLosers} onShare={() => openShareSheet("losers")} />
+                        )}
+                    </div>
+                </section>
+            )}
+
+            {/* Export */}
+            <section className="news-section" aria-labelledby="export-heading">
+                <header className="news-section-header">
+                    <h2 id="export-heading">Export to Excel</h2>
+                    <span>Closing prices for the dates the desk has recorded.</span>
+                </header>
+                <div className="mt-6 grid gap-4 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
+                    <TextField
+                        label="From"
+                        type="date"
+                        value={exportStartDate}
+                        min={availableDates[0] || ""}
+                        max={exportEndDate || availableDates[availableDates.length - 1] || ""}
+                        onChange={(e) => setExportStartDate(e.target.value)}
+                    />
+                    <TextField
+                        label="To"
+                        type="date"
+                        value={exportEndDate}
+                        min={exportStartDate || availableDates[0] || ""}
+                        max={availableDates[availableDates.length - 1] || ""}
+                        onChange={(e) => setExportEndDate(e.target.value)}
+                    />
+                    <SelectField
+                        label="Include"
+                        value={exportWeeklyComparison ? "comparison" : exportFridaysOnly ? "fridays" : "all"}
+                        onChange={(e) => {
+                            setExportWeeklyComparison(e.target.value === "comparison");
+                            setExportFridaysOnly(e.target.value === "fridays");
+                        }}
                     >
-                        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 tracking-tight font-poppins">
-                            <span className="bg-clip-text text-transparent bg-gradient-to-b from-ink to-ink/80">
-                                Market Trends
-                            </span>
-                        </h1>
-                        <p className="text-xl text-ink/60 max-w-2xl mx-auto leading-relaxed">
-                            Weekly winners and losers on the Ghana Stock Exchange, measured week-over-week.
-                        </p>
-                    </motion.div>
-
-                    {/* Export Section */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.15 }}
-                        className="mb-8"
-                    >
-                        <div className="rounded-2xl bg-ink/[0.03] border border-ink/[0.08] p-4 sm:p-5">
-                            <div className="flex items-center justify-between gap-3 mb-3 sm:mb-0">
-                                <h3 className="text-sm font-semibold text-ink">Export to Excel</h3>
-                                <button
-                                    onClick={handleExport}
-                                    disabled={exporting}
-                                    className="flex items-center justify-center gap-2 rounded-xl bg-ink/5 border border-ink/10 px-4 py-2 text-sm font-semibold text-ink transition-all hover:bg-ink/10 hover:border-ink/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {exporting ? (
-                                        <Loader2 size={14} className="animate-spin" />
-                                    ) : (
-                                        <Download size={14} />
-                                    )}
-                                    {exporting ? "Exporting..." : "Export"}
-                                </button>
-                            </div>
-                            <div className="flex flex-wrap items-center gap-2">
-                                <input
-                                    type="date"
-                                    value={exportStartDate}
-                                    min={availableDates[0] || ""}
-                                    max={exportEndDate || availableDates[availableDates.length - 1] || ""}
-                                    onChange={(e) => setExportStartDate(e.target.value)}
-                                    className="rounded-lg border border-ink/10 bg-canvas px-3 py-2 text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
-                                />
-                                <span className="text-xs text-ink/40">to</span>
-                                <input
-                                    type="date"
-                                    value={exportEndDate}
-                                    min={exportStartDate || availableDates[0] || ""}
-                                    max={availableDates[availableDates.length - 1] || ""}
-                                    onChange={(e) => setExportEndDate(e.target.value)}
-                                    className="rounded-lg border border-ink/10 bg-canvas px-3 py-2 text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
-                                />
-                                <select
-                                    value={exportWeeklyComparison ? "comparison" : exportFridaysOnly ? "fridays" : "all"}
-                                    onChange={(e) => {
-                                        setExportWeeklyComparison(e.target.value === "comparison");
-                                        setExportFridaysOnly(e.target.value === "fridays");
-                                    }}
-                                    className="rounded-lg border border-ink/10 bg-canvas px-3 py-2 text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink/20"
-                                >
-                                    <option value="all">All prices</option>
-                                    <option value="fridays">Fridays only</option>
-                                    <option value="comparison">Weekly comparison</option>
-                                </select>
-                            </div>
-                            {exportError && <p className="mt-3 text-xs text-rose-500">{exportError}</p>}
-                        </div>
-                    </motion.div>
-
-                    {/* Week in Review - Top Gainers */}
-                    {!loading && !error && topGainers.length > 0 && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6 }}
-                            className="mb-8"
-                        >
-                            <div className="rounded-2xl bg-ink/[0.03] border border-ink/[0.08] overflow-hidden">
-                                <div className="flex items-start justify-between gap-3 border-b border-ink/[0.08] p-4 sm:p-5">
-                                    <div>
-                                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-500">Week in Review</p>
-                                        <h2 className="mt-1 text-lg font-bold text-ink">Top Gainers</h2>
-                                        <p className="text-xs text-ink/40 mt-1">{rangeLabel?.w1} / {rangeLabel?.w2}</p>
-                                    </div>
-                                    <button
-                                        onClick={() => openShareSheet("gainers")}
-                                        className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 text-xs font-semibold text-emerald-500 transition-all hover:bg-emerald-500/20 hover:border-emerald-500/30"
-                                    >
-                                        <Share2 size={13} />
-                                        Share
-                                    </button>
-                                </div>
-
-                                {/* Mobile cards */}
-                                <div className="flex flex-col gap-2 p-4 md:hidden">
-                                    {topGainers.map((item, index) => (
-                                        <button
-                                            key={item.stock.symbol}
-                                            onClick={() => openStock(item.stock.symbol)}
-                                            className="flex w-full items-center gap-3 rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-3 text-left transition-colors hover:border-ink/20 hover:bg-ink/[0.05]"
-                                        >
-                                            <span className="w-4 shrink-0 text-center font-mono text-xs text-ink/30">{index + 1}</span>
-                                            <TickerLogo symbol={item.stock.symbol} size={38} />
-                                            <div className="min-w-0 flex-1">
-                                                <div className="flex items-baseline justify-between gap-2">
-                                                    <span className="truncate font-bold uppercase text-ink">{item.stock.symbol}</span>
-                                                    <span className="shrink-0 font-mono text-ink">{formatCedis(item.stock.price)}</span>
-                                                </div>
-                                                <div className="mt-0.5 flex items-center justify-between gap-2">
-                                                    <span className="truncate text-xs text-ink/40">{item.stock.company}</span>
-                                                    <span className="flex shrink-0 items-center gap-1 font-mono text-xs font-medium text-emerald-400">
-                                                        <TrendingUp size={12} />
-                                                        +{item.weeklyChangePercent.toFixed(2)}%
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {/* Desktop table */}
-                                <div className="hidden overflow-x-auto md:block">
-                                    <table className="w-full text-left">
-                                        <thead>
-                                            <tr className="border-b border-ink/[0.08] bg-ink/[0.01]">
-                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">#</th>
-                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Symbol</th>
-                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Closing Price</th>
-                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider text-right">Weekly Change</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {topGainers.map((item, index) => (
-                                                <tr
-                                                    key={item.stock.symbol}
-                                                    onClick={() => openStock(item.stock.symbol)}
-                                                    className="border-b border-ink/[0.04] hover:bg-ink/[0.02] transition-colors cursor-pointer"
-                                                >
-                                                    <td className="px-6 py-4 font-mono text-xs text-ink/30">{index + 1}</td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <TickerLogo symbol={item.stock.symbol} size={28} />
-                                                            <div className="min-w-0">
-                                                                <span className="font-bold text-ink uppercase">{item.stock.symbol}</span>
-                                                                <span className="block max-w-[220px] truncate text-xs text-ink/40">{item.stock.company}</span>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 font-mono text-ink">{formatCedis(item.stock.price)}</td>
-                                                    <td className="px-6 py-4 text-right">
-                                                        <span className="inline-flex items-center gap-1 font-medium text-emerald-400">
-                                                            <TrendingUp size={14} />
-                                                            +{item.weeklyChangePercent.toFixed(2)}%
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {/* Week in Review - Top Losers */}
-                    {!loading && !error && topLosers.length > 0 && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6 }}
-                            className="mb-8"
-                        >
-                            <div className="rounded-2xl bg-ink/[0.03] border border-ink/[0.08] overflow-hidden">
-                                <div className="flex items-start justify-between gap-3 border-b border-ink/[0.08] p-4 sm:p-5">
-                                    <div>
-                                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-500">Week in Review</p>
-                                        <h2 className="mt-1 text-lg font-bold text-ink">Top Losers</h2>
-                                        <p className="text-xs text-ink/40 mt-1">{rangeLabel?.w1} / {rangeLabel?.w2}</p>
-                                    </div>
-                                    <button
-                                        onClick={() => openShareSheet("losers")}
-                                        className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 px-3 py-1.5 text-xs font-semibold text-rose-500 transition-all hover:bg-rose-500/20 hover:border-rose-500/30"
-                                    >
-                                        <Share2 size={13} />
-                                        Share
-                                    </button>
-                                </div>
-
-                                {/* Mobile cards */}
-                                <div className="flex flex-col gap-2 p-4 md:hidden">
-                                    {topLosers.map((item, index) => (
-                                        <button
-                                            key={item.stock.symbol}
-                                            onClick={() => openStock(item.stock.symbol)}
-                                            className="flex w-full items-center gap-3 rounded-xl border border-ink/[0.08] bg-ink/[0.03] p-3 text-left transition-colors hover:border-ink/20 hover:bg-ink/[0.05]"
-                                        >
-                                            <span className="w-4 shrink-0 text-center font-mono text-xs text-ink/30">{index + 1}</span>
-                                            <TickerLogo symbol={item.stock.symbol} size={38} />
-                                            <div className="min-w-0 flex-1">
-                                                <div className="flex items-baseline justify-between gap-2">
-                                                    <span className="truncate font-bold uppercase text-ink">{item.stock.symbol}</span>
-                                                    <span className="shrink-0 font-mono text-ink">{formatCedis(item.stock.price)}</span>
-                                                </div>
-                                                <div className="mt-0.5 flex items-center justify-between gap-2">
-                                                    <span className="truncate text-xs text-ink/40">{item.stock.company}</span>
-                                                    <span className="flex shrink-0 items-center gap-1 font-mono text-xs font-medium text-rose-400">
-                                                        <TrendingDown size={12} />
-                                                        {item.weeklyChangePercent.toFixed(2)}%
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {/* Desktop table */}
-                                <div className="hidden overflow-x-auto md:block">
-                                    <table className="w-full text-left">
-                                        <thead>
-                                            <tr className="border-b border-ink/[0.08] bg-ink/[0.01]">
-                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">#</th>
-                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Symbol</th>
-                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider">Closing Price</th>
-                                                <th className="px-6 py-4 text-xs font-semibold text-ink/40 uppercase tracking-wider text-right">Weekly Change</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {topLosers.map((item, index) => (
-                                                <tr
-                                                    key={item.stock.symbol}
-                                                    onClick={() => openStock(item.stock.symbol)}
-                                                    className="border-b border-ink/[0.04] hover:bg-ink/[0.02] transition-colors cursor-pointer"
-                                                >
-                                                    <td className="px-6 py-4 font-mono text-xs text-ink/30">{index + 1}</td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <TickerLogo symbol={item.stock.symbol} size={28} />
-                                                            <div className="min-w-0">
-                                                                <span className="font-bold text-ink uppercase">{item.stock.symbol}</span>
-                                                                <span className="block max-w-[220px] truncate text-xs text-ink/40">{item.stock.company}</span>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 font-mono text-ink">{formatCedis(item.stock.price)}</td>
-                                                    <td className="px-6 py-4 text-right">
-                                                        <span className="inline-flex items-center gap-1 font-medium text-rose-400">
-                                                            <TrendingDown size={14} />
-                                                            {item.weeklyChangePercent.toFixed(2)}%
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {/* Historical Prices */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="mb-12"
-                    >
-                        <div className="mb-6">
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/40">Database</p>
-                            <h2 className="mt-1 text-xl font-bold text-ink">Closing Price History</h2>
-                            <p className="text-sm text-ink/50 mt-1">Daily closing prices recorded from the GSE</p>
-                        </div>
-                        <HistoricalPrices />
-                    </motion.div>
+                        <option value="all">All prices</option>
+                        <option value="fridays">Fridays only</option>
+                        <option value="comparison">Weekly comparison</option>
+                    </SelectField>
+                    <SecondaryButton onClick={handleExport} disabled={exporting} aria-busy={exporting || undefined}>
+                        <Download size={14} className={exporting ? "animate-pulse" : undefined} aria-hidden="true" />
+                        {exporting ? "Exporting..." : "Export"}
+                    </SecondaryButton>
                 </div>
-            </div>
+                {exportError && <Notice tone="error" className="mt-4">{exportError}</Notice>}
+            </section>
+
+            {/* Historical Prices */}
+            <section className="news-section" aria-labelledby="history-heading">
+                <header className="news-section-header">
+                    <h2 id="history-heading">Closing Price History</h2>
+                    <span>Database · Daily closing prices recorded from the GSE</span>
+                </header>
+                <div className="mt-6">
+                    <HistoricalPrices />
+                </div>
+            </section>
 
             {/* Weekly Trends Share Sheet */}
             {shareSheet.input && (
@@ -563,6 +360,60 @@ export default function MarketTrendsPage() {
                     card={shareSheet.input}
                 />
             )}
+        </main>
+    );
+}
+
+/** One ranked column of the week's movers: a subhead with its share control over a hairline table. */
+function MoverBoard({ title, tone, items, onShare }: { title: string; tone: "up" | "down"; items: WeeklyChange[]; onShare: () => void }) {
+    const Trend = tone === "up" ? TrendingUp : TrendingDown;
+    return (
+        <div>
+            <div className="flex items-start justify-between gap-3">
+                <h3 className={cn("news-subhead flex-1", tone === "up" ? "news-up" : "news-down")}>{title}</h3>
+                <button type="button" onClick={onShare} aria-label={`Share ${title.toLowerCase()}`} title={`Share ${title.toLowerCase()}`} className="news-icon-button mt-2">
+                    <Share2 size={14} aria-hidden="true" />
+                </button>
+            </div>
+            <div className="news-table-wrap">
+                <table className="news-table">
+                    <thead>
+                        <tr>
+                            <th scope="col" className="w-6">#</th>
+                            <th scope="col">Symbol</th>
+                            <th scope="col" className="num">Closing Price</th>
+                            <th scope="col" className="num">Weekly Change</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {items.map((item, index) => (
+                            <tr
+                                key={item.stock.symbol}
+                                onClick={() => openStock(item.stock.symbol)}
+                                className="cursor-pointer"
+                            >
+                                <td className="news-mono text-xs text-ink/[0.68]">{index + 1}</td>
+                                <td>
+                                    <div className="flex items-center gap-3">
+                                        <TickerLogo symbol={item.stock.symbol} size={24} />
+                                        <div className="min-w-0">
+                                            <span className="font-bold uppercase text-ink">{item.stock.symbol}</span>
+                                            <span className="block max-w-[180px] truncate text-xs text-ink/[0.68]">{item.stock.company}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td className="num font-semibold text-ink">{formatCedis(item.stock.price)}</td>
+                                <td className="num">
+                                    <span className={cn("news-pill news-mono inline-flex items-center gap-1", tone === "up" ? "news-pill--up" : "news-pill--down")}>
+                                        <Trend size={11} aria-hidden="true" />
+                                        {tone === "up" ? "+" : ""}{item.weeklyChangePercent.toFixed(2)}%
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }
