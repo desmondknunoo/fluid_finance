@@ -80,6 +80,15 @@ articles, comments, forum, profiles and reports. `VITE_API_BASE_URL` selects the
 `http://localhost:8001/api/v1`). Live GSE quotes still come from the investor platform's public
 market API. Nothing Supabase remains in this app.
 
+History cutover verified on 20 October 2026: all 668 valid Supabase closing-price rows
+(10 August–15 October 2026) match the Finance API by symbol, trading date and price.
+The 32 source rows with missing or non-positive prices were excluded. The API also holds
+newer daily snapshots. History tables and Excel exports now read the public
+`/editorial/closes` endpoint without requiring sign-in. Supabase is retained unchanged
+during the migration retention period.
+
+Run the history-client checks with `node --test tests/closes.test.mjs`.
+
 ## Hosting on Cloudflare Pages
 
 The site uses the `fluid-finance` Pages project and the production domain
