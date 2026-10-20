@@ -3,7 +3,7 @@ import { Copy, Download, Share2, X } from "lucide-react";
 import { renderFuelCards } from "@/lib/fuel-share-card";
 import { formatFuelDate, type FuelReport } from "@/lib/fuel-prices";
 
-export function FuelShareSheet({ report, onClose }: { report: FuelReport; onClose: () => void }) {
+export function FuelShareSheet({ report, previous = null, onClose }: { report: FuelReport; previous?: FuelReport | null; onClose: () => void }) {
     const dialog = useRef<HTMLDialogElement>(null);
     const [images, setImages] = useState<{ blob: Blob; url: string }[]>([]);
     const [page, setPage] = useState(0);
@@ -23,14 +23,14 @@ export function FuelShareSheet({ report, onClose }: { report: FuelReport; onClos
         let urls: string[] = [];
         setImages([]); setPage(0); setMessage("");
         setError("");
-        renderFuelCards(report).then(blobs => {
+        renderFuelCards(report, previous).then(blobs => {
             if (cancelled) return;
             const rendered = blobs.map(blob => ({ blob, url: URL.createObjectURL(blob) }));
             urls = rendered.map(item => item.url);
             setImages(rendered);
         }).catch(err => { if (!cancelled) setError(err instanceof Error ? err.message : "Could not generate the image."); });
         return () => { cancelled = true; urls.forEach(url => URL.revokeObjectURL(url)); };
-    }, [report, attempt]);
+    }, [report, previous, attempt]);
     const filename = `fluid-pump-report-${report.report_date}-${report.id.slice(0, 8)}-page-${page + 1}-of-${images.length}.png`;
     const download = () => {
         if (!image) return;

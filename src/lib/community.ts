@@ -268,6 +268,27 @@ export async function listPublicFuelReports(limit = 12): Promise<FuelReport[]> {
     return (await api<Items<FuelReport>>("/editorial/fuel/reports", { auth: false, query: { limit } })).items;
 }
 
+/** A social-desk post that has gone live, as the public site may see it. */
+export interface SocialFeedPost {
+    id: string;
+    title: string;
+    platform: "x" | "instagram" | "tiktok" | "linkedin" | "facebook" | "whatsapp";
+    caption: string;
+    hashtags: string[];
+    asset_url: string | null;
+    source_url: string | null;
+    published_url: string | null;
+    external_url: string | null;
+    media_kind: MediaKind;
+    homepage_section: HomeSection;
+    posted_at: string | null;
+}
+
+/** Posts the social desk has marked as posted, newest first. */
+export async function listPublishedSocialPosts(limit = 8): Promise<SocialFeedPost[]> {
+    return (await api<Items<SocialFeedPost>>("/editorial/social/posts", { auth: false, query: { limit } })).items;
+}
+
 /* ------------------------------------------------------------------ */
 /* formatting                                                          */
 /* ------------------------------------------------------------------ */

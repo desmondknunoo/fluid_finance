@@ -1,4 +1,5 @@
-export const FUEL_TYPES = ["petrol", "diesel", "premium"] as const;
+// Premium was dropped from reports in October 2026; saved editions may still carry it.
+export const FUEL_TYPES = ["petrol", "diesel"] as const;
 export type FuelType = typeof FUEL_TYPES[number];
 export const MAX_OMCS = 500;
 export const OMCS_PER_IMAGE = 10;
@@ -11,7 +12,8 @@ export interface FuelPriceRow {
     logo_url?: string;
     petrol: number | null;
     diesel: number | null;
-    premium: number | null;
+    /** Legacy field on older editions; no longer entered or shown. */
+    premium?: number | null;
 }
 export interface FuelReport {
     id: string;
@@ -19,7 +21,7 @@ export interface FuelReport {
     prices: FuelPriceRow[];
     created_at: string;
 }
-export interface FuelDraftRow { name: string; logo_url?: string; petrol: string; diesel: string; premium: string }
+export interface FuelDraftRow { name: string; logo_url?: string; petrol: string; diesel: string }
 export type FuelSort = "az" | "za" | "price-asc" | "price-desc" | "popular";
 export const POPULAR_OMCS = ["Goil", "StarOil", "Shell", "TotalEnergies", "Zen", "Benab", "Frimps", "Petrosol", "Allied Oil", "Puma Energy", "So Energy", "MISA Energy", "Pacific", "Top Oil", "JP", "Frontier", "Power Fuels", "ICON"];
 const popularity = new Map(POPULAR_OMCS.map((name, index) => [name.toLowerCase(), index]));
@@ -57,7 +59,7 @@ export function mergeOmcLibrary(uploaded: Omc[]): Omc[] {
     for (const omc of uploaded) library.set(omc.name.trim().toLowerCase(), omc);
     return [...library.values()];
 }
-export const blankFuelRow = (name = ""): FuelDraftRow => ({ name, logo_url: DEFAULT_OMCS.find(omc => omc.name.toLowerCase() === name.trim().toLowerCase())?.logo_url, petrol: "", diesel: "", premium: "" });
+export const blankFuelRow = (name = ""): FuelDraftRow => ({ name, logo_url: DEFAULT_OMCS.find(omc => omc.name.toLowerCase() === name.trim().toLowerCase())?.logo_url, petrol: "", diesel: "" });
 
 export function validateFuelReport(date: string, rows: FuelDraftRow[], requireLogos = false): FuelPriceRow[] {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(`${date}T00:00:00Z`)) || new Date(`${date}T00:00:00Z`).toISOString().slice(0, 10) !== date) {
@@ -70,7 +72,7 @@ export function validateFuelReport(date: string, rows: FuelDraftRow[], requireLo
         if (!name || name.length > 60) throw new Error(`Supplier ${i + 1} needs a name of 1–60 characters.`);
         if (names.has(name.toLowerCase())) throw new Error(`The supplier “${name}” appears twice.`);
         names.add(name.toLowerCase());
-        const result: FuelPriceRow = { name, petrol: null, diesel: null, premium: null };
+        const result: FuelPriceRow = { name, petrol: null, diesel: null };
         if (row.logo_url && !validOmcLogo(row.logo_url)) throw new Error(`Upload a valid logo for ${name}.`);
         if (requireLogos && !row.logo_url) throw new Error(`Add a logo for ${name} before saving.`);
         if (row.logo_url) result.logo_url = row.logo_url;
@@ -98,5 +100,47 @@ export function averageFuelPrice(rows: FuelPriceRow[], type: FuelType): number |
     const prices = rows.flatMap(row => row[type] === null ? [] : [row[type]!]);
     return prices.length ? prices.reduce((sum, price) => sum + Math.round(price * 100), 0) / prices.length / 100 : null;
 }
-export const formatFuelPrice = (value: number | null) => value === null ? "—" : value.toFixed(2);
-export const formatFuelDate = (date: string) => new Date(`${date}T12:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Africa/Accra" });
+export const formatFuelPrice = (value: number | null | undefined) => value == null ? "—" : value.toFixed(2);
+
+/* ---- change against the previous saved edition ---------------------------------------- */
+
+/** Percentage move from a previous price to the current one, to one decimal; null when either side is missing. */
+export function fuelPriceChange(current: number | null | undefined, previous: number | null | undefined): number | null {
+    if (current == null || previous == null || previous <= 0) return null;
+    return Math.round(((current - previous) / previous) * 1000) / 10;
+}
+export const formatFuelChange = (value: number | null) => value === null ? "—" : `${value > 0 ? "+" : value < 0 ? "−" : ""}${Math.abs(value).toFixed(1)}%`;
+
+/**
+ * The edition a report is compared with: the most recent other saved edition dated on or before it.
+ * `reports` is the saved list, newest first; the draft or edition being compared is excluded by id.
+ */
+export function previousFuelReport(reports: FuelReport[], current: { id?: string | null; report_date: string; created_at?: string | null }): FuelReport | null {
+    // Same-date editions count only when saved before this one; an unsaved draft follows every save.
+    const before = (report: FuelReport) => report.report_date < current.report_date
+        || (report.report_date === current.report_date && (!current.created_at || report.created_at < current.created_at));
+    return [...reports]
+        .filter(report => report.id !== current.id && before(report))
+        .sort((a, b) => b.report_date.localeCompare(a.report_date) || b.created_at.localeCompare(a.created_at))[0] ?? null;
+}
+
+export type FuelRowChange = { petrol: number | null; diesel: number | null };
+/** Per-fuel % change for one OMC against its row in the previous edition, matched by name. */
+export function fuelRowChange(row: { name: string; petrol: number | null; diesel: number | null }, previous: FuelReport | null | undefined): FuelRowChange {
+    const prior = previous?.prices.find(item => item.name.trim().toLowerCase() === row.name.trim().toLowerCase());
+    return { petrol: fuelPriceChange(row.petrol, prior?.petrol), diesel: fuelPriceChange(row.diesel, prior?.diesel) };
+}
+/** A draft price string as a number, or null when blank or not a valid price. */
+export const draftPrice = (raw: string): number | null => /^\d+(\.\d{1,2})?$/.test(raw.trim()) && Number(raw) > 0 ? Number(raw) : null;
+/** 1 → "1st", 2 → "2nd", 3 → "3rd", 11–13 → "th", 21 → "21st". */
+export function ordinalDay(day: number): string {
+    const teen = day % 100 >= 11 && day % 100 <= 13;
+    const suffix = teen ? "th" : ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[day % 10] ?? "th";
+    return `${day}${suffix}`;
+}
+/** Report dates read as "27th October 2026", in Accra time. */
+export const formatFuelDate = (date: string) => {
+    const parsed = new Date(`${date}T12:00:00Z`);
+    const day = Number(parsed.toLocaleDateString("en-GB", { day: "numeric", timeZone: "Africa/Accra" }));
+    return `${ordinalDay(day)} ${parsed.toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "Africa/Accra" })}`;
+};

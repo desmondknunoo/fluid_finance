@@ -1,11 +1,13 @@
 import { EditorialSections } from '@/components/home/editorial-sections';
+import { SocialFeed } from '@/components/home/social-feed';
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { ArrowRight, BookOpen, ChevronRight, Fuel, GraduationCap, Landmark, LifeBuoy, MessageSquare, Newspaper, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { categoryLabel, formatRelative, listForumCategories, listLatestFxRates, listPublicFuelReports, listPublishedArticles, listThreads, type Article, type ForumThread, type FxRate } from "@/lib/community";
-import { averageFuelPrice, formatFuelDate, formatFuelPrice, type FuelReport } from "@/lib/fuel-prices";
+import { categoryLabel, formatRelative, listForumCategories, listLatestFxRates, listPublicFuelReports, listPublishedArticles, listPublishedSocialPosts, listThreads, type Article, type ForumThread, type FxRate, type SocialFeedPost } from "@/lib/community";
+import { averageFuelPrice, formatFuelChange, formatFuelDate, formatFuelPrice, fuelPriceChange, type FuelReport } from "@/lib/fuel-prices";
 import { formatCedis, formatCompact, type Stock } from "@/lib/gse";
 import { getSeries, periodChange, sliceRange } from "@/lib/history";
+import { SOCIAL_LINKS } from "@/lib/links";
 import { articleHref, forumCategoryHref, threadHref } from "@/lib/navigation";
 import { marketBreadth, useMarket } from "@/lib/use-market";
 import { compositeSeries } from "@/components/home/composite";
@@ -46,15 +48,18 @@ export default function HomePage() {
     const [threads, setThreads] = useState<ForumThread[]>([]);
     const [fx, setFx] = useState<FxRate[]>([]);
     const [fuel, setFuel] = useState<FuelReport | null>(null);
+    const [priorFuel, setPriorFuel] = useState<FuelReport | null>(null);
     const [categories, setCategories] = useState<{ slug: string; name: string }[]>([]);
+    const [social, setSocial] = useState<SocialFeedPost[]>([]);
     const [share, setShare] = useState<"gainers" | "losers" | "active" | null>(null);
 
     useEffect(() => {
         listPublishedArticles({ limit: 120 }).then(setArticles).catch(() => setArticles([]));
         listThreads({ page: 0 }).then((data) => setThreads(data.slice(0, 6))).catch(() => setThreads([]));
         listLatestFxRates().then(setFx).catch(() => setFx([]));
-        listPublicFuelReports(1).then((reports) => setFuel(reports[0] ?? null)).catch(() => setFuel(null));
+        listPublicFuelReports(2).then((reports) => { setFuel(reports[0] ?? null); setPriorFuel(reports[1] ?? null); }).catch(() => setFuel(null));
         listForumCategories().then((data) => setCategories(data.slice(0, 4))).catch(() => setCategories([]));
+        listPublishedSocialPosts(8).then(setSocial).catch(() => setSocial([]));
     }, []);
 
     const composite = useMemo(() => compositeSeries(market.stocks, "1M"), [market.stocks]);
@@ -153,7 +158,7 @@ export default function HomePage() {
                             </RailCard>
                             <RailCard href="#/fuel" icon={Fuel} title={fuel ? `Pump prices · ${formatFuelDate(fuel.report_date)}` : "Pump prices"}>
                                 {!fuel ? <p className="text-xs text-ink/45">The Fluid Pump Report appears here when published.</p> : (
-                                    <ul className="font-mono text-xs">{(["petrol", "diesel", "premium"] as const).map((type) => <li key={type} className="flex justify-between py-0.5"><span className="capitalize text-ink/60">Avg {type}</span><span className="tabular-nums text-ink">GHS {formatFuelPrice(averageFuelPrice(fuel.prices, type))}</span></li>)}</ul>
+                                    <ul className="font-mono text-xs">{(["petrol", "diesel"] as const).map((type) => { const now = averageFuelPrice(fuel.prices, type); const change = priorFuel ? fuelPriceChange(now, averageFuelPrice(priorFuel.prices, type)) : null; return <li key={type} className="flex justify-between gap-3 py-0.5"><span className="capitalize text-ink/60">Avg {type}</span><span className="ml-auto tabular-nums text-ink">GHS {formatFuelPrice(now)}</span><span className={cn("w-14 text-right tabular-nums", change === null || change === 0 ? "text-ink/40" : change > 0 ? "text-fluid-rose" : "text-fluid-green")}>{formatFuelChange(change)}</span></li>; })}</ul>
                                 )}
                             </RailCard>
                         </div>
@@ -183,6 +188,11 @@ export default function HomePage() {
                             {user ? <a href="#/forum/new" className="mt-4 inline-flex min-h-[2.75rem] items-center gap-2 rounded-none bg-fluid-cyan px-4 text-sm font-semibold text-fluid-action-ink hover:bg-fluid-cyan-hover">Start a discussion <ArrowRight size={15} /></a> : <a href="#/register" className="mt-4 inline-flex min-h-[2.75rem] items-center gap-2 rounded-none bg-fluid-cyan px-4 text-sm font-semibold text-fluid-action-ink hover:bg-fluid-cyan-hover">Create an account <ArrowRight size={15} /></a>}
                         </div>
                     </div>
+                </Band>
+
+                {/* Social desk */}
+                <Band id="socials" label="From our socials" links={SOCIAL_LINKS.map((social) => [social.label, social.href] as [string, string])}>
+                    <SocialFeed posts={social} />
                 </Band>
 
                 {/* Press + Learn */}
@@ -227,7 +237,7 @@ function Band({ id, label, links, children }: { id: string; label: string; links
         <section id={id} className="news-band" aria-label={label}>
             <header className="news-band-header">
                 <h2 className="text-2xl font-bold text-ink font-poppins">{label}</h2>
-                {links.map(([text, href]) => <a key={href} href={href} className="text-sm text-ink/50 hover:text-ink">{text}</a>)}
+                {links.map(([text, href]) => <a key={href} href={href} className="text-sm text-ink/50 hover:text-ink" {...(href.startsWith("https://") ? { target: "_blank", rel: "noreferrer noopener" } : {})}>{text}</a>)}
             </header>
             {children}
         </section>

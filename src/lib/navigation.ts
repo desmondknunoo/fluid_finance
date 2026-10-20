@@ -35,8 +35,6 @@ const FORUM_THREAD_ROUTE = /^#\/forum\/t\/([0-9a-f-]{36})$/i;
 const FORUM_NEW_ROUTE = /^#\/forum\/new(?:\/([a-z0-9-]+))?$/;
 
 const PAGE_ROUTES = [
-    { kind: "fuel-prices", pattern: /^#\/fuel-prices$/ },
-    { kind: "team-portal", pattern: /^#\/team-portal$/ },
     { kind: "about", pattern: /^#\/about(-us)?$/ },
     { kind: "contact-support", pattern: /^#\/contact-support$/ },
     { kind: "privacy-policy", pattern: /^#\/privacy-policy$/ },

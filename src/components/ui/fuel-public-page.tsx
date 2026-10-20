@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Fuel, Share2, TrendingDown, TrendingUp } from "lucide-react";
-import { averageFuelPrice, formatFuelDate, formatFuelPrice, FUEL_TYPES, type FuelReport, type FuelType } from "@/lib/fuel-prices";
+import { averageFuelPrice, formatFuelChange, formatFuelDate, formatFuelPrice, fuelPriceChange, fuelRowChange, FUEL_TYPES, type FuelReport, type FuelType } from "@/lib/fuel-prices";
 import { listPublicFuelReports } from "@/lib/community";
 import { FuelShareSheet } from "@/components/stock/fuel-share-sheet";
 import { Notice, panelClass } from "@/components/ui/form";
@@ -65,17 +65,18 @@ export default function FuelPublicPage() {
                                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/40">Report date</p>
                                 <h2 id="report-heading" className="mt-1 text-xl font-bold text-ink font-poppins">{formatFuelDate(report.report_date)}</h2>
                             </div>
-                            <div className="grid grid-cols-3 gap-4 text-right">
+                            <div className="grid grid-cols-2 gap-6 text-right">
                                 {FUEL_TYPES.map((type) => <Average key={type} label={type} value={averageFuelPrice(report.prices, type)} prior={previous ? averageFuelPrice(previous.prices, type) : null} />)}
                             </div>
                         </div>
                         <div className="overflow-x-auto">
-                            <table className="w-full min-w-[32rem] text-left text-sm">
+                            <table className="w-full min-w-[40rem] text-left text-sm">
                                 <caption className="sr-only">Fuel prices in GHS per litre for {formatFuelDate(report.report_date)}</caption>
                                 <thead>
                                     <tr className="border-b border-ink/[0.08] text-[11px] font-semibold uppercase tracking-wider text-ink/40">
                                         <SortHeader active={sortBy === "name"} onClick={() => setSortBy("name")} className="px-5 py-3 sm:px-6">OMC</SortHeader>
                                         {FUEL_TYPES.map((type) => <SortHeader key={type} active={sortBy === type} onClick={() => setSortBy(type)} className="px-4 py-3 text-right">{type}</SortHeader>)}
+                                        {FUEL_TYPES.map((type) => <th key={`${type}-change`} scope="col" className="px-4 py-3 text-right sm:last:pr-6" title={previous ? `Compared with ${formatFuelDate(previous.report_date)}` : undefined}>{type} %</th>)}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -88,12 +89,13 @@ export default function FuelPublicPage() {
                                                 </span>
                                             </th>
                                             {FUEL_TYPES.map((type) => <td key={type} className={cn("px-4 py-3 text-right font-mono tabular-nums", row[type] === null ? "text-ink/30" : "text-ink")}>{formatFuelPrice(row[type])}</td>)}
+                                            {(() => { const change = fuelRowChange(row, previous); return FUEL_TYPES.map((type) => <td key={`${type}-change`} className="px-4 py-3 text-right sm:last:pr-6"><ChangeValue value={change[type]} /></td>); })()}
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
-                        <p className="border-t border-ink/[0.08] px-5 py-3 text-xs text-ink/40 sm:px-6">Recorded {new Date(report.created_at).toLocaleString("en-GB", { timeZone: "Africa/Accra", dateStyle: "medium", timeStyle: "short" })} GMT · {report.prices.length} OMCs · Click a column to sort.</p>
+                        <p className="border-t border-ink/[0.08] px-5 py-3 text-xs text-ink/40 sm:px-6">Recorded {new Date(report.created_at).toLocaleString("en-GB", { timeZone: "Africa/Accra", dateStyle: "medium", timeStyle: "short" })} GMT · {report.prices.length} OMCs · {previous ? `Petrol % and diesel % compare with ${formatFuelDate(previous.report_date)}` : "No earlier report to compare"} · Click a column to sort.</p>
                     </section>
 
                     <aside className={`${panelClass} p-5`} aria-labelledby="history-heading">
@@ -112,20 +114,27 @@ export default function FuelPublicPage() {
                     </aside>
                 </div>
             )}
-            {sharing && <FuelShareSheet report={sharing} onClose={() => setSharing(null)} />}
+            {sharing && <FuelShareSheet report={sharing} previous={reports?.[reports.findIndex((item) => item.id === sharing.id) + 1] ?? null} onClose={() => setSharing(null)} />}
         </main>
     );
 }
 
+const changeTone = (value: number | null) => value === null || value === 0 ? "text-ink/40" : value > 0 ? "text-rose-400" : "text-emerald-400";
+
+/** One fuel's % change for an OMC against the previous report. */
+function ChangeValue({ value }: { value: number | null }) {
+    return <span className={cn("font-mono tabular-nums", changeTone(value))}>{formatFuelChange(value)}</span>;
+}
+
 function Average({ label, value, prior }: { label: string; value: number | null; prior: number | null }) {
-    const delta = value !== null && prior !== null ? value - prior : null;
+    const delta = fuelPriceChange(value, prior);
     return (
         <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-ink/40">Avg {label}</p>
             <p className="mt-0.5 font-mono text-lg font-bold text-ink">{formatFuelPrice(value)}</p>
-            {delta !== null && Math.abs(delta) >= 0.005 && (
+            {delta !== null && delta !== 0 && (
                 <p className={cn("inline-flex items-center gap-0.5 text-xs font-semibold", delta > 0 ? "text-rose-400" : "text-emerald-400")}>
-                    {delta > 0 ? <TrendingUp size={12} aria-hidden="true" /> : <TrendingDown size={12} aria-hidden="true" />}{delta > 0 ? "+" : ""}{delta.toFixed(2)}
+                    {delta > 0 ? <TrendingUp size={12} aria-hidden="true" /> : <TrendingDown size={12} aria-hidden="true" />}{formatFuelChange(delta)}
                 </p>
             )}
         </div>

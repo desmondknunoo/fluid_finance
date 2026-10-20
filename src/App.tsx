@@ -14,8 +14,6 @@ import MarketTrendsPage from "@/components/ui/market-trends-page"
 import BusinessNewsPage from "@/components/ui/business-news-page"
 import TermsOfServicePage from "@/components/ui/terms-of-service-page"
 import GseLivePage from "@/components/ui/gse-live-page"
-import FuelPricesPage from "@/components/ui/fuel-prices-page"
-import TeamPortalPage from "@/components/ui/team-portal-page"
 import FuelPublicPage from "@/components/ui/fuel-public-page"
 import FxPage from "@/components/ui/fx-page"
 import ArticlesPage from "@/components/ui/articles-page"
@@ -81,10 +79,6 @@ function App() {
       window.removeEventListener("keydown", release)
     }
   }, [route])
-
-  // Team tooling still ships here until the portal replaces it; both render without the public chrome.
-  if (route.kind === "fuel-prices") return <FuelPricesPage />
-  if (route.kind === "team-portal") return <TeamPortalPage />
 
   if (route.kind === "stock") {
     return (

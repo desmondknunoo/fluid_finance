@@ -14,7 +14,7 @@ team manages all of that from the separate [Fluid Finance Portal](../fluid_finan
 
 | Area | Hash | Who |
 | --- | --- | --- |
-| Front page: quote tape, market bar, Markets Wrap (equal-weight composite chart and auto headline), lead story, stock spotlight, Latest feed, movers, cedi and pump rails, community and learning bands | `#/` | Everyone |
+| Front page: quote tape, market bar, Markets Wrap (equal-weight composite chart and auto headline), lead story, stock spotlight, Latest feed, movers, cedi and pump rails, community, social desk feed and learning bands | `#/` | Everyone |
 | Markets: GSE live, stock pages, weekly trends | `#/gse-live`, `#/stock/<SYM>`, `#/market-trends` | Everyone |
 | Fuel pump report (read-only) and FX rates with converter | `#/fuel`, `#/fx` | Everyone |
 | Articles and single article with comments | `#/articles`, `#/articles/<slug>` | Read: everyone · comment: members |
@@ -24,8 +24,8 @@ team manages all of that from the separate [Fluid Finance Portal](../fluid_finan
 
 Members can edit their own posts and report others'; moderation, publishing, fuel/FX data entry
 and role assignment happen only in the portal. The portal is an internal tool and is never linked
-or mentioned anywhere on this site, including the account menu. `#/fuel-prices` (editor) and
-`#/team-portal` (preview) remain reachable by direct URL only until the portal ships.
+or mentioned anywhere on this site, including the account menu. The legacy fuel editor and team
+portal preview that once shipped here were removed once the portal went live.
 
 Authentication is Firebase Authentication in **Fluid Finance's own Firebase project**,
 `finance-fluidterra` (the finance.fluidterra Google account), not the investor app's
@@ -75,6 +75,7 @@ node --experimental-strip-types --test tests/gse.test.mjs
 All other data is served by the Fluid Finance backend (`fluid_finance_backend`, FastAPI on the
 finance AWS account) under `/api/v1/editorial`: daily closes (`/closes`, recorded by the backend from the live snapshot),
 fuel reports and OMC logos (`/fuel/*`, logos in the S3 documents bucket), FX rates (`/fx`),
+the social desk's posted items for the front page's "From our socials" band (`/social/posts`),
 articles, comments, forum, profiles and reports. `VITE_API_BASE_URL` selects the backend
 (default `https://api.finance.fluidterra.com/api/v1`; the local Compose stack is
 `http://localhost:8001/api/v1`). Live GSE quotes still come from the investor platform's public
