@@ -1,13 +1,12 @@
 import { EditorialSections } from '@/components/home/editorial-sections';
-import { SocialFeed } from '@/components/home/social-feed';
+import { SocialFeed, FEED_LINKS } from '@/components/home/social-feed';
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { ArrowRight, BookOpen, ChevronRight, Fuel, GraduationCap, Landmark, LifeBuoy, MessageSquare, Newspaper, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { categoryLabel, formatRelative, listForumCategories, listLatestFxRates, listPublicFuelReports, listPublishedArticles, listPublishedSocialPosts, listThreads, type Article, type ForumThread, type FxRate, type SocialFeedPost } from "@/lib/community";
+import { categoryLabel, formatRelative, listForumCategories, listLatestFxRates, listPublicFuelReports, listPublishedArticles, listThreads, type Article, type ForumThread, type FxRate } from "@/lib/community";
 import { averageFuelPrice, formatFuelChange, formatFuelDate, formatFuelPrice, fuelPriceChange, type FuelReport } from "@/lib/fuel-prices";
 import { formatCedis, formatCompact, type Stock } from "@/lib/gse";
 import { getSeries, periodChange, sliceRange } from "@/lib/history";
-import { SOCIAL_LINKS } from "@/lib/links";
 import { articleHref, forumCategoryHref, threadHref } from "@/lib/navigation";
 import { marketBreadth, useMarket } from "@/lib/use-market";
 import { compositeSeries } from "@/components/home/composite";
@@ -50,7 +49,6 @@ export default function HomePage() {
     const [fuel, setFuel] = useState<FuelReport | null>(null);
     const [priorFuel, setPriorFuel] = useState<FuelReport | null>(null);
     const [categories, setCategories] = useState<{ slug: string; name: string }[]>([]);
-    const [social, setSocial] = useState<SocialFeedPost[]>([]);
     const [share, setShare] = useState<"gainers" | "losers" | "active" | null>(null);
 
     useEffect(() => {
@@ -59,7 +57,6 @@ export default function HomePage() {
         listLatestFxRates().then(setFx).catch(() => setFx([]));
         listPublicFuelReports(2).then((reports) => { setFuel(reports[0] ?? null); setPriorFuel(reports[1] ?? null); }).catch(() => setFuel(null));
         listForumCategories().then((data) => setCategories(data.slice(0, 4))).catch(() => setCategories([]));
-        listPublishedSocialPosts(8).then(setSocial).catch(() => setSocial([]));
     }, []);
 
     const composite = useMemo(() => compositeSeries(market.stocks, "1M"), [market.stocks]);
@@ -191,8 +188,8 @@ export default function HomePage() {
                 </Band>
 
                 {/* Social desk */}
-                <Band id="socials" label="From our socials" links={SOCIAL_LINKS.map((social) => [social.label, social.href] as [string, string])}>
-                    <SocialFeed posts={social} />
+                <Band id="socials" label="From our socials" links={FEED_LINKS.map((social) => [social.label, social.href] as [string, string])}>
+                    <SocialFeed />
                 </Band>
 
                 {/* Press + Learn */}

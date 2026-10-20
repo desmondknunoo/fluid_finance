@@ -1,84 +1,69 @@
-import { useState, type ComponentType } from "react";
-import { ArrowUpRight, Facebook, Linkedin, MessageCircle } from "lucide-react";
-import { formatRelative, type SocialFeedPost } from "@/lib/community";
-import { safeExternalUrl } from "@/lib/content-media";
+import { useEffect, useRef, useState } from "react";
+import { ArrowUpRight } from "lucide-react";
 import { SOCIAL_LINKS } from "@/lib/links";
 import { SOCIAL_ICONS } from "@/components/ui/social-icons";
+import { useTheme } from "@/lib/theme";
 
-/**
- * "From our socials": the posts the social desk has marked as posted, pulled from the Fluid
- * backend, plus the company profiles to follow. Everything links out to the live post; nothing
- * here embeds third-party scripts.
- */
+export const FEED_LINKS = SOCIAL_LINKS.filter((social) => social.key !== "x");
+type Social = typeof FEED_LINKS[number];
 
-type Icon = ComponentType<{ size?: number; className?: string }>;
+/** Official account widgets fetch their own current posts; portal drafts are never a feed source. */
+export function SocialFeed() {
+    const container = useRef<HTMLDivElement>(null);
+    const [visible, setVisible] = useState(false);
+    const { resolved } = useTheme();
 
-const PLATFORMS: Record<SocialFeedPost["platform"], { label: string; icon: Icon }> = {
-    x: { label: "X", icon: SOCIAL_ICONS.x },
-    instagram: { label: "Instagram", icon: SOCIAL_ICONS.instagram },
-    tiktok: { label: "TikTok", icon: SOCIAL_ICONS.tiktok },
-    linkedin: { label: "LinkedIn", icon: Linkedin },
-    facebook: { label: "Facebook", icon: Facebook },
-    whatsapp: { label: "WhatsApp", icon: MessageCircle },
-};
+    useEffect(() => {
+        if (!container.current) return;
+        if (!("IntersectionObserver" in window)) { setVisible(true); return; }
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) { setVisible(true); observer.disconnect(); }
+        }, { rootMargin: "300px" });
+        observer.observe(container.current);
+        return () => observer.disconnect();
+    }, []);
 
-const PROFILE_BY_PLATFORM: Partial<Record<SocialFeedPost["platform"], string>> = Object.fromEntries(SOCIAL_LINKS.map((social) => [social.key, social.href]));
-
-const handleOf = (href: string) => `@${new URL(href).pathname.replace(/\/+$/, "").split("/").pop()?.replace(/^@/, "") ?? ""}`;
-
-/** Where a card should send the reader: the live post, else the company profile on that platform. */
-function postLink(post: SocialFeedPost): string | null {
-    return safeExternalUrl(post.published_url) ?? PROFILE_BY_PLATFORM[post.platform] ?? null;
-}
-
-export function SocialFeed({ posts }: { posts: SocialFeedPost[] }) {
     return (
-        <>
-            {posts.length === 0 ? (
-                <p className="px-5 py-6 text-sm text-ink/50">Posts from the Fluid Finance social desk appear here as they go live. Follow us for market updates between editions.</p>
-            ) : (
-                <div className="grid gap-px bg-ink/[0.08] sm:grid-cols-2 lg:grid-cols-4">
-                    {posts.slice(0, 8).map((post) => <PostCard key={post.id} post={post} />)}
-                </div>
-            )}
-            <div className="grid gap-px border-t border-ink/[0.08] bg-ink/[0.08] sm:grid-cols-3">
-                {SOCIAL_LINKS.map((social) => {
+        <div ref={container}>
+            <p className="border-b border-ink/[0.08] px-5 py-3 text-sm text-ink/65">Recent posts directly from our social accounts. If a feed is unavailable, open the account to see its latest posts.</p>
+            <div className="grid gap-px bg-ink/[0.08] lg:grid-cols-2">
+                {FEED_LINKS.map((social) => {
                     const Icon = SOCIAL_ICONS[social.key];
                     return (
-                        <a key={social.key} href={social.href} target="_blank" rel="noreferrer noopener" className="flex items-center gap-3 bg-canvas px-5 py-3 text-sm hover:bg-ink/[0.02]">
-                            <Icon size={16} className="shrink-0 text-ink/50" />
-                            <span className="min-w-0"><span className="block font-semibold text-ink">Follow on {social.label}</span><span className="block truncate text-xs text-ink/45">{handleOf(social.href)}</span></span>
-                            <ArrowUpRight size={14} className="ml-auto shrink-0 text-ink/30" aria-hidden="true" />
-                        </a>
+                        <section key={social.key} aria-label={`${social.label} account feed`} className="min-w-0 bg-canvas">
+                            <a href={social.href} target="_blank" rel="noreferrer noopener" className="flex items-center gap-3 px-5 py-4 text-sm font-semibold hover:underline">
+                                <Icon size={18} className="shrink-0" />
+                                <span>{social.label}</span>
+                                <ArrowUpRight size={16} className="ml-auto" aria-hidden="true" />
+                            </a>
+                            {visible && social.key === "instagram" ? <iframe
+                                title="Latest Fluid Finance posts on Instagram"
+                                src="https://www.instagram.com/fluidfinanceonline/embed/"
+                                referrerPolicy="strict-origin-when-cross-origin"
+                                loading="lazy"
+                                scrolling="no"
+                                className="block h-[720px] w-full border-0 bg-white"
+                            /> : visible ? <iframe
+                                key={`${social.key}-${resolved}`}
+                                title={`Latest Fluid Finance posts on ${social.label}`}
+                                srcDoc={embedDocument(social)}
+                                sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
+                                referrerPolicy="strict-origin-when-cross-origin"
+                                loading="lazy"
+                                scrolling="no"
+                                className="block h-[720px] w-full border-0 bg-white"
+                            /> : <div className="px-5 py-8 text-sm text-ink/65">Feed loads when this section is in view.</div>}
+                            <a href={social.href} target="_blank" rel="noreferrer noopener" className="news-text-link flex items-center gap-2 px-5 py-4">Open {social.label} <ArrowUpRight size={13} aria-hidden="true" /></a>
+                        </section>
                     );
                 })}
             </div>
-        </>
+        </div>
     );
 }
 
-function PostCard({ post }: { post: SocialFeedPost }) {
-    const platform = PLATFORMS[post.platform] ?? PLATFORMS.x;
-    const Icon = platform.icon;
-    const [broken, setBroken] = useState(false);
-    const image = broken ? null : safeExternalUrl(post.asset_url);
-    const link = postLink(post);
-    const tags = post.hashtags.slice(0, 3);
-    const external = link ? { href: link, target: "_blank", rel: "noreferrer noopener" } : null;
-    return (
-        <article className="flex flex-col bg-canvas">
-            {image && (external ? <a {...external} tabIndex={-1} aria-hidden="true"><img src={image} alt="" loading="lazy" onError={() => setBroken(true)} className="aspect-[4/5] w-full object-cover" /></a> : <img src={image} alt="" loading="lazy" onError={() => setBroken(true)} className="aspect-[4/5] w-full object-cover" />)}
-            <div className="flex flex-1 flex-col p-5">
-                <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-fluid-cyan-ink">
-                    <Icon size={14} className="shrink-0" />
-                    <span>{platform.label}</span>
-                    {post.posted_at && <span className="ml-auto font-normal normal-case tracking-normal text-ink/45">{formatRelative(post.posted_at)}</span>}
-                </div>
-                <h3 className="mt-3 text-base font-bold leading-snug text-ink">{post.title}</h3>
-                {post.caption && <p className="mt-2 line-clamp-4 whitespace-pre-line text-sm leading-relaxed text-ink/65">{post.caption}</p>}
-                {tags.length > 0 && <p className="mt-2 text-xs text-ink/45">{tags.map((tag) => `#${tag.replace(/^#+/, "")}`).join(" ")}</p>}
-                {external && <a {...external} className="news-text-link mt-auto pt-4">View on {platform.label} <ArrowUpRight size={13} aria-hidden="true" /></a>}
-            </div>
-        </article>
-    );
+/** TikTok's official creator widget runs in an opaque frame, separate from the site session. */
+function embedDocument(social: Social): string {
+    const markup = `<blockquote class="tiktok-embed" cite="${social.href}" data-unique-id="fluid_finance" data-embed-type="creator" style="max-width:100%;min-width:288px;margin:0"><section><a target="_blank" rel="noopener noreferrer" href="${social.href}">@fluid_finance on TikTok</a></section></blockquote><script async src="https://www.tiktok.com/embed.js"></script>`;
+    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>html,body{margin:0;padding:0;background:#fff;overflow:hidden;font:14px/1.6 Arial,sans-serif}a{color:#005c70}iframe{max-width:100%;height:700px!important;border:0}</style></head><body>${markup}</body></html>`;
 }
