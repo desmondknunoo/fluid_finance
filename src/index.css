@@ -193,7 +193,7 @@ body { margin: 0; }
 ::selection { background: rgb(var(--cyan)); color: rgb(var(--action-ink)); }
 :focus-visible { outline: 2px solid rgb(var(--cyan-ink)); outline-offset: 4px; }
 .news-header { position: relative; z-index: 50; background: rgb(var(--canvas)); }
-.news-skip { position: absolute; top: -100px; left: 16px; padding: 12px; background: rgb(var(--canvas)); color: rgb(var(--ink)); z-index: 60; }
+.news-skip { position: absolute; top: -100px; left: 16px; padding: 12px; background: rgb(var(--canvas)); color: rgb(var(--ink)); z-index: 60; border-radius: 10px; }
 .news-skip:focus { top: 8px; }
 .news-utility { background: rgb(var(--news-black)); color: rgb(var(--news-white)); font-size: 11px; line-height: 32px; }
 .news-masthead { display: flex; justify-content: space-between; align-items: center; min-height: 100px; gap: 20px; }
@@ -370,7 +370,7 @@ body { margin: 0; }
 .editorial-membership { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding-block: 32px; }
 .editorial-membership h3 { font: 600 32px/1.1 var(--news-display); }
 .editorial-membership p { font-size: 13px; line-height: 1.7; color: var(--news-muted); margin-top: 14px; max-width: 65ch; }
-.editorial-membership > a { display: flex; align-items: center; gap: 18px; flex-shrink: 0; padding: 14px 20px; background: rgb(var(--ink)); color: rgb(var(--canvas)); font-size: 13px; font-weight: 700; }
+.editorial-membership > a { display: flex; align-items: center; gap: 18px; flex-shrink: 0; padding: 14px 20px; background: rgb(var(--ink)); color: rgb(var(--canvas)); font-size: 13px; font-weight: 700; border-radius: 12px; }
 .editorial-watchlist { display: grid; grid-template-columns: repeat(3,1fr); padding-bottom: 24px; }
 .editorial-watchlist li { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--news-rule); }
 .editorial-watchlist a { display: flex; flex: 1; align-items: center; gap: 12px; padding-block: 14px; font-size: 12px; }
@@ -378,7 +378,7 @@ body { margin: 0; }
 .media-cover { position: relative; width: 100%; aspect-ratio: 16/9; display: grid; place-items: center; background: rgb(var(--panel)); border: 1px solid var(--news-rule); border-radius: 16px; overflow: hidden; }
 .media-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .media-play { z-index: 1; display: grid; place-items: center; width: 64px; height: 64px; background: rgb(var(--news-black) / .8); color: rgb(var(--news-white)); border: 1px solid rgb(var(--news-white) / .6);  border-radius: 9999px; }
-.media-provider { position: absolute; bottom: 12px; left: 12px; padding: 6px 10px; background: rgb(var(--news-black) / .85); color: rgb(var(--news-white)); font-size: 11px; }
+.media-provider { position: absolute; bottom: 12px; left: 12px; padding: 6px 10px; background: rgb(var(--news-black) / .85); color: rgb(var(--news-white)); font-size: 11px; border-radius: 9999px; }
 .media-original { display: inline-flex; align-items: center; gap: 8px; padding-block: 12px; font-size: 11px; color: var(--news-muted); }
 .media-original:hover { text-decoration: underline; }
 .media-video-frame { aspect-ratio: 16/9; width: 100%; border: 0; }
@@ -475,8 +475,8 @@ body { margin: 0; }
 .news-prose a { color: rgb(var(--cyan-ink)); text-decoration: underline; text-underline-offset: 3px; }
 .news-prose blockquote { border-left: 3px solid rgb(var(--cyan)); border-radius: 2px; padding-left: 16px; font: 500 18px/1.5 var(--news-display); }
 .news-prose img { max-width: 100%; }
-.news-prose code { font-size: .9em; background: var(--news-subtle); padding: 1px 4px; }
-.news-prose pre { background: var(--news-subtle); padding: 14px 16px; overflow: auto; font-size: 13px; }
+.news-prose code { font-size: .9em; background: var(--news-subtle); padding: 1px 4px; border-radius: 6px; }
+.news-prose pre { background: var(--news-subtle); padding: 14px 16px; overflow: auto; font-size: 13px; border-radius: 12px; }
 .news-prose hr { border: 0; border-top: 1px solid var(--news-rule); }
 .news-prose table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .news-prose th, .news-prose td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--news-rule); }

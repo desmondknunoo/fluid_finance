@@ -102,7 +102,7 @@ function LeadStory({ article }: { article: Article }) {
         <article className="news-columns news-columns--main" aria-label="Lead story">
             {body}
             <a href={articleHref(article.slug)} aria-hidden="true" tabIndex={-1} className="block">
-                <div className="aspect-[16/10] overflow-hidden bg-ink/[0.055]">
+                <div className="aspect-[16/10] overflow-hidden rounded-xl bg-ink/[0.055]">
                     <img src={article.cover_url} alt="" className="h-full w-full object-cover" />
                 </div>
             </a>

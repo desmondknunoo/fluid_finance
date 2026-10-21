@@ -125,7 +125,7 @@ export default function HomePage() {
                         <h2 className="news-column-title">Research & perspective</h2>
                         {lead ? <article>
                             <a href={articleHref(lead.slug)} className="group block">
-                                {lead.cover_url && <img src={lead.cover_url} alt="" className="mb-4 aspect-[4/3] w-full object-cover" />}
+                                {lead.cover_url && <img src={lead.cover_url} alt="" className="mb-4 aspect-[4/3] w-full rounded-xl object-cover" />}
                                 <h3 className="news-story-headline group-hover:underline">{lead.title}</h3>
                                 {lead.excerpt && <p className="mt-3 text-sm leading-relaxed text-ink/70">{lead.excerpt}</p>}
                             </a>
@@ -148,7 +148,7 @@ export default function HomePage() {
 
                 {/* Markets band */}
                 <Band id="markets" label="Markets" links={[["GSE Live", "/gse-live"], ["Heatmap", "/gse-live/heatmap"], ["Trends", "/market-trends"], ["Fuel", "/fuel"], ["FX", "/fx"]]}>
-                    <div className="grid gap-px bg-ink/[0.08] lg:grid-cols-[1fr_1fr_1fr_1.1fr]">
+                    <div className="grid gap-px overflow-hidden rounded-2xl border border-ink/[0.08] bg-ink/[0.08] lg:grid-cols-[1fr_1fr_1fr_1.1fr]">
                         <MoverList title="Top gainers" stocks={breadth.gainers} tone="up" onShare={() => setShare("gainers")} />
                         <MoverList title="Top losers" stocks={breadth.losers} tone="down" onShare={() => setShare("losers")} />
                         <MoverList title="Most active" stocks={breadth.active} tone="neutral" onShare={() => setShare("active")} />
@@ -199,7 +199,7 @@ export default function HomePage() {
 
                 {/* Press + Learn */}
                 <Band id="learn" label="Learn & follow" links={[["Learning Center", "/learning-center"], ["Market Education", "/market-education"], ["Help", "/help-center"]]}>
-                    <div className="grid gap-px bg-ink/[0.08] sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="grid gap-px overflow-hidden rounded-2xl border border-ink/[0.08] bg-ink/[0.08] sm:grid-cols-2 lg:grid-cols-4">
                         {LEARN.map((item) => (
                             <a key={item.href} href={item.href} className="group bg-canvas p-5 transition-colors hover:bg-ink/[0.02]">
                                 <item.icon size={24} strokeWidth={1.5} className="mb-6 text-fluid-cyan-ink" aria-hidden="true" />
@@ -208,7 +208,7 @@ export default function HomePage() {
                             </a>
                         ))}
                     </div>
-                    <div className="grid gap-px border-t border-ink/[0.08] bg-ink/[0.08] sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="mt-3 grid gap-px overflow-hidden rounded-2xl border border-ink/[0.08] bg-ink/[0.08] sm:grid-cols-2 lg:grid-cols-4">
                         {PRESS.map((source) => (
                             <a key={source.href} href={source.href} target="_blank" rel="noreferrer noopener" className="flex items-center gap-3 bg-canvas px-5 py-3 text-sm hover:bg-ink/[0.02]"><Newspaper size={15} className="shrink-0 text-ink/40" aria-hidden="true" /><span className="min-w-0"><span className="block font-semibold text-ink">{source.title}</span><span className="block truncate text-xs text-ink/45">{source.note}</span></span></a>
                         ))}

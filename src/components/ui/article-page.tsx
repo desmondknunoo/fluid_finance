@@ -93,7 +93,7 @@ export default function ArticlePage({ slug }: { slug: string }) {
                 </header>
 
                 {article.cover_url && (
-                    <figure className="mt-8 border border-ink/[0.12] bg-ink/[0.055] rounded-xl">
+                    <figure className="mt-8 overflow-hidden rounded-2xl border border-ink/[0.12] bg-ink/[0.055]">
                         <img src={article.cover_url} alt={article.title} className="block w-full object-cover" />
                     </figure>
                 )}

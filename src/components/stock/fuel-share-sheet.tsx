@@ -66,7 +66,7 @@ export function FuelShareSheet({ report, previous = null, onClose }: { report: F
         </div>
         <div className="mt-5 border border-ink/[0.12] bg-canvas rounded-xl">
             {image
-                ? <img src={image.url} alt={`Fluid Pump Report for ${formatFuelDate(report.report_date)}, page ${page + 1} of ${images.length}`} className="block w-full" />
+                ? <img src={image.url} alt={`Fluid Pump Report for ${formatFuelDate(report.report_date)}, page ${page + 1} of ${images.length}`} className="block w-full rounded-xl" />
                 : error
                     ? <div className="flex min-h-64 flex-col items-center justify-center gap-4 p-6"><Notice tone="error" className="w-full">{error}</Notice><QuietButton size="sm" onClick={() => setAttempt(n => n + 1)}>Retry image generation</QuietButton></div>
                     : <div className="flex min-h-64 flex-col items-center justify-center gap-4 p-6 text-center text-sm text-ink/[0.68]" role="status"><Loader2 size={22} className="animate-spin" aria-hidden="true" />Checking every OMC logo and generating your report images…</div>}
