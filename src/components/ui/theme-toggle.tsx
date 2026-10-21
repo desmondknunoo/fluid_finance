@@ -16,7 +16,7 @@ export function ThemeToggle({ className }: { className?: string }) {
         <div
             role="radiogroup"
             aria-label="Colour scheme"
-            className={cn("inline-flex items-stretch border border-ink/[0.19] divide-x divide-ink/[0.19]", className)}
+            className={cn("inline-flex items-stretch border border-ink/[0.12] divide-x divide-ink/[0.19] rounded-xl", className)}
         >
             {OPTIONS.map(({ mode: value, label, Icon }) => (
                 <button

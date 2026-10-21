@@ -286,7 +286,7 @@ export function PriceChart({ points, positive, height = 300, unit = "₵", class
 
             {active && hover !== null && geometry && (
                 <div
-                    className="pointer-events-none absolute z-10 border border-ink bg-canvas px-3 py-2"
+                    className="pointer-events-none absolute z-10 border border-ink/[0.12] bg-canvas px-3 py-2 rounded-xl"
                     style={{
                         left: Math.min(Math.max(geometry.x(hover) - 60, 0), Math.max(width - 130, 0)),
                         top: 0,

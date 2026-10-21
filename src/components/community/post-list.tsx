@@ -54,7 +54,7 @@ export function PostList<T extends Post>({ posts, table, reportTarget, onReply, 
                 <li key={post.id}>
                     <PostItem post={post} table={table} reportTarget={reportTarget} onReply={onReply} onEdited={onEdited} replyPlaceholder={replyPlaceholder} locked={locked} />
                     {(tree.replies.get(post.id)?.length ?? 0) > 0 && (
-                        <ol className="mt-4 space-y-4 border-l border-ink/[0.19] pl-4 sm:ml-11">
+                        <ol className="mt-4 space-y-4 border-l border-ink/[0.12] pl-4 sm:ml-11">
                             {tree.replies.get(post.id)!.map((reply) => (
                                 <li key={reply.id}>
                                     <PostItem post={reply} table={table} reportTarget={reportTarget} onEdited={onEdited} replyPlaceholder={replyPlaceholder} locked={locked} isReply />

@@ -110,8 +110,8 @@ export default function SettingsPage() {
                             <Notice className="mt-6">Confirm your email address to comment and post. <button type="button" onClick={() => { void resendVerification().then(() => setMessage({ tone: "success", text: "Verification email sent." })).catch((caught) => setMessage({ tone: "error", text: caught instanceof Error ? caught.message : "Could not send the email." })); }} className="font-semibold underline">Resend the link</button></Notice>
                         )}
                         <dl className="mt-6 text-sm">
-                            <div className="flex items-center justify-between gap-4 border-b border-ink/[0.19] py-3"><dt className="news-label mb-0">Email</dt><dd className="truncate font-medium text-ink">{user.email}{user.emailVerified ? "" : " · unverified"}</dd></div>
-                            <div className="flex items-center justify-between gap-4 border-b border-ink/[0.19] py-3"><dt className="news-label mb-0">Password</dt><dd><button type="button" onClick={() => void sendReset()} className="text-sm font-bold text-fluid-cyan-ink hover:underline">Send reset link</button></dd></div>
+                            <div className="flex items-center justify-between gap-4 border-b border-ink/[0.12] py-3"><dt className="news-label mb-0">Email</dt><dd className="truncate font-medium text-ink">{user.email}{user.emailVerified ? "" : " · unverified"}</dd></div>
+                            <div className="flex items-center justify-between gap-4 border-b border-ink/[0.12] py-3"><dt className="news-label mb-0">Password</dt><dd><button type="button" onClick={() => void sendReset()} className="text-sm font-bold text-fluid-cyan-ink hover:underline">Send reset link</button></dd></div>
                         </dl>
                         <div className="news-form-actions mt-6">
                             <SecondaryButton onClick={() => { void signOut().then(() => { navigate("/"); }); }}><LogOut size={16} aria-hidden="true" /> Sign out</SecondaryButton>

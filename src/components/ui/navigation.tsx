@@ -59,7 +59,7 @@ export const Navigation = memo(() => {
                     <span className="news-edition hidden lg:block">Ghana edition <span aria-hidden="true">/</span> Accra, GMT</span>
                     <ThemeToggleButton />
                     <div className="hidden sm:block"><AccountMenu /></div>
-                    <button type="button" onClick={() => setMobileOpen(!mobileOpen)} aria-expanded={mobileOpen} aria-controls="news-mobile-menu" aria-label={mobileOpen ? "Close navigation" : "Open navigation"} className="grid h-11 w-11 place-items-center border border-ink/20 lg:hidden">
+                    <button type="button" onClick={() => setMobileOpen(!mobileOpen)} aria-expanded={mobileOpen} aria-controls="news-mobile-menu" aria-label={mobileOpen ? "Close navigation" : "Open navigation"} className="grid h-11 w-11 place-items-center border border-ink/[0.12] lg:hidden rounded-xl">
                         {mobileOpen ? <X size={20} /> : <Menu size={20} />}
                     </button>
                 </div>
@@ -70,14 +70,14 @@ export const Navigation = memo(() => {
                     {LINKS.map(([label, href]) => <a key={href} href={href} className="news-nav-link" aria-current={isCurrent(path, href) ? "page" : undefined}>{label}</a>)}
                     <div className="relative ml-auto" onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setMoreOpen(false); }}>
                         <button type="button" className="news-nav-link flex items-center gap-1.5" onClick={() => setMoreOpen(!moreOpen)} aria-expanded={moreOpen} aria-controls="news-more">More <ChevronDown size={13} aria-hidden="true" /></button>
-                        {moreOpen && <div id="news-more" className="absolute right-0 top-full z-50 w-56 border border-ink/20 bg-canvas p-2 shadow-lg">{MORE.map(([label, href]) => <a key={href} href={href} className="block px-3 py-3 text-sm hover:bg-ink/[0.06]">{label}</a>)}</div>}
+                        {moreOpen && <div id="news-more" className="absolute right-0 top-full z-50 w-56 border border-ink/[0.12] bg-canvas p-2 shadow-lg rounded-2xl">{MORE.map(([label, href]) => <a key={href} href={href} className="block px-3 py-3 text-sm hover:bg-ink/[0.06]">{label}</a>)}</div>}
                     </div>
                 </nav>
                 <nav aria-label="Quick navigation" className="page-container flex overflow-x-auto lg:hidden">
                     {LINKS.slice(0, 5).map(([label, href]) => <a key={href} href={href} className="news-nav-link shrink-0" aria-current={isCurrent(path, href) ? "page" : undefined}>{label}</a>)}
                 </nav>
             </div>
-            {mobileOpen && <nav id="news-mobile-menu" aria-label="Expanded navigation" className="page-container border-b border-ink/20 py-5 lg:hidden">
+            {mobileOpen && <nav id="news-mobile-menu" aria-label="Expanded navigation" className="page-container border-b border-ink/[0.12] py-5 lg:hidden">
                 <div className="grid grid-cols-2 gap-x-6">{[["Home", "/"], ...LINKS, ...MORE].map(([label, href]) => <a key={href} href={href} onClick={() => setMobileOpen(false)} className="border-b border-ink/10 py-3 text-sm font-semibold">{label}</a>)}</div>
                 <div className="mt-5"><AccountMenu variant="mobile" onNavigate={() => setMobileOpen(false)} /></div>
             </nav>}

@@ -153,7 +153,7 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
     return (
         <div className="finance-public min-h-screen bg-canvas text-ink selection:bg-fluid-cyan selection:text-fluid-action-ink">
             {/* Page bar: this route has no site masthead, so back, share and theme live here. */}
-            <header className="sticky top-0 z-40 border-b border-ink/[0.19] bg-canvas">
+            <header className="sticky top-0 z-40 border-b border-ink/[0.12] bg-canvas">
                 <div className="page-container flex min-h-[56px] items-center justify-between gap-4">
                     <button type="button" onClick={onBack} aria-label="Back to market" className="news-text-link">
                         <ArrowLeft size={16} aria-hidden="true" />
@@ -275,7 +275,7 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                         </h2>
 
                         {/* Range tabs and export share one hairline, as on the GSE Live board. */}
-                        <div className="mb-6 flex flex-wrap items-end justify-between gap-x-4 gap-y-2 border-b border-ink/[0.19]">
+                        <div className="mb-6 flex flex-wrap items-end justify-between gap-x-4 gap-y-2 border-b border-ink/[0.12]">
                             <div className="flex flex-wrap gap-x-1" role="tablist" aria-label="Chart range">
                                 {RANGES.map((key) => (
                                     <button
@@ -302,7 +302,7 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
 
                         <PriceChart points={visible} positive={windowPositive} height={300} />
 
-                        <p className="news-byline mt-4 border-t border-ink/[0.19] pt-3">
+                        <p className="news-byline mt-4 border-t border-ink/[0.12] pt-3">
                             {series.recordedFrom
                                 ? `Closes recorded live from ${new Date(series.recordedFrom).toLocaleDateString("en-GB", {
                                       day: "numeric",
@@ -439,7 +439,7 @@ export function StockDetail({ symbol, onBack }: { symbol: string; onBack: () => 
                     </aside>
                 </div>
 
-                <p className="news-byline mt-12 border-t border-ink/[0.19] pt-4">
+                <p className="news-byline mt-12 border-t border-ink/[0.12] pt-4">
                     Fluid Finance publishes market information and education only. Nothing here is a trade
                     facility, an offer, or investment advice.
                 </p>

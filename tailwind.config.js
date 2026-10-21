@@ -35,9 +35,13 @@ export default {
                 // Elevated panel shadow — softer on light, deeper on dark.
                 panel: 'var(--panel-shadow)',
             },
+            borderRadius: {
+                control: '0.75rem',
+            },
             fontFamily: {
-                sans: ['Inter', 'Arial', 'sans-serif'],
-                poppins: ['Barlow', 'Arial', 'sans-serif'],
+                // Poppins throughout, matching the investor apps (fluid-webapp / fluid-portal).
+                sans: ['Poppins', 'Inter', 'Arial', 'sans-serif'],
+                poppins: ['Poppins', 'Barlow', 'Arial', 'sans-serif'],
             },
         },
     },

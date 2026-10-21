@@ -174,7 +174,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
             <div className="news-session -mt-px" aria-label="Market status">
                 <span className="inline-flex items-center gap-2 font-semibold">
                     <span
-                        className={cn("h-1.5 w-1.5", marketOpen ? "animate-pulse bg-fluid-green" : "bg-fluid-rose")}
+                        className={cn("h-1.5 w-1.5 rounded-full", marketOpen ? "animate-pulse bg-fluid-green" : "bg-fluid-rose")}
                         aria-hidden="true"
                     />
                     <span className="text-ink/[0.68]">Ghana Stock Exchange</span>
@@ -206,7 +206,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
             </dl>
 
             {/* View toggle + search, sharing one hairline. */}
-            <div className="mt-6 flex flex-col gap-3 border-b border-ink/[0.19] md:flex-row md:items-end md:justify-between">
+            <div className="mt-6 flex flex-col gap-3 border-b border-ink/[0.12] md:flex-row md:items-end md:justify-between">
                 <div className="flex gap-1" role="group" aria-label="View">
                     {VIEW_MODES.map((key) => {
                         const Icon = VIEW_ICONS[key];
@@ -227,7 +227,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                 </div>
 
                 <div className="flex items-center gap-3 pb-3">
-                    <div className="flex flex-1 items-center border border-ink/[0.19] focus-within:border-ink md:w-72">
+                    <div className="flex flex-1 items-center border border-ink/[0.12] focus-within:border-ink md:w-72 rounded-xl">
                         <Search size={15} className="ml-3 shrink-0 text-ink/[0.68]" aria-hidden="true" />
                         <input
                             value={query}
@@ -382,7 +382,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
 
                     {mode === "heatmap" && (
                         filtered.length === 0 ? noMatch : (
-                            <div className="grid grid-cols-2 gap-px border border-ink/[0.19] bg-ink/[0.19] sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-6">
+                            <div className="grid grid-cols-2 gap-px border border-ink/[0.12] bg-ink/[0.19] sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-6 rounded-xl overflow-hidden">
                                 {gridStocks.map((stock) => (
                                     <button
                                         key={stock.symbol}

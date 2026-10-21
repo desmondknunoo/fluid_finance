@@ -25,7 +25,7 @@ export function QuoteTape({ stocks, className }: { stocks: Stock[]; className?: 
                             <a href={`/stock/${stock.symbol}`} tabIndex={index >= stocks.length ? -1 : undefined} className="flex h-9 items-center gap-2 border-r border-ink/[0.06] px-3 font-mono text-xs hover:bg-ink/[0.04]">
                                 <span className="font-semibold text-ink">{stock.symbol}</span>
                                 <span className="tabular-nums text-ink/70">{formatCedis(stock.price)}</span>
-                                <span className={cn("tabular-nums", up ? "text-fluid-green" : down ? "text-fluid-rose" : "text-ink/40")}>{up ? "▲" : down ? "▼" : "■"} {stock.changePercent >= 0 ? "+" : ""}{stock.changePercent.toFixed(2)}%</span>
+                                <span className={cn("tabular-nums", up ? "text-fluid-green" : down ? "text-fluid-rose" : "text-ink/40")}>{up ? "▲" : down ? "▼" : "●"} {stock.changePercent >= 0 ? "+" : ""}{stock.changePercent.toFixed(2)}%</span>
                             </a>
                         </li>
                     );

@@ -38,7 +38,7 @@ export function TickerLogo({ symbol, size = 56, className }: TickerLogoProps) {
 
     return (
         <div
-            className={cn("flex shrink-0 items-center justify-center overflow-hidden border border-ink/[0.19] bg-white", className)}
+            className={cn("flex shrink-0 items-center justify-center overflow-hidden border border-ink/[0.12] bg-white rounded-xl", className)}
             style={{ width: size, height: size, padding: size <= 40 ? 2 : Math.round(size * 0.08) }}
         >
             <img

@@ -26,7 +26,7 @@ export function StockCard({ stock, onSelect, rank, showVolume = true }: StockCar
         <button
             type="button"
             onClick={() => onSelect(stock.symbol)}
-            className="flex w-full items-center gap-3 border-b border-ink/[0.19] px-0 py-3 text-left transition-colors hover:bg-ink/[0.055] active:bg-ink/[0.08]"
+            className="flex w-full items-center gap-3 border-b border-ink/[0.12] px-0 py-3 text-left transition-colors hover:bg-ink/[0.055] active:bg-ink/[0.08]"
         >
             {rank !== undefined && (
                 <span className="w-4 shrink-0 text-center text-xs tabular-nums text-ink/[0.68]">{rank}</span>

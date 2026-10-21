@@ -68,7 +68,7 @@ export default function ThreadPage({ id }: { id: string }) {
                         {thread.locked && <span className="news-pill news-pill--neutral">Locked</span>}
                     </p>
                     <h1 className="news-headline-lg mt-4 text-ink">{thread.title}</h1>
-                    <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-y border-ink/[0.19] py-4">
+                    <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-y border-ink/[0.12] py-4">
                         <UserChip author={thread.author} meta={`Started ${formatRelative(thread.created_at)}`} />
                         {user && user.id !== thread.author_id && (
                             <QuietButton size="sm" onClick={() => setReporting((value) => !value)}>Report</QuietButton>
@@ -94,7 +94,7 @@ export default function ThreadPage({ id }: { id: string }) {
                             locked={thread.locked}
                         />
                     </div>
-                    <div className="mt-8 border-t border-ink/[0.19] pt-8">
+                    <div className="mt-8 border-t border-ink/[0.12] pt-8">
                         {thread.locked ? (
                             <Notice>This discussion is locked. New replies are closed.</Notice>
                         ) : (

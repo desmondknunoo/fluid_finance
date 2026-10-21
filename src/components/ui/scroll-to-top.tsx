@@ -36,7 +36,7 @@ export function ScrollToTop({ threshold = 400 }: { threshold?: number }) {
             type="button"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             aria-label="Scroll to top"
-            className="fixed bottom-6 right-6 z-40 grid h-11 w-11 place-items-center border border-ink bg-canvas text-ink transition-colors hover:bg-ink hover:text-canvas"
+            className="fixed bottom-6 right-6 z-40 grid h-11 w-11 place-items-center border border-ink/[0.12] bg-canvas text-ink transition-colors hover:bg-ink hover:text-canvas rounded-xl"
         >
             <ArrowUp size={18} strokeWidth={2.5} aria-hidden="true" />
         </button>

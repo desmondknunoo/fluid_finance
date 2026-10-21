@@ -60,8 +60,8 @@ export function AccountMenu({ variant = "desktop", onNavigate }: { variant?: "de
                     <div className="min-w-0"><p className="truncate text-sm font-semibold text-ink">{name}</p>{profile && <p className="news-byline">@{profile.username}</p>}</div>
                 </div>
                 <div className="mt-4 flex flex-col">
-                    {items.map((item) => <a key={item.href} href={item.href} onClick={onNavigate} className="flex items-center gap-2.5 border-t border-ink/[0.19] py-3 text-sm font-semibold text-ink"><item.icon size={16} className="text-ink/[0.68]" aria-hidden="true" /> {item.label}</a>)}
-                    <button type="button" onClick={() => void leave()} className="flex items-center gap-2.5 border-y border-ink/[0.19] py-3 text-left text-sm font-semibold text-ink"><LogOut size={16} className="text-ink/[0.68]" aria-hidden="true" /> Sign out</button>
+                    {items.map((item) => <a key={item.href} href={item.href} onClick={onNavigate} className="flex items-center gap-2.5 border-t border-ink/[0.12] py-3 text-sm font-semibold text-ink"><item.icon size={16} className="text-ink/[0.68]" aria-hidden="true" /> {item.label}</a>)}
+                    <button type="button" onClick={() => void leave()} className="flex items-center gap-2.5 border-y border-ink/[0.12] py-3 text-left text-sm font-semibold text-ink"><LogOut size={16} className="text-ink/[0.68]" aria-hidden="true" /> Sign out</button>
                 </div>
             </div>
         );
@@ -69,7 +69,7 @@ export function AccountMenu({ variant = "desktop", onNavigate }: { variant?: "de
 
     return (
         <div ref={ref} className="relative">
-            <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-haspopup="menu" aria-label="Account menu" className="flex items-center gap-1.5 border border-ink/[0.19] p-1 pr-2 transition-colors hover:border-ink">
+            <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-haspopup="menu" aria-label="Account menu" className="flex items-center gap-1.5 border border-ink/[0.12] p-1 pr-2 transition-colors hover:border-ink rounded-full">
                 <Avatar author={{ display_name: name, avatar_url: profile?.avatar_url ?? null }} size="sm" />
                 <ChevronDown size={13} className={cn("text-ink/[0.68] transition-transform", open && "rotate-180")} aria-hidden="true" />
             </button>

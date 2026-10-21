@@ -67,7 +67,7 @@ export function BuyRedirectSheet({ open, onClose, symbol, company }: BuyRedirect
                         exit={{ y: 8, opacity: 0 }}
                         transition={{ duration: 0.15, ease: "easeOut" }}
                         onClick={(e) => e.stopPropagation()}
-                        className="w-full max-w-sm border border-ink bg-canvas p-5 text-ink sm:p-6"
+                        className="w-full max-w-sm border border-ink/[0.12] bg-canvas p-5 text-ink sm:p-6 rounded-2xl"
                     >
                         <div className="mb-4 flex items-center justify-between gap-4 border-b-2 border-ink pb-3">
                             <div className="flex items-center gap-2">
@@ -97,7 +97,7 @@ export function BuyRedirectSheet({ open, onClose, symbol, company }: BuyRedirect
                             Continue to app.fluidterra.com
                         </a>
 
-                        <p className="news-byline mt-4 border-t border-ink/[0.19] pt-3">
+                        <p className="news-byline mt-4 border-t border-ink/[0.12] pt-3">
                             You'll leave fluidfinance.com — trades are placed and settled entirely within the
                             Fluid Finance app.
                         </p>

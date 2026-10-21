@@ -91,7 +91,7 @@ export default function FxPage() {
                                     </SelectField>
                                 </div>
                             </div>
-                            <div className="mt-6 border-t border-ink/[0.19] pt-4" aria-live="polite">
+                            <div className="mt-6 border-t border-ink/[0.12] pt-4" aria-live="polite">
                                 {converted === null ? (
                                     <p className="text-sm text-ink/[0.68]">No rate available for {from}/{to} yet.</p>
                                 ) : (

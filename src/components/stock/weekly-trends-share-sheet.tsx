@@ -221,7 +221,7 @@ export function WeeklyTrendsShareSheet({ open, onClose, card }: WeeklyTrendsShar
                 >
                     <div
                         onClick={(e) => e.stopPropagation()}
-                        className="max-h-[92vh] w-full max-w-lg overflow-y-auto border border-ink bg-canvas p-5 text-ink shadow-lg sm:p-6"
+                        className="max-h-[92vh] w-full max-w-lg overflow-y-auto border border-ink/[0.12] bg-canvas p-5 text-ink shadow-lg sm:p-6 rounded-2xl"
                     >
                         <div className="flex items-start justify-between gap-4 border-b-[3px] border-ink pb-3">
                             <div className="min-w-0">
@@ -241,7 +241,7 @@ export function WeeklyTrendsShareSheet({ open, onClose, card }: WeeklyTrendsShar
                         </div>
 
                         {/* Preview */}
-                        <div className="mt-5 flex aspect-[4/5] w-full items-center justify-center overflow-hidden border border-ink/[0.19] bg-canvas">
+                        <div className="mt-5 flex aspect-[4/5] w-full items-center justify-center overflow-hidden border border-ink/[0.12] bg-canvas rounded-xl">
                             {status === "rendering" && (
                                 <Loader2 className="h-7 w-7 animate-spin text-ink/[0.68]" aria-label="Generating share image" />
                             )}
@@ -300,7 +300,7 @@ export function WeeklyTrendsShareSheet({ open, onClose, card }: WeeklyTrendsShar
                             })}
                         </div>
 
-                        <p className="mt-4 border-t border-ink/[0.19] pt-3 text-xs leading-relaxed text-ink/[0.68]">
+                        <p className="mt-4 border-t border-ink/[0.12] pt-3 text-xs leading-relaxed text-ink/[0.68]">
                             {canNativeShare
                                 ? "Sharing to a network opens your device's share sheet with the image attached — pick the app to post to."
                                 : "The image is copied for you to paste (or saved) when you open a network. Nothing is posted until you publish it yourself."}

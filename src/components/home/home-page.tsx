@@ -187,7 +187,7 @@ export default function HomePage() {
                             
                             <h3 className="mt-3 text-xl font-bold leading-tight text-ink font-poppins">Join the Fluid Finance community</h3>
                             <p className="mt-2 text-sm leading-relaxed text-ink/60">Comment on research, start discussions and keep a public profile for your market views. Nothing here is investment advice.</p>
-                            {user ? <a href="/forum/new" className="mt-4 inline-flex min-h-[2.75rem] items-center gap-2 rounded-none bg-fluid-cyan px-4 text-sm font-semibold text-fluid-action-ink hover:bg-fluid-cyan-hover">Start a discussion <ArrowRight size={15} /></a> : <a href="/register" className="mt-4 inline-flex min-h-[2.75rem] items-center gap-2 rounded-none bg-fluid-cyan px-4 text-sm font-semibold text-fluid-action-ink hover:bg-fluid-cyan-hover">Create an account <ArrowRight size={15} /></a>}
+                            {user ? <a href="/forum/new" className="mt-4 inline-flex min-h-[2.75rem] items-center gap-2 rounded-xl bg-fluid-cyan px-4 text-sm font-semibold text-fluid-action-ink hover:bg-fluid-cyan-hover">Start a discussion <ArrowRight size={15} /></a> : <a href="/register" className="mt-4 inline-flex min-h-[2.75rem] items-center gap-2 rounded-xl bg-fluid-cyan px-4 text-sm font-semibold text-fluid-action-ink hover:bg-fluid-cyan-hover">Create an account <ArrowRight size={15} /></a>}
                         </div>
                     </div>
                 </Band>

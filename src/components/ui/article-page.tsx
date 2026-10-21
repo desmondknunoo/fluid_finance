@@ -81,7 +81,7 @@ export default function ArticlePage({ slug }: { slug: string }) {
                     </p>
                     <h1 className="news-headline-lg mt-4 text-ink">{article.title}</h1>
                     {article.excerpt && <p className="news-standfirst mt-5">{article.excerpt}</p>}
-                    <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-ink/[0.19] pt-4">
+                    <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-ink/[0.12] pt-4">
                         <UserChip author={article.author} meta={`${formatLongDate(article.published_at)} · ${readingMinutes(article.body)} min read`} />
                         <div className="flex flex-wrap items-center gap-3">
                             <span className="news-byline inline-flex items-center gap-1.5"><Clock3 size={12} aria-hidden="true" /> Updated {formatLongDate(article.updated_at)}</span>
@@ -93,7 +93,7 @@ export default function ArticlePage({ slug }: { slug: string }) {
                 </header>
 
                 {article.cover_url && (
-                    <figure className="mt-8 border border-ink/[0.19] bg-ink/[0.055]">
+                    <figure className="mt-8 border border-ink/[0.12] bg-ink/[0.055] rounded-xl">
                         <img src={article.cover_url} alt={article.title} className="block w-full object-cover" />
                     </figure>
                 )}
@@ -113,7 +113,7 @@ export default function ArticlePage({ slug }: { slug: string }) {
                     </ul>
                 )}
 
-                <p className="news-byline mt-10 max-w-[70ch] border-t border-ink/[0.19] pt-4">
+                <p className="news-byline mt-10 max-w-[70ch] border-t border-ink/[0.12] pt-4">
                     Fluid Finance publishes market information and education. This article is not investment advice; investing carries risk of loss.
                 </p>
 

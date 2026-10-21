@@ -154,7 +154,7 @@ export function GoogleMark({ size = 18 }: { size?: number }) {
 
 function Done({ title, body, link }: { title: string; body: string; link: { href: string; label: string } }) {
     return (
-        <div className="border-y border-ink/[0.19] py-10 text-center" role="status">
+        <div className="border-y border-ink/[0.12] py-10 text-center" role="status">
             <CheckCircle2 size={32} className="mx-auto text-fluid-green" aria-hidden="true" />
             <h2 className="news-headline mt-4 text-ink">{title}</h2>
             <p className="mt-3 text-sm leading-relaxed text-ink/[0.68]">{body}</p>

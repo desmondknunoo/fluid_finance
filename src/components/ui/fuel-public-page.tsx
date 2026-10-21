@@ -90,7 +90,7 @@ export default function FuelPublicPage() {
                                         <tr key={row.name}>
                                             <th scope="row" className="font-medium text-ink">
                                                 <span className="flex items-center gap-3">
-                                                    {row.logo_url ? <img src={row.logo_url} alt="" className="h-6 w-6 shrink-0 border border-ink/[0.19] bg-white object-contain" /> : <span className="grid h-6 w-6 shrink-0 place-items-center border border-ink/[0.19] bg-ink/[0.055] text-[10px] font-bold text-ink/[0.68]">{row.name.slice(0, 2).toUpperCase()}</span>}
+                                                    {row.logo_url ? <img src={row.logo_url} alt="" className="h-6 w-6 shrink-0 border border-ink/[0.12] bg-white object-contain rounded-md" /> : <span className="grid h-6 w-6 shrink-0 place-items-center border border-ink/[0.12] bg-ink/[0.055] text-[10px] font-bold text-ink/[0.68] rounded-md">{row.name.slice(0, 2).toUpperCase()}</span>}
                                                     {row.name}
                                                 </span>
                                             </th>

@@ -56,7 +56,7 @@ export function FuelShareSheet({ report, previous = null, onClose }: { report: F
         try { await navigator.share({ files: [file], title: "Fluid Pump Report", text: `Fluid Pump Report · ${formatFuelDate(report.report_date)}` }); }
         catch (err) { if (!(err instanceof DOMException && err.name === "AbortError")) setMessage("Sharing failed. Download the image and attach it to your post."); }
     };
-    return <dialog ref={dialog} onCancel={onClose} onClick={e => { if (e.target === e.currentTarget) onClose(); }} aria-labelledby="fuel-share-title" className="m-auto max-h-[92dvh] w-[calc(100%-2rem)] max-w-lg overflow-y-auto border border-ink bg-canvas p-5 text-ink shadow-lg backdrop:bg-black/70 sm:p-6">
+    return <dialog ref={dialog} onCancel={onClose} onClick={e => { if (e.target === e.currentTarget) onClose(); }} aria-labelledby="fuel-share-title" className="m-auto max-h-[92dvh] w-[calc(100%-2rem)] max-w-lg overflow-y-auto border border-ink/[0.12] bg-canvas p-5 text-ink shadow-lg backdrop:bg-black/70 sm:p-6 rounded-2xl">
         <div className="flex items-start justify-between gap-4 border-b-[3px] border-ink pb-3">
             <div className="min-w-0">
                 <p className="news-kicker">Fuel prices</p>
@@ -64,7 +64,7 @@ export function FuelShareSheet({ report, previous = null, onClose }: { report: F
             </div>
             <button type="button" onClick={onClose} aria-label="Close share preview" className="news-icon-button h-10 w-10 shrink-0"><X size={18} aria-hidden="true" /></button>
         </div>
-        <div className="mt-5 border border-ink/[0.19] bg-canvas">
+        <div className="mt-5 border border-ink/[0.12] bg-canvas rounded-xl">
             {image
                 ? <img src={image.url} alt={`Fluid Pump Report for ${formatFuelDate(report.report_date)}, page ${page + 1} of ${images.length}`} className="block w-full" />
                 : error
@@ -81,7 +81,7 @@ export function FuelShareSheet({ report, previous = null, onClose }: { report: F
             <QuietButton disabled={!image} onClick={copy} className="grow basis-24"><Copy size={16} aria-hidden="true" />Copy</QuietButton>
             <QuietButton disabled={!image} onClick={download} className="grow basis-28"><Download size={16} aria-hidden="true" />Save image</QuietButton>
         </div>
-        <p className="mt-4 border-t border-ink/[0.19] pt-3 text-xs leading-relaxed text-ink/[0.68]">Share, copy or download the selected page. Each image includes up to 10 OMCs with their logos. Use Previous and Next to export every page.</p>
+        <p className="mt-4 border-t border-ink/[0.12] pt-3 text-xs leading-relaxed text-ink/[0.68]">Share, copy or download the selected page. Each image includes up to 10 OMCs with their logos. Use Previous and Next to export every page.</p>
         <p role="status" className={message ? "news-notice mt-3" : "sr-only"}>{message}</p>
     </dialog>;
 }

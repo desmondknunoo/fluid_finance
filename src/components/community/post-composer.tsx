@@ -28,7 +28,7 @@ export function PostComposer({ onSubmit, placeholder, submitLabel = "Post", onCa
 
     if (!user) {
         return (
-            <div className={cn("flex flex-col items-start gap-3 border-y border-ink/[0.19] py-4 sm:flex-row sm:items-center sm:justify-between", compact && "py-3")}>
+            <div className={cn("flex flex-col items-start gap-3 border-y border-ink/[0.12] py-4 sm:flex-row sm:items-center sm:justify-between", compact && "py-3")}>
                 <p className="text-sm text-ink/[0.68]">Join the conversation — sign in or create a free Fluid Finance account.</p>
                 <SecondaryButton size="sm" onClick={() => openLogin()} className="shrink-0"><LogIn size={15} aria-hidden="true" /> Sign in to post</SecondaryButton>
             </div>
