@@ -31,6 +31,25 @@ export interface Profile {
     department_head?: boolean;
     email?: string;
     created_at: string;
+    /** False when an admin has deactivated the account (soft delete). Defaults to active. */
+    active?: boolean;
+    deactivated_at?: string | null;
+}
+
+export type InviteStatus = "pending" | "accepted";
+
+/** A staff seat offered to an email: pending until that person first signs in, then accepted. */
+export interface Invite {
+    id: string;
+    email: string;
+    role: MemberRole;
+    department_head: boolean;
+    /** Missing from older API builds; derive it from `consumed_at`. */
+    status?: InviteStatus;
+    consumed_at: string | null;
+    created_at: string;
+    /** Only on the response to sending: whether the invite email reached the mail server. */
+    email_sent?: boolean;
 }
 
 /** The author columns embedded in posts and comments. */

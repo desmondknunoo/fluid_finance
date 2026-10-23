@@ -1,6 +1,9 @@
 import { drawReportFooter } from "@/lib/weekly-trends-share-card";
 
 export type SocialAssetKind =
+    | "breaking-news"
+    | "news"
+    | "company-profile"
     | "just-in"
     | "company-portfolio"
     | "fx"
@@ -21,11 +24,16 @@ export interface SocialAssetInput {
     change: string;
     date: string;
     details: string;
+    source?: string;
+    picture?: string;
 }
 
 const CANVAS_WIDTH = 1080;
 const CANVAS_HEIGHT = 1350;
 const ACCENTS: Record<SocialAssetKind, string> = {
+    "breaking-news":"#fb7185",
+    news:"#27dccc",
+    "company-profile":"#416bff",
     "just-in": "#fb7185",
     "company-portfolio": "#34d399",
     fx: "#c4b5fd",
@@ -206,8 +214,9 @@ export async function renderSocialAsset(input: SocialAssetInput): Promise<Blob> 
     if (!ctx) throw new Error("Your browser could not prepare the image.");
 
     await document.fonts.ready;
-    const accent = input.kind === "just-in" ? TEMPLATE_ACCENTS[input.template] : ACCENTS[input.kind];
-    const category = input.kind === "just-in"
+    const justIn = input.kind === "just-in" || input.kind === "breaking-news";
+    const accent = justIn ? TEMPLATE_ACCENTS[input.template] : ACCENTS[input.kind];
+    const category = justIn
         ? TEMPLATE_LABELS[input.template]
         : input.kind.replaceAll("-", " ").toUpperCase();
     const margin = 64;
@@ -241,12 +250,12 @@ export async function renderSocialAsset(input: SocialAssetInput): Promise<Blob> 
     ctx.letterSpacing = "6px";
     ctx.fillText(category, margin, headerY);
     ctx.letterSpacing = "0px";
-    if (input.kind === "just-in") drawTemplateTreatment(ctx, input.template, accent);
+    if (justIn) drawTemplateTreatment(ctx, input.template, accent);
 
     const title = input.title.trim() || "Market update";
     ctx.fillStyle = "#ffffff";
     ctx.font = "700 58px Poppins, system-ui, sans-serif";
-    const titleTop = headerY + (input.kind === "just-in" ? 130 : 62);
+    const titleTop = headerY + (justIn ? 130 : 62);
     const titleHeight = drawWrappedText(ctx, title, margin, titleTop, CANVAS_WIDTH - margin * 2, 68, 3);
 
     const instrument = input.symbol.trim().toUpperCase();
@@ -280,18 +289,37 @@ export async function renderSocialAsset(input: SocialAssetInput): Promise<Blob> 
         sectionY += quoteHeight + 34;
     }
 
+    if (input.picture) {
+        const photo = await loadImage(input.picture);
+        if (!photo) throw new Error("The selected picture could not be loaded.");
+        const height = Math.min(300, Math.max(150, 1030 - sectionY));
+        const scale = Math.max((CANVAS_WIDTH - margin * 2) / photo.naturalWidth, height / photo.naturalHeight);
+        ctx.save(); ctx.beginPath(); ctx.rect(margin, sectionY, CANVAS_WIDTH - margin * 2, height); ctx.clip();
+        ctx.drawImage(photo, margin + (CANVAS_WIDTH-margin*2-photo.naturalWidth*scale)/2, sectionY+(height-photo.naturalHeight*scale)/2, photo.naturalWidth*scale, photo.naturalHeight*scale); ctx.restore();
+        sectionY += height + 34;
+    }
     if (input.details.trim()) {
         ctx.fillStyle = "rgba(255,255,255,0.46)";
         ctx.font = "600 18px Poppins, system-ui, sans-serif";
         ctx.letterSpacing = "2px";
         ctx.fillText(input.kind === "company-portfolio" ? "PORTFOLIO" : "THE DETAILS", margin, sectionY);
         ctx.letterSpacing = "0px";
-        drawDetails(ctx, input.details, margin, sectionY + 27, accent);
+        if (input.kind === "news" || justIn || input.kind === "company-profile") {
+            ctx.fillStyle="rgba(255,255,255,0.88)";ctx.font="500 28px Poppins, system-ui, sans-serif";
+            drawWrappedText(ctx,input.details,margin,sectionY+44,CANVAS_WIDTH-margin*2,40,Math.max(1,Math.floor((CANVAS_HEIGHT-245-sectionY)/40)));
+        } else {
+            const availableLines = Math.max(0, Math.floor((CANVAS_HEIGHT - 225 - sectionY) / 67));
+            drawDetails(ctx, input.details.split("\n").slice(0, availableLines).join("\n"), margin, sectionY + 27, accent);
+        }
     }
 
     ctx.fillStyle = "rgba(255,255,255,0.46)";
     ctx.font = "500 20px Poppins, system-ui, sans-serif";
     ctx.textAlign = "center";
+    if (input.source?.trim()) {
+        ctx.font = "500 18px Poppins, system-ui, sans-serif";
+        drawWrappedText(ctx, `Source: ${input.source.trim()}`, CANVAS_WIDTH / 2, CANVAS_HEIGHT - 210, 900, 24, 1);
+    }
     ctx.fillText(`As of ${input.date || new Date().toLocaleDateString("en-GB")}`, CANVAS_WIDTH / 2, CANVAS_HEIGHT - 180);
     ctx.textAlign = "left";
     drawReportFooter(ctx, "dark", CANVAS_HEIGHT);

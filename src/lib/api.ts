@@ -17,6 +17,19 @@ export class ApiError extends Error {
 
 type Query = Record<string, string | number | boolean | null | undefined>;
 
+/**
+ * Per-app wording. The public site speaks to readers (an outage is "this section is unavailable");
+ * the portal speaks to staff who can act on it. Each app calls `configureApi` once in `main.tsx`
+ * before rendering, so this file stays identical in both.
+ */
+const config = {
+    networkErrorMessage: "This section is temporarily unavailable. Please try again shortly.",
+};
+
+export function configureApi(overrides: Partial<typeof config>): void {
+    Object.assign(config, overrides);
+}
+
 export async function api<T>(path: string, options: { method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"; body?: unknown; query?: Query; auth?: boolean } = {}): Promise<T> {
     const url = new URL(`${API_BASE}${path}`, window.location.origin);
     for (const [key, value] of Object.entries(options.query ?? {})) {
@@ -30,9 +43,8 @@ export async function api<T>(path: string, options: { method?: "GET" | "POST" | 
     try {
         response = await fetch(url.toString(), { method: options.method ?? "GET", headers, body: options.body === undefined ? undefined : JSON.stringify(options.body) });
     } catch {
-        // Covers the backend being unreachable as well as a genuinely offline client; don't blame the
-        // reader's connection for what is usually a service-side outage.
-        throw new ApiError("This section is temporarily unavailable. Please try again shortly.", 0, "NETWORK");
+        // Covers the backend being unreachable as well as a genuinely offline client.
+        throw new ApiError(config.networkErrorMessage, 0, "NETWORK");
     }
     if (response.status === 204) return undefined as T;
     const text = await response.text();

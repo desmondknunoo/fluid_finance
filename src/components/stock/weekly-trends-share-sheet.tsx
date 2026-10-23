@@ -1,6 +1,6 @@
 "use client";
 
-import { type ComponentType, useCallback, useEffect, useRef, useState } from "react";
+import { type ComponentType, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
     Check,
@@ -21,10 +21,15 @@ type IconType = ComponentType<{ size?: number }>;
 
 type Status = "rendering" | "ready" | "error";
 
-interface WeeklyTrendsShareSheetProps {
+export interface WeeklyTrendsShareSheetProps {
     open: boolean;
     onClose: () => void;
     card: WeeklyTrendCardInput;
+    /**
+     * Extra controls between the share actions and the networks, e.g. the portal's "save as draft".
+     * Receives the rendered image (null until ready), the card and the caption the sheet shares.
+     */
+    footer?: (state: { blob: Blob | null; card: WeeklyTrendCardInput; text: string }) => ReactNode;
 }
 
 function shareText(card: WeeklyTrendCardInput): string {
@@ -74,10 +79,12 @@ const NETWORKS: Network[] = [
     },
 ];
 
-export function WeeklyTrendsShareSheet({ open, onClose, card }: WeeklyTrendsShareSheetProps) {
+export function WeeklyTrendsShareSheet({ open, onClose, card, footer }: WeeklyTrendsShareSheetProps) {
     const { resolved } = useTheme();
     const [status, setStatus] = useState<Status>("rendering");
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    /** The rendered image once ready, for the optional footer; `blobRef` serves the share handlers. */
+    const [readyBlob, setReadyBlob] = useState<Blob | null>(null);
     const [toast, setToast] = useState<string | null>(null);
     const blobRef = useRef<Blob | null>(null);
 
@@ -91,6 +98,7 @@ export function WeeklyTrendsShareSheet({ open, onClose, card }: WeeklyTrendsShar
                 const blob = await renderWeeklyTrendCard({ ...card, theme: resolved });
                 if (cancelled) return;
                 blobRef.current = blob;
+                setReadyBlob(blob);
                 setPreviewUrl((old) => {
                     if (old) URL.revokeObjectURL(old);
                     return URL.createObjectURL(blob);
@@ -280,6 +288,8 @@ export function WeeklyTrendsShareSheet({ open, onClose, card }: WeeklyTrendsShar
                                 Save
                             </QuietButton>
                         </div>
+
+                        {footer?.({ blob: status === "ready" ? readyBlob : null, card, text: shareText(card) })}
 
                         {/* Networks */}
                         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">

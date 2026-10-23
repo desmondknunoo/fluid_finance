@@ -1,10 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, Copy, Download, Loader2, Share2, X } from "lucide-react";
 import { Notice, PrimaryButton, QuietButton } from "@/components/ui/form";
 import { renderFuelCards } from "@/lib/fuel-share-card";
 import { formatFuelDate, type FuelReport } from "@/lib/fuel-prices";
 
-export function FuelShareSheet({ report, previous = null, onClose }: { report: FuelReport; previous?: FuelReport | null; onClose: () => void }) {
+export interface FuelShareSheetProps {
+    report: FuelReport;
+    previous?: FuelReport | null;
+    onClose: () => void;
+    /** Extra controls under the share actions, e.g. the portal's "save as draft"; receives the page shown. */
+    footer?: (state: { blob: Blob | undefined; page: number }) => ReactNode;
+}
+
+export function FuelShareSheet({ report, previous = null, onClose, footer }: FuelShareSheetProps) {
     const dialog = useRef<HTMLDialogElement>(null);
     const [images, setImages] = useState<{ blob: Blob; url: string }[]>([]);
     const [page, setPage] = useState(0);
@@ -82,6 +90,7 @@ export function FuelShareSheet({ report, previous = null, onClose }: { report: F
             <QuietButton disabled={!image} onClick={download} className="grow basis-28"><Download size={16} aria-hidden="true" />Save image</QuietButton>
         </div>
         <p className="mt-4 border-t border-ink/[0.12] pt-3 text-xs leading-relaxed text-ink/[0.68]">Share, copy or download the selected page. Each image includes up to 10 OMCs with their logos. Use Previous and Next to export every page.</p>
+        {footer?.({ blob: image?.blob, page })}
         <p role="status" className={message ? "news-notice mt-3" : "sr-only"}>{message}</p>
     </dialog>;
 }

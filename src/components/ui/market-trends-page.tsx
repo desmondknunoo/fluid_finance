@@ -8,7 +8,7 @@ import { getStockPriceHistory, listCloseDates } from "@/lib/closes";
 import { openStock } from "@/lib/navigation";
 import { TickerLogo } from "@/components/stock/ticker-logo";
 import { HistoricalPrices } from "@/components/stock/historical-prices";
-import { WeeklyTrendsShareSheet } from "@/components/stock/weekly-trends-share-sheet";
+import { WeeklyTrendsShareSheet, type WeeklyTrendsShareSheetProps } from "@/components/stock/weekly-trends-share-sheet";
 import type { WeeklyTrendCardInput } from "@/lib/weekly-trends-share-card";
 import { Notice, SecondaryButton, SelectField, TextField } from "@/components/ui/form";
 import { PageIntro } from "@/components/ui/page-intro";
@@ -69,7 +69,8 @@ function formatDateShort(iso: string): string {
     });
 }
 
-export default function MarketTrendsPage() {
+/** `shareFooter` lets the portal add its own controls to the share sheet; the public site passes nothing. */
+export default function MarketTrendsPage({ shareFooter }: { shareFooter?: WeeklyTrendsShareSheetProps["footer"] } = {}) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [shareSheet, setShareSheet] = useState<{ open: boolean; input: WeeklyTrendCardInput | null }>({
@@ -359,6 +360,7 @@ export default function MarketTrendsPage() {
                     open={shareSheet.open}
                     onClose={() => setShareSheet({ open: false, input: null })}
                     card={shareSheet.input}
+                    footer={shareFooter}
                 />
             )}
         </main>

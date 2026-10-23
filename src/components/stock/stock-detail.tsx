@@ -57,7 +57,8 @@ const TABS: [Tab, string][] = [
 ];
 
 /**
- * The company page at /stock/<SYMBOL>. It renders on its own, outside the site masthead, so it
+ * The company page for one listing (the route lives in navigation.ts). It renders on its own, outside
+ * the site masthead, so it
  * carries a slim bar of its own (back, share, theme) above the editorial page: an intro with the
  * company name and last price, the session figures, then the chart beside a key-facts rail.
  */
