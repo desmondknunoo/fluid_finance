@@ -2,10 +2,11 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { getAllStocks, getStock, getEquityDetail } from '../src/lib/gse.ts';
 
+// Rows as kwayisi's `/live` ticker returns them: `change` is the day's move against the previous close.
 const snapshot = [
-  { symbol: 'GCB', price: '43.00', change: '2.40', changePercent: '5.91', volume: 123 },
-  { symbol: 'TBL', price: '0.50', change: '0', changePercent: '0', volume: 0 },
-  { symbol: 'CAL', price: '0.75', change: '-0.01', changePercent: '-1.32', volume: 7 },
+  { name: 'GCB', price: '43.00', change: '2.40', volume: 123 },
+  { name: 'TBL', price: '0.50', change: '0', volume: 0 },
+  { name: 'CAL', price: '0.75', change: '-0.01', volume: 7 },
 ];
 
 async function withFetch(fn, run) {
@@ -14,24 +15,27 @@ async function withFetch(fn, run) {
   try { await run(); } finally { globalThis.fetch = original; }
 }
 
-test('uses the shared backend snapshot and preserves full coverage, decimal prices and changes', async () => {
+test('reads the whole board from the live ticker and keeps decimal prices, moves and % change', async () => {
   await withFetch(async (url) => {
-    assert.equal(url, 'https://api.fluidterra.com/api/v1/market/stocks');
-    return Response.json({ items: snapshot });
+    assert.equal(url, 'https://dev.kwayisi.org/apis/gse/live');
+    return Response.json(snapshot);
   }, async () => {
     const stocks = await getAllStocks(true);
     assert.deepEqual(stocks.map(s => s.symbol), ['CAL', 'GCB', 'TBL']);
-    assert.equal(stocks.find(s => s.symbol === 'GCB').price, 43);
-    assert.equal(stocks.find(s => s.symbol === 'GCB').changePercent, 5.91);
+    const gcb = stocks.find(s => s.symbol === 'GCB');
+    assert.equal(gcb.price, 43);
+    assert.equal(gcb.change, 2.4);
+    // 2.40 on a previous close of 40.60
+    assert.equal(gcb.changePercent.toFixed(2), '5.91');
     assert.equal(stocks.filter(s => s.change > 0).length, 1);
     assert.equal(stocks.filter(s => s.change < 0).length, 1);
     assert.equal(stocks.filter(s => s.change === 0).length, 1);
   });
 });
 
-test('individual stock prices come from the backend while company metadata keeps its existing source', async () => {
+test('a single quote comes from the live ticker and company detail from the equities endpoint', async () => {
   await withFetch(async (url) => {
-    if (url === 'https://api.fluidterra.com/api/v1/market/stocks/GCB') return Response.json(snapshot[0]);
+    if (url === 'https://dev.kwayisi.org/apis/gse/live/GCB') return Response.json(snapshot[0]);
     assert.equal(url, 'https://dev.kwayisi.org/apis/gse/equities/gcb');
     return Response.json({ name: 'GCB', company: { name: 'GCB Bank Limited' } });
   }, async () => {
@@ -40,14 +44,14 @@ test('individual stock prices come from the backend while company metadata keeps
   });
 });
 
-test('does not silently substitute another source or partial data when the backend fails', async () => {
+test('does not silently substitute another source or partial data when the ticker fails', async () => {
   await withFetch(async () => new Response('unavailable', { status: 503 }), async () => {
     await assert.rejects(getAllStocks(true), /503/);
   });
-  await withFetch(async () => Response.json({ items: [] }), async () => {
+  await withFetch(async () => Response.json([]), async () => {
     await assert.rejects(getAllStocks(true), /snapshot is empty/);
   });
-  await withFetch(async () => Response.json({ items: [{ ...snapshot[0], price: 'bad' }] }), async () => {
-    await assert.rejects(getAllStocks(true), /Invalid Fluid market quote/);
+  await withFetch(async () => Response.json([{ ...snapshot[0], price: 'bad' }]), async () => {
+    await assert.rejects(getAllStocks(true), /Invalid GSE live quote/);
   });
 });
