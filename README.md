@@ -94,6 +94,18 @@ during the migration retention period.
 
 Run the history-client checks with `node --test tests/closes.test.mjs`.
 
+## Shared code
+
+The team portal (`../fluid_finance_portal`) reuses this site's market, closes, community and API
+clients, `src/components/stock/*`, the GSE live board, the market snapshot, the week-in-review
+page and a few UI primitives as byte-identical copies. `shared-files.json` lists them and this
+repository is the source of truth: edit a shared file here, then run `npm run shared:pull` in the
+portal. `npm run shared:check` (also run by `npm test`) compares every listed file with the sibling
+checkout and fails when any differ; it passes with a notice when `../fluid_finance_portal` is not
+checked out beside this repository. Differences the portal needs are parameters of the shared
+file (`configureApi()`, `stockHref`, the share sheets' `footer` slot), never edits to its copy.
+A true shared package needs a repository or workspace of its own, which is the owner's call.
+
 ## Hosting on Cloudflare Pages
 
 The site uses the `fluid-finance` Pages project and the production domain
