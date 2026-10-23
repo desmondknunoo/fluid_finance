@@ -83,8 +83,8 @@ export function BuyRedirectSheet({ open, onClose, symbol, company }: BuyRedirect
 
                         <p className="text-sm leading-relaxed text-ink/[0.68]">
                             Fluid Finance shows you {company} ({symbol}) prices for information and education
-                            only — there's no trading here. To actually buy shares, head to the Fluid Finance
-                            trading app.
+                            only — there's no trading here. To actually buy shares, head to the Fluid app at
+                            app.fluidterra.com.
                         </p>
 
                         <a
@@ -98,8 +98,8 @@ export function BuyRedirectSheet({ open, onClose, symbol, company }: BuyRedirect
                         </a>
 
                         <p className="news-byline mt-4 border-t border-ink/[0.12] pt-3">
-                            You'll leave fluidfinance.com — trades are placed and settled entirely within the
-                            Fluid Finance app.
+                            You'll leave finance.fluidterra.com — trades are placed and settled entirely within
+                            the Fluid app.
                         </p>
                     </motion.div>
                 </motion.div>
