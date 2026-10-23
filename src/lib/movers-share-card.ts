@@ -44,7 +44,7 @@ function getShareDateAndTimestamp(now = new Date()): { date: string; timestamp: 
     if (isWeekday && minutes >= 15 * 60) {
         // Mon–Fri after 15:00 → today's close
     } else {
-        let daysBack = isWeekday ? 1 : day === 0 ? 2 : 1;
+        const daysBack = isWeekday ? 1 : day === 0 ? 2 : 1;
         close.setUTCDate(close.getUTCDate() - daysBack);
     }
 

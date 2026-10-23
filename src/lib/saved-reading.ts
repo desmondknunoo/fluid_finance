@@ -22,7 +22,7 @@ export async function cacheReadingShell():Promise<void>{
  if(!registration.active)throw Error('Offline cache is not ready. Try again.');
  await new Promise<void>((resolve,reject)=>{
   const channel=new MessageChannel();const timer=setTimeout(()=>{channel.port1.close();reject(Error('Offline files could not be cached. Try again while online.'));},10000);
-  channel.port1.onmessage=event=>{clearTimeout(timer);channel.port1.close();event.data?.ok?resolve():reject(Error('Some offline files could not be saved. Try again.'));};
+  channel.port1.onmessage=event=>{clearTimeout(timer);channel.port1.close();if(event.data?.ok)resolve();else reject(Error('Some offline files could not be saved. Try again.'));};
   registration.active!.postMessage({type:'CACHE_READING_SHELL',urls},[channel.port2]);
  });
 }
