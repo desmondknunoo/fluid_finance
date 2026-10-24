@@ -1,3 +1,4 @@
+import { drawStudioFooter } from "@/lib/weekly-trends-share-card";
 /**
  * Fluid Finance - social share card
  *
@@ -11,6 +12,7 @@ import { logoUrl } from "@/lib/logos";
 import type { PricePoint, RangeKey } from "@/lib/history";
 
 export interface ShareCardInput {
+    asOf?: string;
     symbol: string;
     company: string;
     sector: string;
@@ -28,12 +30,12 @@ export interface ShareCardInput {
 export type ShareCardTheme = "light" | "dark";
 
 const W = 1080;
-const H = 1080;
+const H = 1350;
 
 const PALETTES = {
 dark: {
-    canvas: "#08090b",
-    surface: "#101114",
+    canvas: "#020e25",
+    surface: "#06162c",
     border: "rgba(255,255,255,0.09)",
     text: "#ffffff",
     muted: "rgba(255,255,255,0.42)",
@@ -70,36 +72,12 @@ light: {
 } as const;
 
 /** 24×24 brand glyph paths (from components/ui/social-icons). */
-const ICONS = {
-    instagram:
-        "M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z",
-    tiktok:
-        "M16.6 5.82a4.28 4.28 0 0 1-1.05-2.82h-3.2v12.86a2.59 2.59 0 0 1-2.59 2.5 2.59 2.59 0 0 1 0-5.18c.27 0 .53.04.77.12v-3.3a5.9 5.9 0 0 0-.77-.05 5.84 5.84 0 1 0 5.84 5.84V9.4a7.5 7.5 0 0 0 4.4 1.41V7.62a4.3 4.3 0 0 1-3.4-1.8z",
-    x: "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z",
-} as const;
-
-const SOCIALS = [
-    { icon: ICONS.instagram, handle: "@fluidfinanceonline" },
-    { icon: ICONS.tiktok, handle: "@fluid_finance" },
-    { icon: ICONS.x, handle: "@FluidFinanceX" },
-] as const;
-
-/** Draws a 24-unit SVG glyph at (x,y) scaled to `size`, filled with `color`. */
-function drawGlyph(ctx: CanvasRenderingContext2D, path: string, x: number, y: number, size: number, color: string): void {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(size / 24, size / 24);
-    ctx.fillStyle = color;
-    ctx.fill(new Path2D(path));
-    ctx.restore();
-}
-
 type ShareCardPalette = (typeof PALETTES)[ShareCardTheme];
 
 function font(weight: number, size: number, mono = false): string {
     const family = mono
         ? "'SFMono-Regular', ui-monospace, Menlo, Consolas, monospace"
-        : "Poppins, system-ui, -apple-system, 'Segoe UI', sans-serif";
+        : "FluidStockBody, Poppins, system-ui, -apple-system, 'Segoe UI', sans-serif";
     return `${weight} ${size}px ${family}`;
 }
 
@@ -326,7 +304,14 @@ function drawChart(
 }
 
 /** Renders the share card and resolves with a PNG blob. */
+let stockFontsReady: Promise<void> | undefined;
+function loadStockFonts(): Promise<void> {
+    if(!stockFontsReady) stockFontsReady=Promise.all([400,500,700].map(async weight=>{const face=await new FontFace("FluidStockBody",`url("/fonts/Poppins-${weight===400?"Regular":weight===500?"Medium":"Bold"}.ttf")`,{weight:String(weight)}).load();document.fonts.add(face);})).then(()=>{}).catch(()=>{stockFontsReady=undefined;throw new Error("The stock card fonts could not load. Try again.");});
+    return stockFontsReady;
+}
+
 export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
+    await loadStockFonts();
     const canvas = document.createElement("canvas");
     canvas.width = W;
     canvas.height = H;
@@ -346,7 +331,7 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
 
     const positive = input.change >= 0;
     const periodPositive = input.periodPercent >= 0;
-    const ink = PALETTES[input.theme ?? "dark"];
+    const ink = PALETTES.dark;
 
     // background
     ctx.fillStyle = ink.canvas;
@@ -360,11 +345,11 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
     const M = 64;
 
     // brand strip — logo on the left, exchange note on the right
-    const logoImg = await loadImage(ink.logo);
+    const logoImg = await loadImage("/logo/studio-approved.png");
     const brandH = 46;
     if (logoImg) {
-        const scale = brandH / (logoImg.naturalHeight || brandH);
-        ctx.drawImage(logoImg, M, M - 6, (logoImg.naturalWidth || brandH) * scale, brandH);
+        const wash=ctx.createRadialGradient(90,88,0,90,88,220);wash.addColorStop(0,"#06245570");wash.addColorStop(1,"#020e2500");ctx.fillStyle=wash;ctx.fillRect(0,0,380,300);
+        ctx.drawImage(logoImg,798,862,1704,826,M,44,230,230*826/1704);
     } else {
         ctx.fillStyle = ink.text;
         ctx.font = font(700, 26);
@@ -380,6 +365,8 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
 
+    // Keep the original chart geometry while giving the whole content group more breathing room.
+    ctx.save();ctx.translate(16,180);ctx.scale(0.97,0.97);
     // identity
     const logoTop = M + 76;
     const logoSize = 120;
@@ -427,7 +414,7 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
     ctx.textAlign = "left";
 
     // chart panel
-    const panel = { x: M, y: logoTop + 168, w: W - M * 2, h: 520 };
+    const panel = { x: M, y: logoTop + 168, w: W - M * 2, h: 590 };
     ctx.fillStyle = ink.surface;
     roundRect(ctx, panel.x, panel.y, panel.w, panel.h, 28);
     ctx.fill();
@@ -454,13 +441,14 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
     drawChart(
         ctx,
         input.points,
-        { x: panel.x + 36, y: panel.y + 92, w: panel.w - 72, h: panel.h - 132 },
+        { x: panel.x + 36, y: panel.y + 92, w: panel.w - 72, h: panel.h - 202 },
         periodPositive,
         ink,
     );
 
     // range strip
-    const strip = panel.y + panel.h + 34;
+    const strip = panel.y + panel.h - 46;
+    ctx.strokeStyle=ink.border;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(panel.x+36,strip-48);ctx.lineTo(panel.x+panel.w-36,strip-48);ctx.stroke();
     const ranges: RangeKey[] = ["1W", "1M", "3M", "6M", "YTD", "1Y", "ALL"];
     const cell = (W - M * 2) / ranges.length;
     ctx.font = font(600, 24);
@@ -481,10 +469,11 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
     ctx.textBaseline = "alphabetic";
     ctx.textAlign = "left";
 
+    ctx.restore();
     // timestamp + backfill note, just above the footer strip
-    const barH = 132;
+    const barH = 152;
     const barY = H - barH;
-    const asOf = new Date().toLocaleString("en-GB", {
+    const asOf = new Date(input.asOf || Date.now()).toLocaleString("en-GB", {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -503,45 +492,7 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
         ctx.textAlign = "left";
     }
 
-    // ---- Footer strip ----
-    ctx.fillStyle = ink.footerBg;
-    ctx.fillRect(0, barY, W, barH);
-
-    // Tagline (left)
-    ctx.textBaseline = "alphabetic";
-    ctx.fillStyle = ink.footerText;
-    ctx.font = font(800, 28);
-    ctx.letterSpacing = "1px";
-    ctx.fillText("DECISIONS THAT", M, barY + 54);
-
-    const buildText = "BUILD WEALTH";
-    ctx.font = font(800, 36);
-    const buildW = ctx.measureText(buildText).width;
-    const buildGrad = ctx.createLinearGradient(M, 0, M + buildW, 0);
-    buildGrad.addColorStop(0, "#22d3ee");
-    buildGrad.addColorStop(1, "#6366f1");
-    ctx.fillStyle = buildGrad;
-    ctx.fillText(buildText, M, barY + 98);
-    ctx.letterSpacing = "0px";
-
-    // Socials (right, stacked)
-    const rowGap = 38;
-    const socialsTop = barY + 34;
-    ctx.font = font(500, 21);
-    for (let i = 0; i < SOCIALS.length; i++) {
-        const s = SOCIALS[i];
-        const cy = socialsTop + i * rowGap;
-        const handleW = ctx.measureText(s.handle).width;
-        const iconSize = 24;
-        const handleLeft = W - M - handleW;
-        ctx.fillStyle = ink.footerText;
-        ctx.textAlign = "left";
-        ctx.textBaseline = "middle";
-        ctx.fillText(s.handle, handleLeft, cy);
-        drawGlyph(ctx, s.icon, handleLeft - iconSize - 12, cy - iconSize / 2, iconSize, ink.footerText);
-    }
-    ctx.textBaseline = "alphabetic";
-    ctx.textAlign = "left";
+    drawStudioFooter(ctx,H);
 
     return new Promise((resolve, reject) => {
         canvas.toBlob(

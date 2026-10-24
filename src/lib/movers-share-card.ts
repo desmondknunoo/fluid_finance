@@ -1,3 +1,4 @@
+import { renderSocialAsset } from "@/lib/social-asset";
 /**
  * Fluid Finance - market movers share card
  *
@@ -212,6 +213,13 @@ const TITLES: Record<MoverCategory, string> = {
 };
 
 export async function renderMoversCard(input: MoversCardInput): Promise<Blob> {
+    if(input.category!=="active"){
+        const stamp=getShareDateAndTimestamp();const date=new Date(stamp.date+" 12:00:00 GMT").toISOString().slice(0,10);
+        return renderSocialAsset({kind:"today-movers",template:"breaking",title:"Today's market movers",symbol:"",value:"",change:"",details:"",date,source:"Ghana Stock Exchange",theme:"fluid-text-blue",weekReview:{direction:input.category,startDate:date,rows:input.stocks.slice(0,5).map(stock=>({name:`${stock.company} (${stock.symbol})`,logo:logoUrl(stock.symbol)||undefined,price:stock.price.toFixed(2),change:stock.changePercent.toFixed(2)}))}});
+    }
+    return renderLegacyMoversCard(input);
+}
+async function renderLegacyMoversCard(input: MoversCardInput): Promise<Blob> {
     const canvas = document.createElement("canvas");
     canvas.width = W;
     canvas.height = H;

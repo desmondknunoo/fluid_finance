@@ -1,0 +1,34 @@
+[
+  {
+    "name": "bitcoin",
+    "file": "bitcoin.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Bitcoin_BTC_Golden_coins_8K_wallpaper.jpg",
+    "artist": "Satheesh Sankaran",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0"
+  },
+  {
+    "name": "gold",
+    "file": "gold.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Gold_Ingots_on_white_background.jpg",
+    "artist": "Szaaman",
+    "license": "Public domain",
+    "licenseUrl": null
+  },
+  {
+    "name": "cedi",
+    "file": "cedi.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:50_Ghana_Cedis.jpg",
+    "artist": "<a href=\"https://en.wikipedia.org/wiki/Bank_of_Ghana\" class=\"extiw\" title=\"en:Bank of Ghana\">Bank of Ghana</a>, <a rel=\"nofollow\" class=\"external text\" href=\"http://www.bog.gov.gh/index.php?option=com_content&amp;view=article&amp;id=168&amp;Itemid=171\">http://www.ghanacedi.gov.gh</a>",
+    "license": "Public domain",
+    "licenseUrl": null
+  },
+  {
+    "name": "central-bank",
+    "file": "central-bank.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Bank_of_Ghana_High_Street.jpg",
+    "artist": "<a href=\"//commons.wikimedia.org/wiki/User:Natsubee\" title=\"User:Natsubee\">Natsubee</a>",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+  }
+]

@@ -252,7 +252,7 @@ export function ShareSheet({ open, onClose, card }: ShareSheetProps) {
                         </div>
 
                         {/* Preview */}
-                        <div className="mt-5 flex aspect-square w-full items-center justify-center overflow-hidden border border-ink/[0.12] bg-canvas rounded-xl">
+                        <div className="mt-5 flex aspect-[4/5] w-full items-center justify-center overflow-hidden border border-ink/[0.12] bg-canvas rounded-xl">
                             {status === "rendering" && (
                                 <Loader2 className="h-7 w-7 animate-spin text-ink/[0.68]" aria-label="Generating share image" />
                             )}

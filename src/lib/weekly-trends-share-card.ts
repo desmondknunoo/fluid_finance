@@ -1,3 +1,4 @@
+import { FLUID_DESIGN_PRESETS as PRESETS } from "@/lib/fluid-design-presets";
 /**
  * Fluid Finance - weekly trends share card
  *
@@ -167,6 +168,12 @@ async function drawTickerLogo(
 }
 
 export async function renderWeeklyTrendCard(input: WeeklyTrendCardInput): Promise<Blob> {
+    const {renderSocialAsset}=await import("@/lib/social-asset");
+    return renderSocialAsset({kind:"week-in-review",template:"breaking",title:"Week in Review",symbol:"",value:"",change:"",details:"",date:input.endDate,source:"Ghana Stock Exchange",theme:"fluid-text-blue",weekReview:{direction:input.type,startDate:input.startDate,rows:input.weeklyChanges.slice(0,5).map(({stock,weeklyChangePercent})=>({name:`${stock.company} (${stock.symbol})`,logo:stock.symbol==="EGH"?"/gse/enterprise.jpeg":logoUrl(stock.symbol)||undefined,price:stock.price.toFixed(2),change:weeklyChangePercent.toFixed(2)}))}});
+}
+
+/** Retained for older integrations; current share screens use renderWeeklyTrendCard. */
+export async function renderLegacyWeeklyTrendCard(input: WeeklyTrendCardInput): Promise<Blob> {
     const canvas = document.createElement("canvas");
     canvas.width = W;
     canvas.height = H;
@@ -397,4 +404,31 @@ export function drawReportFooter(ctx: CanvasRenderingContext2D, theme: "light" |
     ctx.textBaseline = "alphabetic";
     ctx.textAlign = "left";
 
+}
+
+/** Studio-only footer matching the approved Genser reference. Other report footers stay unchanged. */
+export function drawStudioFooter(ctx: CanvasRenderingContext2D, height = H): void {
+    const y = height - 152;
+    ctx.save();
+    ctx.fillStyle = PRESETS.footerBlue.color;
+    ctx.fillRect(0, y, W, 152);
+    ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; ctx.letterSpacing = "0px";
+    ctx.font = "700 26px FluidStudioBody, Poppins, sans-serif";
+    ctx.fillStyle = "#ffffff"; ctx.fillText("DECISIONS THAT", 78, y + 64);
+    const sloganWidth = ctx.measureText("DECISIONS THAT").width;
+    const wealthWidth = ctx.measureText("BUILD WEALTH").width;
+    ctx.font = `700 ${26 * sloganWidth / wealthWidth}px FluidStudioBody, Poppins, sans-serif`;
+    const wealthGradient = ctx.createLinearGradient(78, 0, 78 + sloganWidth, 0);
+    wealthGradient.addColorStop(0, "#22d3ee"); wealthGradient.addColorStop(1, "#1685e5");
+    ctx.fillStyle = wealthGradient; ctx.fillText("BUILD WEALTH", 78, y + 94);
+    const dividers = [342, 590, 800];
+    const starts = [366, 610, 820];
+    SOCIALS.forEach((social, index) => {
+        ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(dividers[index], y + 28); ctx.lineTo(dividers[index], y + 124); ctx.stroke();
+        drawGlyph(ctx, social.icon, starts[index], y + 61, 28, "#ffffff");
+        ctx.fillStyle = "#ffffff"; ctx.font = "500 14px FluidStudioBody, Poppins, sans-serif";
+        ctx.textBaseline = "middle"; ctx.fillText(social.handle, starts[index] + 38, y + 76);
+    });
+    ctx.restore();
 }
