@@ -40,7 +40,7 @@ async function renderPage(report: FuelReport, previous: FuelReport | null, rows:
     const scale=Math.max(1080/background.naturalWidth,footerY/background.naturalHeight),w=background.naturalWidth*scale,h=background.naturalHeight*scale;
     ctx.drawImage(background,(1080-w)/2,(footerY-h)/2,w,h);
     const overlay=ctx.createLinearGradient(0,0,1080,footerY);overlay.addColorStop(0,"#020e25e0");overlay.addColorStop(0.55,"#06245566");overlay.addColorStop(1,"#020e2580");ctx.fillStyle=overlay;ctx.fillRect(0,0,1080,footerY);
-    const corner=ctx.createLinearGradient(32,20,340,190);corner.addColorStop(0,"#062455b0");corner.addColorStop(1,"#020e2500");ctx.fillStyle=corner;ctx.fillRect(32,20,308,170);
+    const wash=ctx.createRadialGradient(140,88,0,140,88,380);wash.addColorStop(0,"#020e2599");wash.addColorStop(0.28,"#020e2570");wash.addColorStop(0.55,"#020e2538");wash.addColorStop(0.8,"#020e250d");wash.addColorStop(1,"#020e2500");ctx.fillStyle=wash;ctx.fillRect(0,0,1080,1350);
     ctx.drawImage(logo,798,862,1704,826,64,44,230,230*826/1704);
     // Blend the averages into a dark corner without a visible panel edge.
     const averageWash=ctx.createRadialGradient(1016,60,24,1016,60,365);

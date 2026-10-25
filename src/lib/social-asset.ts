@@ -6,7 +6,7 @@ import { drawStudioFooter } from "@/lib/weekly-trends-share-card";
 import { formatFuelDate } from "@/lib/fuel-prices";
 
 export type SocialAssetKind = "bond-market-update" | "policy-update" | "single-stock" | "today-movers" | "week-in-review" | "investor-brief" | "breaking-news" | "news" | "company-profile" | "just-in" | "company-portfolio" | "fx" | "commodities" | "crypto" | "indices" | "bonds" | "other" | "logo-footer" | "trending" | "treasury-bills";
-export type JustInTemplate = "breaking" | "price-alert" | "company-update" | "market-note" | "economic-release";
+export type JustInTemplate = "just-in" | "breaking" | "price-alert" | "company-update" | "market-note" | "economic-release";
 export type SocialTheme = "neutral" | "photo" | "fluid-text-blue" | "fluid-text-green" | "blue" | "gold" | "emerald" | "custom";
 export interface CompanyProfileContent {
     layout?: "classic" | "heritage-leadership";
@@ -93,9 +93,13 @@ export interface SocialAssetInput {
 const W = 1080, H = 1350, M = 64, FOOTER_Y = H - 152;
 const DISPLAY = "FluidStudioBody";
 const BODY = "FluidStudioBody";
-const TEMPLATE_LABELS: Record<JustInTemplate, string> = { breaking: "BREAKING", "price-alert": "PRICE ALERT", "company-update": "COMPANY UPDATE", "market-note": "MARKET NOTE", "economic-release": "ECONOMIC RELEASE" };
+const TEMPLATE_LABELS: Record<JustInTemplate, string> = { "just-in": "JUST IN", breaking: "BREAKING", "price-alert": "PRICE ALERT", "company-update": "COMPANY UPDATE", "market-note": "MARKET NOTE", "economic-release": "ECONOMIC RELEASE" };
 const LABELS: Record<SocialAssetKind, string> = { "bond-market-update":"BOND MARKET UPDATE", "policy-update":"POLICY UPDATE", "single-stock":"", "today-movers":"", "week-in-review":"", "investor-brief":"INVESTOR BRIEF", "breaking-news": "BREAKING", news: "NEWS UPDATE", "company-profile": "GSE PROFILE OF THE WEEK", "just-in": "JUST IN", "company-portfolio": "COMPANY PORTFOLIO", fx: "FX", commodities: "COMMODITIES", crypto: "CRYPTO", indices: "INDICES", bonds: "BONDS", other: "", "logo-footer": "", trending: "TRENDING", "treasury-bills": "TREASURY BILLS" };
 const CATEGORY_BADGES: Record<string, { background: string; text: string }> = {
+    "JUST IN": {background:"#22d3ee",text:"#041426"},
+    "COMPANY UPDATE": {background:"#1685e5",text:"#ffffff"},
+    "MARKET NOTE": {background:"#6d28d9",text:"#ffffff"},
+    "ECONOMIC RELEASE": {background:"#0f766e",text:"#ffffff"},
     "BOND MARKET UPDATE":{background:"#fcd34d",text:"#000000"}, "POLICY UPDATE":{background:"#fcd34d",text:"#000000"},
     "GSE PROFILE OF THE WEEK": {background:"#1685e5",text:"#ffffff"}, "INVESTOR BRIEF": {background:"#22d3ee",text:"#041426"}, BREAKING: {background:"#be123c",text:"#ffffff"}, "PRICE ALERT": {background:"#fcd34d",text:"#000000"},
     TRENDING: {background:"#7c3aed",text:"#ffffff"}, "NEWS UPDATE": {background:"#fcd34d",text:"#000000"},
@@ -351,7 +355,7 @@ async function drawCompanyProfile(ctx: CanvasRenderingContext2D, input: SocialAs
     const content = input.profile ?? {};
     ctx.textBaseline = "top";
     ctx.textAlign="left";ctx.letterSpacing="0px";
-    const panel=ctx.createLinearGradient(M,286,1016,488);panel.addColorStop(0,"#082548");panel.addColorStop(1,"#12466b");ctx.fillStyle=panel;ctx.beginPath();ctx.roundRect(M,286,952,202,20);ctx.fill();ctx.strokeStyle="#1685e588";ctx.lineWidth=1;ctx.stroke();
+    const panel=ctx.createLinearGradient(M,286,1016,488);panel.addColorStop(0,"#082548");panel.addColorStop(1,"#12466b");ctx.fillStyle=panel;ctx.beginPath();ctx.roundRect(M,286,952,202,20);ctx.fill();ctx.strokeStyle=PRESETS.cardOutline.color;ctx.lineWidth=PRESETS.cardOutline.width;ctx.stroke();
     const profileLogo=content.logo && /\/(SCB|standardchartered)\.png$/i.test(content.logo)?"/gse/standard-chartered-white.svg":content.logo;
     const companyLogo=profileLogo ? await loadImage(profileLogo) : null;
     if(companyLogo){const scale=Math.min(174/companyLogo.naturalWidth,156/companyLogo.naturalHeight),w=companyLogo.naturalWidth*scale,h=companyLogo.naturalHeight*scale;ctx.drawImage(companyLogo,86+(174-w)/2,309+(156-h)/2,w,h);ctx.strokeStyle="#ffffff55";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(282,312);ctx.lineTo(282,462);ctx.stroke();}
@@ -367,7 +371,7 @@ async function drawCompanyProfile(ctx: CanvasRenderingContext2D, input: SocialAs
     const gap=22,width=(W-M*2-gap)/2,rowTops=[510,734,904],rowHeights=[204,150,204];
     sections.forEach(([label,value],index)=>{
         const row=Math.floor(index/2),x=M+(index%2)*(width+gap),y=rowTops[row],height=rowHeights[row],textX=x+110,textWidth=width-128;
-        ctx.fillStyle="#03172cd9";ctx.strokeStyle="#1685e588";ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(x,y,width,height,18);ctx.fill();ctx.stroke();
+        ctx.fillStyle="#03172cd9";ctx.strokeStyle=PRESETS.cardOutline.color;ctx.lineWidth=PRESETS.cardOutline.width;ctx.beginPath();ctx.roundRect(x,y,width,height,18);ctx.fill();ctx.stroke();
         drawProfileSectionIcon(ctx,index,x+54,y+54);
         const labelText=fitText(ctx,label.toUpperCase(),textWidth,52,{display:true,weight:700,max:22,min:18,field:"profile heading"});const labelGradient=ctx.createLinearGradient(textX,0,textX+Math.max(...labelText.rows.map(line=>ctx.measureText(line).width)),0);labelGradient.addColorStop(0,PRESETS.textBlue.start);labelGradient.addColorStop(1,PRESETS.textBlue.end);ctx.fillStyle=labelGradient;labelText.rows.forEach((line,n)=>ctx.fillText(line,textX,y+24+n*labelText.step));
         const underlineY=y+28+labelText.rows.length*labelText.step;ctx.fillStyle="#22d3ee";ctx.beginPath();ctx.roundRect(textX,underlineY,34,4,2);ctx.fill();
@@ -388,7 +392,7 @@ function drawProfileSectionIcon(ctx: CanvasRenderingContext2D,index:number,x:num
 async function drawHeritageProfile(ctx: CanvasRenderingContext2D,input: SocialAssetInput): Promise<void> {
     const content=input.profile!;
     const portraits=await Promise.all([content.managingDirectorPhoto,content.boardChairmanPhoto].map(url=>url?loadImage(url):Promise.resolve(null)));
-    const card=(x:number,y:number,width:number,height:number)=>{ctx.fillStyle="#03172cd9";ctx.strokeStyle="#22d3ee66";ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(x,y,width,height,18);ctx.fill();ctx.stroke();};
+    const card=(x:number,y:number,width:number,height:number)=>{ctx.fillStyle="#03172cd9";ctx.strokeStyle=PRESETS.cardOutline.color;ctx.lineWidth=PRESETS.cardOutline.width;ctx.beginPath();ctx.roundRect(x,y,width,height,18);ctx.fill();ctx.stroke();};
     const label=(text:string,x:number,y:number,width:number)=>{ctx.textBaseline="top";ctx.textAlign="left";const title=fitText(ctx,text.toUpperCase(),width,54,{display:true,weight:700,max:22,min:18,field:"profile heading"});const gradient=ctx.createLinearGradient(x,0,x+Math.max(...title.rows.map(row=>ctx.measureText(row).width)),0);gradient.addColorStop(0,PRESETS.textBlue.start);gradient.addColorStop(1,PRESETS.textBlue.end);ctx.fillStyle=gradient;title.rows.forEach((row,n)=>ctx.fillText(row,x,y+n*title.step));ctx.letterSpacing="0px";};
     card(64,516,304,398);label(content.heritageLabel||"Our heritage",80,532,272);
     content.milestones!.forEach((point,index)=>{const y=580+index*78;ctx.strokeStyle="#22d3ee66";ctx.lineWidth=1;if(index<3){ctx.beginPath();ctx.moveTo(91,y+12);ctx.lineTo(91,y+88);ctx.stroke();}ctx.fillStyle="#22d3ee";ctx.beginPath();ctx.arc(91,y+7,5,0,Math.PI*2);ctx.fill();
@@ -470,7 +474,7 @@ function drawPolicyUpdate(ctx: CanvasRenderingContext2D,input: SocialAssetInput,
 function drawBondUpdate(ctx: CanvasRenderingContext2D,input: SocialAssetInput,color:{accent:string;accentEnd:string;background:string;text:string}): void {
     drawUpdateLead(ctx,input,color,548);const bond=input.bondUpdate!;
     ctx.textBaseline="top";ctx.textAlign="left";
-    const panel=(x:number,w:number)=>{const wash=ctx.createLinearGradient(x,676,x+w,956);wash.addColorStop(0,"#092945ed");wash.addColorStop(1,"#03172cb3");ctx.fillStyle=wash;ctx.beginPath();ctx.roundRect(x,676,w,280,20);ctx.fill();ctx.strokeStyle="#62b8ef77";ctx.lineWidth=1.2;ctx.stroke();};panel(64,452);panel(536,480);
+    const panel=(x:number,w:number)=>{const wash=ctx.createLinearGradient(x,676,x+w,956);wash.addColorStop(0,"#092945ed");wash.addColorStop(1,"#03172cb3");ctx.fillStyle=wash;ctx.beginPath();ctx.roundRect(x,676,w,280,20);ctx.fill();ctx.strokeStyle=PRESETS.cardOutline.color;ctx.lineWidth=PRESETS.cardOutline.width;ctx.stroke();};panel(64,452);panel(536,480);
     ctx.font=`700 21px ${BODY}`;ctx.fillStyle="#67e8f9";ctx.fillText("YIELD COMPARISON",86,694);
     [[bond.previousPeriod,bond.previousYield,86],[bond.currentPeriod,bond.currentYield,322]].forEach(([period,value,x])=>{ctx.font=`500 18px ${BODY}`;ctx.fillStyle="#cbd5e1";ctx.fillText(String(period),Number(x),738);const rate=fitText(ctx,String(value),174,72,{display:true,weight:700,max:52,min:28,singleLine:true,field:"bond yield"});ctx.fillStyle="#ffffff";ctx.fillText(rate.rows[0],Number(x),768);});
     const previous=parseFloat(bond.previousYield),current=parseFloat(bond.currentYield),down=Number.isFinite(previous)&&Number.isFinite(current)&&current<previous;
@@ -480,7 +484,7 @@ function drawBondUpdate(ctx: CanvasRenderingContext2D,input: SocialAssetInput,co
     ctx.font=`700 21px ${BODY}`;ctx.fillStyle="#fcd34d";ctx.fillText("NEW BOND OFFER",558,694);ctx.font=`500 17px ${BODY}`;ctx.fillStyle="#cbd5e1";ctx.fillText("MATURITY",558,744);
     const maturity=fitText(ctx,bond.maturity,280,66,{weight:700,max:58,min:28,singleLine:true,field:"maturity"});ctx.fillStyle="#fcd34d";ctx.fillText(maturity.rows[0],710,728);
     [["PRICING GUIDANCE",bond.pricingGuidance,810],["DISTRIBUTION",bond.distribution,880]].forEach(([label,value,y])=>{const yy=Number(y);ctx.strokeStyle="#ffffff33";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(558,yy-14);ctx.lineTo(994,yy-14);ctx.stroke();const key=fitText(ctx,String(label),144,52,{max:16,min:14,field:"bond label"});ctx.fillStyle="#94a3b8";key.rows.forEach((row,n)=>ctx.fillText(row,558,yy+n*key.step));const text=fitText(ctx,String(value),274,62,{max:20,min:16,weight:400,field:"bond offer detail"});ctx.fillStyle="#ffffff";text.rows.forEach((row,n)=>ctx.fillText(row,720,yy+n*text.step));});
-    ctx.fillStyle="#062455dd";ctx.beginPath();ctx.roundRect(64,976,952,126,18);ctx.fill();ctx.strokeStyle="#fcd34d88";ctx.stroke();
+    ctx.fillStyle="#062455dd";ctx.beginPath();ctx.roundRect(64,976,952,126,18);ctx.fill();ctx.strokeStyle=PRESETS.cardOutline.color;ctx.lineWidth=PRESETS.cardOutline.width;ctx.stroke();
     // Calendar icon anchors the launch date without competing with its text.
     ctx.strokeStyle="#fcd34d";ctx.lineWidth=2.5;ctx.beginPath();ctx.roundRect(86,1016,42,42,5);ctx.moveTo(86,1028);ctx.lineTo(128,1028);ctx.moveTo(97,1010);ctx.lineTo(97,1021);ctx.moveTo(117,1010);ctx.lineTo(117,1021);ctx.stroke();
     [["OFFER OPENS",bond.offerOpens,148,400],["PRICING STATUS",bond.pricingStatus,600,390]].forEach(([label,value,x,width])=>{ctx.font=`700 17px ${BODY}`;ctx.fillStyle="#fcd34d";ctx.fillText(String(label),Number(x),994);const text=fitText(ctx,String(value),Number(width),72,{max:24,min:18,field:"bond launch detail"});ctx.fillStyle="#ffffff";text.rows.forEach((row,n)=>ctx.fillText(row,Number(x),1024+n*text.step));});
@@ -495,8 +499,7 @@ function drawInvestorBrief(ctx: CanvasRenderingContext2D, input: SocialAssetInpu
     if(input.details.trim()){const intro=fitText(ctx,input.details,952,66,{max:24,min:20,field:"investor introduction"});ctx.fillStyle="#e2e8f0";intro.rows.forEach((row,index)=>ctx.fillText(row,M,438+index*intro.step));}
     brief.metrics.forEach((metric,index)=>{
         const first=index<3,width=first?302:465,x=M+(first?index*325:(index-3)*487),y=first?526:700;
-        ctx.fillStyle="#03172c8c";ctx.fillRect(x,y,width,154);
-        if(index!==0 && index!==3){ctx.strokeStyle="#9fb6cc66";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x-11,y);ctx.lineTo(x-11,y+154);ctx.stroke();}
+        ctx.fillStyle="#03172c8c";ctx.beginPath();ctx.roundRect(x,y,width,154,14);ctx.fill();ctx.strokeStyle=PRESETS.cardOutline.color;ctx.lineWidth=PRESETS.cardOutline.width;ctx.stroke();
         const label=fitText(ctx,metric.label.toUpperCase(),width-24,40,{display:true,weight:700,max:18,min:14,field:"metric label"});ctx.fillStyle="#22d3ee";label.rows.forEach((line,n)=>ctx.fillText(line,x+12,y+10+n*label.step));
         const value=fitText(ctx,metric.value,width-24,58,{display:true,weight:700,max:44,min:26,singleLine:true,field:"metric value"});ctx.fillStyle="#ffffff";ctx.fillText(value.rows[0],x+12,y+53);
         if(metric.note){const note=fitText(ctx,metric.note,width-24,52,{max:18,min:14,field:"metric note"});ctx.fillStyle="#cbd5e1";note.rows.forEach((line,n)=>ctx.fillText(line,x+12,y+100+n*note.step));}
@@ -504,7 +507,7 @@ function drawInvestorBrief(ctx: CanvasRenderingContext2D, input: SocialAssetInpu
     ctx.strokeStyle="#9fb6cc66";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(M,876);ctx.lineTo(1016,876);ctx.stroke();
     ctx.fillStyle="#ffffff";ctx.font=`700 23px ${BODY}`;ctx.fillText("WHAT INVESTORS SHOULD WATCH",M,892);
     brief.watchPoints.forEach((point,index)=>{const x=M+index*244;const text=fitText(ctx,point,218,64,{max:19,min:16,field:"watch point"});ctx.fillStyle="#e2e8f0";text.rows.forEach((line,n)=>ctx.fillText(line,x,932+n*text.step));if(index){ctx.strokeStyle="#9fb6cc66";ctx.beginPath();ctx.moveTo(x-12,932);ctx.lineTo(x-12,990);ctx.stroke();}});
-    ctx.fillStyle="#03172cb3";ctx.beginPath();ctx.roundRect(M,1010,952,92,12);ctx.fill();ctx.strokeStyle="#22d3ee66";ctx.stroke();
+    ctx.fillStyle="#03172cb3";ctx.beginPath();ctx.roundRect(M,1010,952,92,12);ctx.fill();ctx.strokeStyle=PRESETS.cardOutline.color;ctx.lineWidth=PRESETS.cardOutline.width;ctx.stroke();
     ctx.font=`700 19px ${BODY}`;ctx.fillStyle="#22d3ee";ctx.fillText("THE BOTTOM LINE",M+16,1026);
     const bottom=fitText(ctx,brief.bottomLine,700,70,{max:20,min:16,field:"bottom line"});ctx.fillStyle="#ffffff";bottom.rows.forEach((line,n)=>ctx.fillText(line,300,1022+n*bottom.step));
 }
@@ -745,11 +748,13 @@ function drawIndices(ctx: CanvasRenderingContext2D, input: SocialAssetInput, col
 
 function drawLogoCorner(ctx: CanvasRenderingContext2D): void {
     ctx.save();
-    const wash = ctx.createLinearGradient(32, 20, 340, 190);
-    wash.addColorStop(0, `${PRESETS.footerBlue.color}b0`);
-    wash.addColorStop(0.5, `${PRESETS.backgroundBlue.base}60`);
-    wash.addColorStop(1, `${PRESETS.backgroundBlue.base}00`);
-    ctx.fillStyle = wash; ctx.fillRect(32, 20, 308, 170);
+    const wash = ctx.createRadialGradient(140, 88, 0, 140, 88, 380);
+    wash.addColorStop(0, "#020e2599");
+    wash.addColorStop(0.28, "#020e2570");
+    wash.addColorStop(0.55, "#020e2538");
+    wash.addColorStop(0.8, "#020e250d");
+    wash.addColorStop(1, "#020e2500");
+    ctx.fillStyle = wash; ctx.fillRect(0, 0, W, H);
     ctx.restore();
 }
 

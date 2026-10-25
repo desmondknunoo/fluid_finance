@@ -1,3 +1,4 @@
+import { FLUID_DESIGN_PRESETS as PRESETS } from "@/lib/fluid-design-presets";
 import { drawStudioFooter } from "@/lib/weekly-trends-share-card";
 /**
  * Fluid Finance - social share card
@@ -348,7 +349,7 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
     const logoImg = await loadImage("/logo/studio-approved.png");
     const brandH = 46;
     if (logoImg) {
-        const wash=ctx.createRadialGradient(90,88,0,90,88,220);wash.addColorStop(0,"#06245570");wash.addColorStop(1,"#020e2500");ctx.fillStyle=wash;ctx.fillRect(0,0,380,300);
+        const wash=ctx.createRadialGradient(140,88,0,140,88,380);wash.addColorStop(0,"#020e2599");wash.addColorStop(0.28,"#020e2570");wash.addColorStop(0.55,"#020e2538");wash.addColorStop(0.8,"#020e250d");wash.addColorStop(1,"#020e2500");ctx.fillStyle=wash;ctx.fillRect(0,0,1080,1350);
         ctx.drawImage(logoImg,798,862,1704,826,M,44,230,230*826/1704);
     } else {
         ctx.fillStyle = ink.text;
@@ -418,8 +419,8 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
     ctx.fillStyle = ink.surface;
     roundRect(ctx, panel.x, panel.y, panel.w, panel.h, 28);
     ctx.fill();
-    ctx.strokeStyle = ink.border;
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = PRESETS.cardOutline.color;
+    ctx.lineWidth = PRESETS.cardOutline.width;
     ctx.stroke();
 
     ctx.fillStyle = ink.muted;
