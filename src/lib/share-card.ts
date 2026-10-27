@@ -1,3 +1,4 @@
+import { artworkHeadingTop } from "@/lib/artwork-layout";
 import { FLUID_DESIGN_PRESETS as PRESETS } from "@/lib/fluid-design-presets";
 import { drawStudioFooter } from "@/lib/weekly-trends-share-card";
 /**
@@ -307,7 +308,7 @@ function drawChart(
 /** Renders the share card and resolves with a PNG blob. */
 let stockFontsReady: Promise<void> | undefined;
 function loadStockFonts(): Promise<void> {
-    if(!stockFontsReady) stockFontsReady=Promise.all([400,500,700].map(async weight=>{const face=await new FontFace("FluidStockBody",`url("/fonts/Poppins-${weight===400?"Regular":weight===500?"Medium":"Bold"}.ttf")`,{weight:String(weight)}).load();document.fonts.add(face);})).then(()=>{}).catch(()=>{stockFontsReady=undefined;throw new Error("The stock card fonts could not load. Try again.");});
+    if(!stockFontsReady) stockFontsReady=Promise.all([400,500,700,800].map(async weight=>{const face=await new FontFace("FluidStockBody",`url("/fonts/Poppins-${weight===400?"Regular":weight===500?"Medium":weight===700?"Bold":"ExtraBold"}.ttf")`,{weight:String(weight)}).load();document.fonts.add(face);})).then(()=>{}).catch(()=>{stockFontsReady=undefined;throw new Error("The stock card fonts could not load. Try again.");});
     return stockFontsReady;
 }
 
@@ -367,7 +368,7 @@ export async function renderShareCard(input: ShareCardInput): Promise<Blob> {
     ctx.textBaseline = "alphabetic";
 
     // Keep the original chart geometry while giving the whole content group more breathing room.
-    ctx.save();ctx.translate(16,180);ctx.scale(0.97,0.97);
+    ctx.save();ctx.translate(16,artworkHeadingTop(ctx,"FluidStockBody")-0.97*(M+76));ctx.scale(0.97,0.97);
     // identity
     const logoTop = M + 76;
     const logoSize = 120;

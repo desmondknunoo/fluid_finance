@@ -1,3 +1,4 @@
+import { artworkTextTop, beginArtworkContent } from "@/lib/artwork-layout";
 import { renderShareCard, type ShareCardInput } from "@/lib/share-card";
 import { logoUrl } from "@/lib/logos";
 import { FX_GROUPS, FX_PROVIDERS, type FxProviderGroup } from "@/lib/fx-providers";
@@ -23,11 +24,11 @@ export interface CompanyProfileContent {
 export const PROFILE_LIMITS = { heritageLabel: 26, heritage: 110, whatWeDo: 110, didYouKnow: 110, managingDirectorLabel: 26, managingDirector: 70, boardChairmanLabel: 26, boardChairman: 70, shareStructure: 110 } as const;
 export const SOCIAL_ASSET_LIMITS = { title: 90, details: 240, symbol: 32, value: 24, change: 28, period: 40, facts: 180 } as const;
 
-export interface CommodityItem { basis?: string; name: string; price: string; change: string; picture?: string; illustration?: "auto" | "none" | "oil" | "gas" | "corn" | "cocoa" | "gold" | "manganese" | "cashew" | "copper" | "coffee" | "wheat" }
+export interface CommodityItem { market?: "local" | "international"; basis?: string; name: string; price: string; change: string; picture?: string; illustration?: "auto" | "none" | "oil" | "gas" | "corn" | "cocoa" | "gold" | "manganese" | "cashew" | "copper" | "coffee" | "wheat" }
 
 export function defaultCommodityRows(category: "energy" | "agriculture" | "metals" = "energy"): CommodityItem[] {
     const names = {energy:["Crude Oil","Natural Gas","Brent Crude Oil","Natural Gas"],metals:["Gold","Manganese Ore","Gold","Copper"],agriculture:["Cocoa Beans","Cashew","Coffee","Wheat"]}[category];
-    return names.map(name=>({name,price:"",change:""}));
+    return names.map((name,index)=>({name,market:index<2?"local" as const:"international" as const,price:"",change:""}));
 }
 
 export interface FxRateRow { group?: Exclude<FxProviderGroup,"all">; logo?: string; label: string; code?: string; buying: string; selling: string; buyingTrend?: "up" | "down"; sellingTrend?: "up" | "down" }
@@ -44,9 +45,9 @@ export interface InvestorMetric { label:string; value:string; note:string }
 export interface InvestorBriefContent { metrics:InvestorMetric[]; watchPoints:string[]; bottomLine:string }
 export function defaultInvestorBrief(): InvestorBriefContent { return {metrics:["Revenue","Net profit","Valuation","Total debt","Capacity / outlook"].map(label=>({label,value:"",note:""})),watchPoints:["","","",""],bottomLine:""}; }
 
-export interface WeekReviewRow { logo?:string; name:string; price:string; change:string }
+export interface WeekReviewRow { logo?:string; name:string; price:string; change:string; volume?:number }
 function weekReviewLogo(row: WeekReviewRow): string | null { const ticker=row.name.match(/\(([A-Za-z0-9]+)\)\s*$/)?.[1] || row.name.trim();return row.logo || (ticker.toUpperCase()==="EGH"?"/gse/enterprise.jpeg":logoUrl(ticker.toUpperCase()==="KASAP"?"KASA":ticker)); }
-export interface WeekReviewContent { direction:"gainers"|"losers"; startDate:string; rows:WeekReviewRow[] }
+export interface WeekReviewContent { direction:"gainers"|"losers"|"active"; startDate:string; rows:WeekReviewRow[] }
 export function defaultWeekReview(): WeekReviewContent { return {direction:"gainers",startDate:"",rows:Array.from({length:5},()=>({name:"",price:"",change:""}))}; }
 export interface BondUpdateContent { previousPeriod:string; previousYield:string; currentPeriod:string; currentYield:string; performanceNote:string; maturity:string; pricingGuidance:string; distribution:string; offerOpens:string; pricingStatus:string }
 export const BOND_UPDATE_LIMITS={previousPeriod:24,previousYield:16,currentPeriod:24,currentYield:16,performanceNote:90,maturity:24,pricingGuidance:64,distribution:90,offerOpens:48,pricingStatus:64} as const;
@@ -227,22 +228,24 @@ export function validateSocialAsset(input: SocialAssetInput): void {
     }
     if(input.kind==="policy-update"){
         const policy=input.policyUpdate;
-        if(!policy || policy.implications.length!==3 || policy.implications.some(point=>!point.title.trim()||point.title.length>28||!point.details.trim()||point.details.length>100)) throw new Error("Complete three policy implications: titles up to 28 and details up to 100 characters.");
+        if(!policy || (policy.implications.length<1 || policy.implications.length>3) || policy.implications.some(point=>!point.title.trim()||point.title.length>28||!point.details.trim()||point.details.length>100)) throw new Error("Complete one to three policy implications: titles up to 28 and details up to 100 characters.");
     }
     if (input.kind === "logo-footer") {
         if (!input.picture) throw new Error("Upload your already designed image first.");
         return;
     }
     if (input.kind === "commodities" && input.commodities) {
-        if (![1,2,4].includes(input.commodities.length)) throw new Error("Use one or two legacy cards, or four cards for Local and International.");
+        if ((input.commodities.length<1 || input.commodities.length>4)) throw new Error("Use one to four commodity cards.");
+        if(input.commodities.some(row=>row.market) && ["local","international"].some(market=>input.commodities!.filter((row,index)=>(row.market || (index<2?"local":"international"))===market).length>2)) throw new Error("Use at most two Local and two International commodity cards.");
         for (const row of input.commodities) {
-            if (!row.name.trim() || !row.price.trim()) throw new Error("Enter a name and price with units for each commodity.");
+            if (!row.name?.trim() || !row.price?.trim()) throw new Error("Enter a name and price with units for each commodity.");
             if (row.name.length > 36 || row.price.length > 28 || row.change.length > 24) throw new Error("Keep commodity names within 36, prices within 28 and changes within 24 characters.");
         }
     }
     if (input.kind === "fx" && input.fxTemplate) {
         const rows = input.fxRows ?? [];
-        if (input.fxTemplate === "bog" ? rows.length !== 3 : rows.length < 1 || rows.length > 60) throw new Error("Use three BoG currency rows, or one to sixty provider rows.");
+        if(input.fxTemplate==="bog" && rows.some(row=>!row.code || !/^[A-Z]{3}$/.test(row.code))) throw new Error("Enter a three-letter currency code for each BoG row.");
+        if (input.fxTemplate === "bog" ? (rows.length < 1 || rows.length > 3) : rows.length < 1 || rows.length > 60) throw new Error("Use one to three BoG currency rows, or one to sixty provider rows.");
         if(input.fxTemplate==="cedirates" && (!fxPageCount(input) || !Number.isInteger(input.fxPage ?? 0) || (input.fxPage ?? 0)<0 || (input.fxPage ?? 0)>=fxPageCount(input))) throw new Error("Add a provider to this group and choose an available flyer page.");
         for (const row of rows) {
             if(!row.label.trim() || row.label.length > 28) throw new Error("Enter a provider or currency name within 28 characters.");
@@ -265,17 +268,18 @@ export function validateSocialAsset(input: SocialAssetInput): void {
     }
     if(input.kind==="week-in-review" || input.kind==="today-movers"){
         const week=input.weekReview;
-        if(!week || (week.rows.length<1 || week.rows.length>5) || !["gainers","losers"].includes(week.direction)) throw new Error("Complete one to five rows for Top Gainers or Top Losers.");
+        if(!week || (week.rows.length<1 || week.rows.length>5) || !["gainers","losers",...(input.kind==="today-movers"?["active"]:[])].includes(week.direction)) throw new Error("Complete one to five rows for the selected market-mover list.");
         if(input.kind!=="today-movers" && (!/^\d{4}-\d{2}-\d{2}$/.test(week.startDate) || !Number.isFinite(Date.parse(week.startDate+"T12:00:00Z")) || new Date(week.startDate+"T12:00:00Z").toISOString().slice(0,10)!==week.startDate || week.startDate>input.date)) throw new Error("Choose a valid week start on or before the end date.");
         for(const row of week.rows){if(!row.name.trim() || row.name.length>80 || !/^\d+(\.\d{1,2})?$/.test(row.price) || Number(row.price)<=0 || row.price.length>12 || !/^[+−-]?\d+(\.\d{1,2})?%?$/.test(row.change) || row.change.length>10) throw new Error("Each weekly row needs a name (80 characters), positive price and numeric percentage change.");
+            if(week.direction==="active" && (!Number.isSafeInteger(row.volume) || row.volume!<0)) throw new Error("Each Most Active row needs a non-negative whole-number trading volume.");
             if(!weekReviewLogo(row)) throw new Error("Add a company logo or a recognised GSE ticker in parentheses for every weekly row.");
             if(week.direction==="gainers" && /^[-−]/.test(row.change) && Number(row.change.replace("−","-").replace("%",""))!==0 || week.direction==="losers" && Number(row.change.replace("−","-").replace("%",""))>0) throw new Error("Use positive changes for gainers and negative changes for losers.");}
     }
     if(input.kind==="investor-brief"){
         const brief=input.investorBrief;
-        if(!brief || brief.metrics.length!==5 || brief.watchPoints.length!==4) throw new Error("Complete five investor metrics and four watch points.");
+        if(!brief || brief.metrics.length<1 || brief.metrics.length>5 || brief.watchPoints.length<1 || brief.watchPoints.length>4) throw new Error("Complete one to five investor metrics and one to four watch points.");
         for(const metric of brief.metrics) if(!metric.label.trim() || !metric.value.trim() || metric.label.length>32 || metric.value.length>22 || metric.note.length>70) throw new Error("Investor metrics need a label (32 characters), value (22) and optional note (70).");
-        if(brief.watchPoints.some(point=>!point.trim() || point.length>48)) throw new Error("Complete four watch points, each within 48 characters.");
+        if(brief.watchPoints.some(point=>!point.trim() || point.length>48)) throw new Error("Complete each watch point within 48 characters.");
         if(!brief.bottomLine.trim() || brief.bottomLine.length>160) throw new Error("Add a bottom line within 160 characters.");
         if(input.details.length>140) throw new Error("Keep the investor introduction within 140 characters.");
     }
@@ -286,8 +290,8 @@ export function validateSocialAsset(input: SocialAssetInput): void {
         for (const [field, limit] of Object.entries(PROFILE_LIMITS)) if ((profile[field as keyof CompanyProfileContent] ?? "").length > limit) throw new Error(`Keep the profile ${field} within ${limit} characters.`);
         for (const field of [ "didYouKnow", "shareStructure", "managingDirector", "boardChairman"] as const) if (!profile[field]?.trim()) throw new Error("Complete all six company profile sections before generating.");
         if(profile.layout==="heritage-leadership"){
-            if(!profile.milestones || profile.milestones.length!==4 || profile.milestones.some(point=>!point.year.trim()||point.year.length>12||!point.event.trim()||point.event.length>70)) throw new Error("Complete four heritage milestones, with years up to 12 and descriptions up to 70 characters.");
-            if(!profile.services || profile.services.length!==6 || profile.services.some(service=>!service.trim()||service.length>36)) throw new Error("Complete six services, each within 36 characters.");
+            if(!profile.milestones || (profile.milestones.length<1 || profile.milestones.length>4) || profile.milestones.some(point=>!point.year.trim()||point.year.length>12||!point.event.trim()||point.event.length>70)) throw new Error("Complete one to four heritage milestones, with years up to 12 and descriptions up to 70 characters.");
+            if(!profile.services || (profile.services.length<1 || profile.services.length>6) || profile.services.some(service=>!service.trim()||service.length>36)) throw new Error("Complete one to six services, each within 36 characters.");
         }else if(!profile.heritage?.trim() || !profile.whatWeDo?.trim())throw new Error("Complete all six company profile sections before generating.");
         const shares = (profile.shareStructure ?? "").split("\n").filter(v => v.trim());
         if (shares.length > 2) throw new Error("Use at most two share-structure figures to keep the full profile readable.");
@@ -395,7 +399,7 @@ async function drawHeritageProfile(ctx: CanvasRenderingContext2D,input: SocialAs
     const card=(x:number,y:number,width:number,height:number)=>{ctx.fillStyle="#03172cd9";ctx.strokeStyle=PRESETS.cardOutline.color;ctx.lineWidth=PRESETS.cardOutline.width;ctx.beginPath();ctx.roundRect(x,y,width,height,18);ctx.fill();ctx.stroke();};
     const label=(text:string,x:number,y:number,width:number)=>{ctx.textBaseline="top";ctx.textAlign="left";const title=fitText(ctx,text.toUpperCase(),width,54,{display:true,weight:700,max:22,min:18,field:"profile heading"});const gradient=ctx.createLinearGradient(x,0,x+Math.max(...title.rows.map(row=>ctx.measureText(row).width)),0);gradient.addColorStop(0,PRESETS.textBlue.start);gradient.addColorStop(1,PRESETS.textBlue.end);ctx.fillStyle=gradient;title.rows.forEach((row,n)=>ctx.fillText(row,x,y+n*title.step));ctx.letterSpacing="0px";};
     card(64,516,304,398);label(content.heritageLabel||"Our heritage",80,532,272);
-    content.milestones!.forEach((point,index)=>{const y=580+index*78;ctx.strokeStyle="#22d3ee66";ctx.lineWidth=1;if(index<3){ctx.beginPath();ctx.moveTo(91,y+12);ctx.lineTo(91,y+88);ctx.stroke();}ctx.fillStyle="#22d3ee";ctx.beginPath();ctx.arc(91,y+7,5,0,Math.PI*2);ctx.fill();
+    content.milestones!.forEach((point,index)=>{const y=580+index*78;ctx.strokeStyle="#22d3ee66";ctx.lineWidth=1;if(index<content.milestones!.length-1){ctx.beginPath();ctx.moveTo(91,y+12);ctx.lineTo(91,y+88);ctx.stroke();}ctx.fillStyle="#22d3ee";ctx.beginPath();ctx.arc(91,y+7,5,0,Math.PI*2);ctx.fill();
         const year=fitText(ctx,point.year,72,54,{display:true,weight:700,max:19,min:15,field:"milestone year"});ctx.fillStyle="#22d3ee";year.rows.forEach((row,n)=>ctx.fillText(row,106,y-4+n*year.step));const event=fitText(ctx,point.event,166,70,{max:17,min:14,field:"heritage milestone"});ctx.fillStyle="#ffffff";event.rows.forEach((row,n)=>ctx.fillText(row,188,y-4+n*event.step));});
     card(388,516,286,398);label("What we do",404,532,254);
     content.services!.forEach((service,index)=>{const y=580+index*51;ctx.strokeStyle="#ffffff33";ctx.beginPath();ctx.moveTo(404,y+39);ctx.lineTo(658,y+39);ctx.stroke();ctx.fillStyle="#22d3ee";ctx.fillRect(406,y+9,5,5);const text=fitText(ctx,service,228,48,{max:20,min:16,field:"service"});ctx.fillStyle="#ffffff";text.rows.forEach((row,n)=>ctx.fillText(row,424,y+n*text.step));});
@@ -409,15 +413,15 @@ async function drawHeritageProfile(ctx: CanvasRenderingContext2D,input: SocialAs
 
 async function drawWeekReview(ctx: CanvasRenderingContext2D, input: SocialAssetInput): Promise<void> {
     const daily=input.kind==="today-movers";
-    const week=input.weekReview!,gainers=week.direction==="gainers",accent=gainers?"#80d44b":"#fb476b";
+    const week=input.weekReview!,gainers=week.direction==="gainers",active=week.direction==="active",accent=active?"#22d3ee":gainers?"#80d44b":"#fb476b";
     const logos=await Promise.all(week.rows.map(row=>loadImage(weekReviewLogo(row)!)));
     ctx.textAlign="center";ctx.textBaseline="top";ctx.letterSpacing="-2px";ctx.font=`800 94px ${DISPLAY}`;ctx.fillStyle="#ffffff";ctx.fillText(daily?"TODAY’S":"WEEK IN REVIEW",540,216);
-    const headingGradient=ctx.createLinearGradient(290,0,790,0);headingGradient.addColorStop(0,gainers?PRESETS.textBlue.start:"#ff697f");headingGradient.addColorStop(1,gainers?PRESETS.textBlue.end:"#db123b");ctx.fillStyle=headingGradient;ctx.fillText(gainers?"TOP GAINERS":"TOP LOSERS",540,304);ctx.letterSpacing="0px";
+    const headingGradient=ctx.createLinearGradient(290,0,790,0);headingGradient.addColorStop(0,gainers||active?PRESETS.textBlue.start:"#ff697f");headingGradient.addColorStop(1,gainers||active?PRESETS.textBlue.end:"#db123b");ctx.fillStyle=headingGradient;ctx.fillText(active?"MOST ACTIVE":gainers?"TOP GAINERS":"TOP LOSERS",540,304);ctx.letterSpacing="0px";
     const format=(date:string)=>new Intl.DateTimeFormat("en-GB",{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"}).format(new Date(date+"T12:00:00Z"));
     const period=daily?format(input.date):`${format(week.startDate)} – ${format(input.date)}`;ctx.font=`500 23px ${BODY}`;const periodWidth=ctx.measureText(period).width+48;ctx.fillStyle="#03172c99";ctx.strokeStyle="#22d3ee77";ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(540-periodWidth/2,402,periodWidth,44,22);ctx.fill();ctx.stroke();ctx.fillStyle="#ffffff";ctx.textBaseline="middle";ctx.fillText(period,540,424);
     const top=522,headerY=466,rowH=112,bottom=522+week.rows.length*112,edges=[64,624,804,1016];
     ctx.fillStyle="#03172c8c";ctx.beginPath();ctx.roundRect(M,headerY,952,bottom-headerY,18);ctx.fill();ctx.save();ctx.clip();week.rows.forEach((_,n)=>{ctx.fillStyle=n%2===0?"#020e2566":"#06245533";ctx.fillRect(M,top+n*rowH,952,rowH);});ctx.restore();ctx.strokeStyle="#ffffff";ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(M,headerY,952,bottom-headerY,18);ctx.stroke();ctx.beginPath();for(const x of edges.slice(1,-1)){ctx.moveTo(x,headerY);ctx.lineTo(x,bottom);}for(let n=0;n<week.rows.length;n++){ctx.moveTo(M,top+n*rowH);ctx.lineTo(1016,top+n*rowH);}ctx.stroke();
-    ctx.font=`700 24px ${BODY}`;ctx.fillStyle="#ffffff";ctx.textAlign="left";ctx.fillText("Company",86,494);ctx.textAlign="center";ctx.font=`700 24px ${BODY}`;ctx.fillText("Price (GHS)",714,494);ctx.fillText(daily?"Day change":"Weekly change",910,494);
+    ctx.font=`700 24px ${BODY}`;ctx.fillStyle="#ffffff";ctx.textAlign="left";ctx.fillText("Company",86,494);ctx.textAlign="center";ctx.font=`700 24px ${BODY}`;ctx.fillText("Price (GHS)",714,494);ctx.fillText(active?"Volume":daily?"Day change":"Weekly change",910,494);
     week.rows.forEach((row,n)=>{
         const center=top+n*rowH+rowH/2,logo=logos[n],scale=Math.min(44/logo.naturalWidth,44/logo.naturalHeight),w=logo.naturalWidth*scale,h=logo.naturalHeight*scale;
         ctx.fillStyle="#ffffff";ctx.beginPath();ctx.roundRect(82,center-26,52,52,7);ctx.fill();ctx.drawImage(logo,86+(44-w)/2,center-22+(44-h)/2,w,h);
@@ -428,6 +432,11 @@ async function drawWeekReview(ctx: CanvasRenderingContext2D, input: SocialAssetI
         if(ticker){ctx.font=`700 16px ${BODY}`;const chipWidth=ctx.measureText(ticker).width+18,chipY=nameY+nameHeight+8;ctx.fillStyle="#ffffff20";ctx.beginPath();ctx.roundRect(150,chipY,chipWidth,24,4);ctx.fill();ctx.fillStyle="#cbd5e1";ctx.textBaseline="middle";ctx.fillText(ticker,159,chipY+12);}
 
         const price=fitText(ctx,`₵${Number(row.price).toFixed(2)}`,156,48,{display:true,weight:700,max:34,min:24,singleLine:true,field:"weekly price"});ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#ffffff";ctx.fillText(price.rows[0],714,center);
+        if(active){
+            const volume=new Intl.NumberFormat("en-GB",{notation:"compact",maximumFractionDigits:1}).format(row.volume!);
+            const text=fitText(ctx,volume,180,48,{display:true,weight:700,max:32,min:22,singleLine:true,field:"trading volume"});
+            ctx.fillStyle=accent;ctx.fillText(text.rows[0],910,center);return;
+        }
         ctx.font=`700 32px ${BODY}`;ctx.letterSpacing="0px";const change=`${Math.abs(Number(row.change.replace("−","-").replace("%","")))}%`,groupWidth=ctx.measureText(change).width+27,start=910-groupWidth/2;
         ctx.fillStyle=accent;const negative=!gainers;ctx.beginPath();ctx.moveTo(start,center+(negative?-5:5));ctx.lineTo(start+13,center+(negative?-5:5));ctx.lineTo(start+6.5,center+(negative?5:-5));ctx.closePath();ctx.fill();ctx.textAlign="left";ctx.fillText(change,start+27,center);
     });ctx.textAlign="left";
@@ -541,7 +550,7 @@ async function drawCommodities(ctx: CanvasRenderingContext2D, input: SocialAsset
         const source = item.picture || (illustration ? `/studio/commodities/${illustration}.png` : undefined);
         return source ? loadImage(source) : Promise.resolve(undefined);
     }));
-    if (rows.length === 4) {
+    if (rows.length >= 3 || rows.some(row=>row.market)) {
         const shades = categoryShades;
         for (let col=0;col<2;col++) {
             const left=col===0?M:552, header=ctx.createLinearGradient(left,510,left+464,552);
@@ -559,7 +568,8 @@ async function drawCommodities(ctx: CanvasRenderingContext2D, input: SocialAsset
         }
         ctx.textBaseline="top";
         rows.forEach((row,index)=>{
-            const x=index<2?M:552,y=566+(index%2)*268,width=464,height=244;
+            const market=row.market || (index<2?"local":"international"),position=rows.slice(0,index).filter((item,n)=>(item.market || (n<2?"local":"international"))===market).length;
+            const x=market==="local"?M:552,y=566+position*268,width=464,height=244;
             const card=ctx.createLinearGradient(x,y,x+width,y+height);card.addColorStop(0,"#041d31");card.addColorStop(0.65,"#04162b");card.addColorStop(1,"#071329");
             ctx.fillStyle=card;ctx.beginPath();ctx.roundRect(x,y,width,height,32);ctx.fill();ctx.strokeStyle=accent;ctx.lineWidth=2;ctx.stroke();
             const picture=pictures[index],textX=x+(picture?176:24),textWidth=width-(textX-x)-22;
@@ -579,7 +589,7 @@ async function drawCommodities(ctx: CanvasRenderingContext2D, input: SocialAsset
             ctx.fillStyle=changeColor;ctx.textBaseline="middle";ctx.fillText(change.rows[0],changeTextX,y+147);ctx.textBaseline="top";
             ctx.strokeStyle="#a5b8cc66";ctx.beginPath();ctx.moveTo(textX,y+184);ctx.lineTo(x+width-22,y+184);ctx.stroke();
             if(row.basis){ctx.strokeStyle="#b7cbe0";ctx.lineWidth=1.2;
-                if(index>=2){ctx.beginPath();ctx.arc(textX+8,y+205,7,0,Math.PI*2);ctx.moveTo(textX+8,y+200);ctx.lineTo(textX+8,y+205);ctx.lineTo(textX+12,y+208);ctx.stroke();}
+                if(market==="international"){ctx.beginPath();ctx.arc(textX+8,y+205,7,0,Math.PI*2);ctx.moveTo(textX+8,y+200);ctx.lineTo(textX+8,y+205);ctx.lineTo(textX+12,y+208);ctx.stroke();}
                 else{ctx.fillStyle="#b7cbe0";ctx.fillRect(textX,y+206,4,6);ctx.fillRect(textX+6,y+202,4,10);ctx.fillRect(textX+12,y+197,4,15);}
                 const basis=fitText(ctx,row.basis,textWidth-27,36,{max:14,min:11,field:"price basis"});
                 ctx.fillStyle="#cbd5e1";ctx.textBaseline="alphabetic";
@@ -627,11 +637,12 @@ function drawBogCurrencyFlag(ctx: CanvasRenderingContext2D, x: number, y: number
     }else if(code==="EUR"){
         ctx.fillStyle="#1249a4";ctx.fillRect(0,0,44,44);ctx.fillStyle="#ffdc00";
         for(let n=0;n<12;n++){const angle=n*Math.PI/6,cx=22+Math.sin(angle)*13,cy=22-Math.cos(angle)*13;ctx.beginPath();for(let point=0;point<10;point++){const a=-Math.PI/2+point*Math.PI/5,r=point%2===0?2:0.85;const px=cx+Math.cos(a)*r,py=cy+Math.sin(a)*r;if(point===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);}ctx.closePath();ctx.fill();}
-    }else{
+    }else if(code==="USD"){
         ctx.fillStyle="#ffffff";ctx.fillRect(0,0,44,44);ctx.fillStyle="#e31d3b";for(let n=0;n<13;n+=2)ctx.fillRect(0,n*44/13,44,44/13);
         ctx.fillStyle="#17417e";ctx.fillRect(0,0,21,24);ctx.fillStyle="#ffffff";
         for(let row=0;row<6;row++)for(let col=0;col<5;col++){ctx.beginPath();ctx.arc(2+col*4,2+row*4,0.8,0,Math.PI*2);ctx.fill();}
     }
+    if(!["USD","GBP","EUR"].includes(code)) {ctx.fillStyle="#17417e";ctx.fillRect(0,0,44,44);ctx.fillStyle="#ffffff";ctx.font=`700 12px ${BODY}`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(code,22,22);}
     ctx.restore();
 }
 
@@ -792,6 +803,13 @@ export async function renderSocialAsset(input: SocialAssetInput): Promise<Blob> 
     ctx.fillStyle = color.accent; ctx.font = `700 30px ${BODY}`; ctx.letterSpacing = "2px";
     const badge = CATEGORY_BADGES[category];
     const headerY = badge ? 246 : 218;
+    const tableHeading = input.kind==="week-in-review" || input.kind==="today-movers" || input.kind==="commodities";
+    const headingTop = tableHeading
+        ? artworkTextTop(ctx,input.kind==="commodities"?"COMMODITIES":input.kind==="today-movers"?"TODAY’S":"WEEK IN REVIEW",`800 94px ${BODY}`,"top",216)
+        : badge ? headerY-37.5 : category
+        ? artworkTextTop(ctx,category,`700 30px ${BODY}`,"alphabetic",headerY)
+        : artworkTextTop(ctx,input.title.toUpperCase(),`800 104px ${BODY}`,"top",278);
+    beginArtworkContent(ctx,headingTop,BODY);
     if (input.kind === "commodities") {
         // This format has its own two-line title and category bar.
     } else if (badge) {
@@ -862,6 +880,7 @@ export async function renderSocialAsset(input: SocialAssetInput): Promise<Blob> 
     }
     if (facts) drawFacts(ctx, input.facts!, color);
     }
+    ctx.restore();
     if (input.source?.trim()) {
         let source = input.source.trim();
         try { source = new URL(source).hostname.replace(/^www\./, ""); } catch { /* A publisher name is also accepted. */ }

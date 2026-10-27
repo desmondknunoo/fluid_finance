@@ -1,3 +1,4 @@
+import { artworkTextTop, beginArtworkContent } from "@/lib/artwork-layout";
 import { FLUID_DESIGN_PRESETS as PRESETS } from "@/lib/fluid-design-presets";
 import { drawStudioFooter } from "@/lib/weekly-trends-share-card";
 import { averageFuelPrice, formatFuelChange, formatFuelDate, formatFuelPrice, fuelReportPages, fuelRowChange, type FuelReport, type FuelPriceRow } from "@/lib/fuel-prices";
@@ -51,6 +52,7 @@ async function renderPage(report: FuelReport, previous: FuelReport | null, rows:
         const price=averageFuelPrice(report.prices,fuel);ctx.font=`500 21px ${body}`;ctx.fillStyle="#cbd5e1";ctx.fillText(fuel==="petrol"?"Petrol":"Diesel",890,108+index*34);
         ctx.font=`700 25px ${body}`;ctx.fillStyle=fuel==="petrol"?"#67e8f9":"#34d399";ctx.fillText(formatFuelPrice(price),1016,108+index*34);
     }
+    beginArtworkContent(ctx,artworkTextTop(ctx,"FLUID PUMP",`800 94px ${body}`,"alphabetic",242),body);
     ctx.textAlign="left";ctx.letterSpacing="-2px";ctx.font=`800 94px ${body}`;ctx.fillStyle="#ffffff";ctx.fillText("FLUID PUMP",64,242);
     const gradient=ctx.createLinearGradient(64,0,440,0);gradient.addColorStop(0,PRESETS.textBlue.start);gradient.addColorStop(1,PRESETS.textBlue.end);ctx.fillStyle=gradient;ctx.fillText("REPORT",64,330);ctx.letterSpacing="0px";
     const edges=[64,464,609,754,885,1016],headerY=360,headerH=54,top=414,rowH=64,bottom=top+rows.length*rowH;
@@ -72,7 +74,8 @@ async function renderPage(report: FuelReport, previous: FuelReport | null, rows:
     ctx.textBaseline="alphabetic";ctx.textAlign="left";ctx.fillStyle="#cbd5e1";ctx.font=`400 18px ${body}`;
     ctx.fillText(previous?`% change vs ${formatFuelDate(previous.report_date)}`:"% change: no earlier report to compare",64,bottom+30);
     if(pageCount>1){ctx.textAlign="right";ctx.fillText(`Page ${page} of ${pageCount}`,1016,bottom+30);}
-    ctx.font=`500 22px ${body}`;ctx.fillStyle="#ffffff";ctx.textAlign="left";ctx.fillText("Source: Fluid Finance",64,1146);ctx.textAlign="right";ctx.fillText(formatFuelDate(report.report_date),1016,1146);ctx.textAlign="left";
+    ctx.restore();
+    ctx.textBaseline="alphabetic";ctx.font=`500 22px ${body}`;ctx.fillStyle="#ffffff";ctx.textAlign="left";ctx.fillText("Source: Fluid Finance",64,1146);ctx.textAlign="right";ctx.fillText(formatFuelDate(report.report_date),1016,1146);ctx.textAlign="left";
     drawStudioFooter(ctx,1350);
     return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("Could not encode the image.")),"image/png"));
 }

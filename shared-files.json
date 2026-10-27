@@ -126,6 +126,7 @@
         "public/studio/backgrounds/profile-generated.png",
         "public/studio/backgrounds/crypto-generated.png",
         "public/gse/standard-chartered-white.svg",
-        "public/studio/backgrounds/bonds-notice-generated.png"
+        "public/studio/backgrounds/bonds-notice-generated.png",
+        "src/lib/artwork-layout.ts"
     ]
 }

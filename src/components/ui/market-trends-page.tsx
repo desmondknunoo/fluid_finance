@@ -259,6 +259,7 @@ export default function MarketTrendsPage({ shareFooter }: { shareFooter?: Weekly
     };
 
     const openShareSheet = (type: "gainers" | "losers") => {
+        if (!week2Range) return;
         const items = type === "gainers" ? topGainers : topLosers;
         setShareSheet({
             open: true,
@@ -266,8 +267,8 @@ export default function MarketTrendsPage({ shareFooter }: { shareFooter?: Weekly
                 type,
                 stocks: items.map((w) => w.stock),
                 weeklyChanges: items,
-                startDate: rangeLabel?.w1 ?? "",
-                endDate: rangeLabel?.w2 ?? "",
+                startDate: week2Range.start,
+                endDate: week2Range.end,
             },
         });
     };
