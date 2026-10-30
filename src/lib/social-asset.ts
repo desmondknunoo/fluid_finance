@@ -195,11 +195,11 @@ function lines(ctx: CanvasRenderingContext2D, text: string, width: number): stri
 }
 
 /** Fit the complete copy. Never export clipped text or hide its ending behind an ellipsis. */
-function fitText(ctx: CanvasRenderingContext2D, text: string, width: number, height: number, options: { display?: boolean; max: number; min: number; field: string; singleLine?: boolean; weight?: number }): { rows: string[]; size: number; step: number } {
+function fitText(ctx: CanvasRenderingContext2D, text: string, width: number, height: number, options: { display?: boolean; max: number; min: number; field: string; singleLine?: boolean; weight?: number; lineHeight?: number }): { rows: string[]; size: number; step: number } {
     for (let size = options.max; size >= options.min; size -= 2) {
         ctx.letterSpacing = options.display && options.weight !== 700 ? "-2px" : "0px";
         ctx.font = options.display ? `${options.weight ?? 800} ${size}px ${DISPLAY}` : `${options.weight ?? 500} ${size}px ${BODY}`;
-        const rows = lines(ctx, text, width), step = Math.ceil(size * (options.display ? 0.94 : 1.45));
+        const rows = lines(ctx, text, width), step = Math.ceil(size * (options.lineHeight ?? (options.display ? 0.94 : 1.45)));
         if ((!options.singleLine || rows.length === 1) && rows.length * step <= height) return { rows, size, step };
     }
     throw new Error(`Shorten the ${options.field} so it fits at a readable size. Nothing has been cut off.`);
@@ -411,14 +411,15 @@ async function drawHeritageProfile(ctx: CanvasRenderingContext2D,input: SocialAs
     card(536,934,480,174);label("Did you know?",552,950,448);const fact=fitText(ctx,content.didYouKnow!,448,112,{max:24,min:20,field:"profile fact"});ctx.fillStyle="#ffffff";fact.rows.forEach((row,n)=>ctx.fillText(row,552,988+n*fact.step));
 }
 
+const shortDate=(date:string)=>new Intl.DateTimeFormat("en-GB",{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"}).format(new Date(date+"T12:00:00Z"));
+
 async function drawWeekReview(ctx: CanvasRenderingContext2D, input: SocialAssetInput): Promise<void> {
     const daily=input.kind==="today-movers";
     const week=input.weekReview!,gainers=week.direction==="gainers",active=week.direction==="active",accent=active?"#22d3ee":gainers?"#80d44b":"#fb476b";
     const logos=await Promise.all(week.rows.map(row=>loadImage(weekReviewLogo(row)!)));
     ctx.textAlign="center";ctx.textBaseline="top";ctx.letterSpacing="-2px";ctx.font=`800 94px ${DISPLAY}`;ctx.fillStyle="#ffffff";ctx.fillText(daily?"TODAY’S":"WEEK IN REVIEW",540,216);
     const headingGradient=ctx.createLinearGradient(290,0,790,0);headingGradient.addColorStop(0,gainers||active?PRESETS.textBlue.start:"#ff697f");headingGradient.addColorStop(1,gainers||active?PRESETS.textBlue.end:"#db123b");ctx.fillStyle=headingGradient;ctx.fillText(active?"MOST ACTIVE":gainers?"TOP GAINERS":"TOP LOSERS",540,304);ctx.letterSpacing="0px";
-    const format=(date:string)=>new Intl.DateTimeFormat("en-GB",{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"}).format(new Date(date+"T12:00:00Z"));
-    const period=daily?format(input.date):`${format(week.startDate)} – ${format(input.date)}`;ctx.font=`500 23px ${BODY}`;const periodWidth=ctx.measureText(period).width+48;ctx.fillStyle="#03172c99";ctx.strokeStyle="#22d3ee77";ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(540-periodWidth/2,402,periodWidth,44,22);ctx.fill();ctx.stroke();ctx.fillStyle="#ffffff";ctx.textBaseline="middle";ctx.fillText(period,540,424);
+    const period=daily?shortDate(input.date):`${shortDate(week.startDate)} – ${shortDate(input.date)}`;ctx.font=`500 23px ${BODY}`;const periodWidth=ctx.measureText(period).width+48;ctx.fillStyle="#03172c99";ctx.strokeStyle="#22d3ee77";ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(540-periodWidth/2,402,periodWidth,44,22);ctx.fill();ctx.stroke();ctx.fillStyle="#ffffff";ctx.textBaseline="middle";ctx.fillText(period,540,424);
     const top=522,headerY=466,rowH=112,bottom=522+week.rows.length*112,edges=[64,624,804,1016];
     ctx.fillStyle="#03172c8c";ctx.beginPath();ctx.roundRect(M,headerY,952,bottom-headerY,18);ctx.fill();ctx.save();ctx.clip();week.rows.forEach((_,n)=>{ctx.fillStyle=n%2===0?"#020e2566":"#06245533";ctx.fillRect(M,top+n*rowH,952,rowH);});ctx.restore();ctx.strokeStyle="#ffffff";ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(M,headerY,952,bottom-headerY,18);ctx.stroke();ctx.beginPath();for(const x of edges.slice(1,-1)){ctx.moveTo(x,headerY);ctx.lineTo(x,bottom);}for(let n=0;n<week.rows.length;n++){ctx.moveTo(M,top+n*rowH);ctx.lineTo(1016,top+n*rowH);}ctx.stroke();
     ctx.font=`700 24px ${BODY}`;ctx.fillStyle="#ffffff";ctx.textAlign="left";ctx.fillText("Company",86,494);ctx.textAlign="center";ctx.font=`700 24px ${BODY}`;ctx.fillText("Price (GHS)",714,494);ctx.fillText(active?"Volume":daily?"Day change":"Weekly change",910,494);
@@ -426,18 +427,18 @@ async function drawWeekReview(ctx: CanvasRenderingContext2D, input: SocialAssetI
         const center=top+n*rowH+rowH/2,logo=logos[n],scale=Math.min(44/logo.naturalWidth,44/logo.naturalHeight),w=logo.naturalWidth*scale,h=logo.naturalHeight*scale;
         ctx.fillStyle="#ffffff";ctx.beginPath();ctx.roundRect(82,center-26,52,52,7);ctx.fill();ctx.drawImage(logo,86+(44-w)/2,center-22+(44-h)/2,w,h);
         const identity=row.name.match(/^(.*?)\s*\(([A-Za-z0-9]+)\)\s*$/),company=identity?.[1] || row.name,ticker=identity?.[2]?.toUpperCase();
-        ctx.textBaseline="top";const name=fitText(ctx,company,452,ticker?66:92,{display:true,weight:700,max:26,min:20,field:"weekly company"});
+        ctx.textBaseline="top";const name=fitText(ctx,company,452,ticker?66:92,{display:true,weight:700,max:26,min:20,lineHeight:1.18,field:"weekly company"});
         const nameHeight=name.rows.length*name.step,identityHeight=nameHeight+(ticker?32:0),nameY=center-identityHeight/2;
         ctx.textAlign="left";ctx.fillStyle="#ffffff";name.rows.forEach((line,i)=>ctx.fillText(line,150,nameY+i*name.step));ctx.letterSpacing="0px";
         if(ticker){ctx.font=`700 16px ${BODY}`;const chipWidth=ctx.measureText(ticker).width+18,chipY=nameY+nameHeight+8;ctx.fillStyle="#ffffff20";ctx.beginPath();ctx.roundRect(150,chipY,chipWidth,24,4);ctx.fill();ctx.fillStyle="#cbd5e1";ctx.textBaseline="middle";ctx.fillText(ticker,159,chipY+12);}
 
-        const price=fitText(ctx,`₵${Number(row.price).toFixed(2)}`,156,48,{display:true,weight:700,max:34,min:24,singleLine:true,field:"weekly price"});ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#ffffff";ctx.fillText(price.rows[0],714,center);
+        const price=fitText(ctx,Number(row.price).toFixed(2),156,48,{display:true,weight:700,max:34,min:24,singleLine:true,field:"weekly price"});ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#ffffff";ctx.fillText(price.rows[0],714,center);
         if(active){
             const volume=new Intl.NumberFormat("en-GB",{notation:"compact",maximumFractionDigits:1}).format(row.volume!);
             const text=fitText(ctx,volume,180,48,{display:true,weight:700,max:32,min:22,singleLine:true,field:"trading volume"});
             ctx.fillStyle=accent;ctx.fillText(text.rows[0],910,center);return;
         }
-        ctx.font=`700 32px ${BODY}`;ctx.letterSpacing="0px";const change=`${Math.abs(Number(row.change.replace("−","-").replace("%","")))}%`,groupWidth=ctx.measureText(change).width+27,start=910-groupWidth/2;
+        ctx.font=`700 32px ${BODY}`;ctx.letterSpacing="0px";const change=`${Math.abs(Number(row.change.replace("−","-").replace("%",""))).toFixed(2)}%`,groupWidth=ctx.measureText(change).width+27,start=910-groupWidth/2;
         ctx.fillStyle=accent;const negative=!gainers;ctx.beginPath();ctx.moveTo(start,center+(negative?-5:5));ctx.lineTo(start+13,center+(negative?-5:5));ctx.lineTo(start+6.5,center+(negative?5:-5));ctx.closePath();ctx.fill();ctx.textAlign="left";ctx.fillText(change,start+27,center);
     });ctx.textAlign="left";
 }
@@ -783,7 +784,6 @@ export async function renderSocialAsset(input: SocialAssetInput): Promise<Blob> 
         const context = canvas.getContext("2d");
         if (!context) throw new Error("Your browser could not prepare the image.");
         context.drawImage(photo, 0, 0, W, imageHeight);
-        drawLogoCorner(context);
         context.drawImage(logo, 798, 862, 1704, 826, M, 44, 230, 230 * 826 / 1704);
         drawStudioFooter(context, canvas.height);
         return new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("The image could not be exported. Try again.")), "image/png"));
@@ -889,7 +889,8 @@ export async function renderSocialAsset(input: SocialAssetInput): Promise<Blob> 
         sourceText.rows.forEach((row, n) => ctx.fillText(row, M, 1130 + n * sourceText.step));
     }
     ctx.textBaseline = "top"; ctx.textAlign = "right"; ctx.fillStyle = color.text; ctx.font = `500 22px ${BODY}`;
-    ctx.fillText(formatFuelDate(input.date), W - M, 1130); ctx.textAlign = "left";
+    // Week in Review already prints its period in the short form; match it.
+    ctx.fillText(input.kind === "week-in-review" || input.kind === "today-movers" ? shortDate(input.date) : formatFuelDate(input.date), W - M, 1130); ctx.textAlign = "left";
     drawStudioFooter(ctx, H);
     return new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("The image could not be exported. Try again.")), "image/png"));
 }
