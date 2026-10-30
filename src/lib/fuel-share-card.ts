@@ -1,4 +1,4 @@
-import { artworkTextTop, beginArtworkContent } from "@/lib/artwork-layout";
+import { artworkTextTop, balancedRows, beginArtworkContent } from "@/lib/artwork-layout";
 import { FLUID_DESIGN_PRESETS as PRESETS } from "@/lib/fluid-design-presets";
 import { drawStudioFooter } from "@/lib/weekly-trends-share-card";
 import { averageFuelPrice, formatFuelChange, formatFuelDate, formatFuelPrice, fuelReportPages, fuelRowChange, type FuelReport, type FuelPriceRow } from "@/lib/fuel-prices";
@@ -62,16 +62,22 @@ async function renderPage(report: FuelReport, previous: FuelReport | null, rows:
     ctx.restore();
     ctx.strokeStyle="#ffffff";ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(64,headerY,952,bottom-headerY,18);ctx.stroke();ctx.beginPath();
     for(const x of edges.slice(1,-1)){ctx.moveTo(x,headerY);ctx.lineTo(x,bottom);}for(let n=0;n<rows.length;n++){ctx.moveTo(64,top+n*rowH);ctx.lineTo(1016,top+n*rowH);}ctx.stroke();
-    ctx.fillStyle="#ffffff";ctx.textBaseline="middle";ctx.font=`700 17px ${body}`;
+    ctx.fillStyle="#ffffff";ctx.textBaseline="middle";ctx.font=`700 18px ${body}`;
     ["Name","Petrol (GHS)","Diesel (GHS)","Petrol %","Diesel %"].forEach((label,n)=>{ctx.fillStyle=n===0?"#ffffff":n%2===1?"#67e8f9":"#34d399";ctx.textAlign=n===0?"left":"center";ctx.fillText(label,n===0?86:(edges[n]+edges[n+1])/2,headerY+headerH/2);});
+    // Each % column shares one right edge so the figures line up down the table.
+    const changes=rows.map(row=>fuelRowChange(row,previous));ctx.font=`700 20px ${body}`;
+    const changeWidths=(["petrol","diesel"] as const).map(fuel=>Math.max(...changes.map(change=>ctx.measureText(formatFuelChange(change[fuel])).width)));
     rows.forEach((row,index)=>{
         const y=top+index*rowH,center=y+rowH/2,companyLogo=logos.get(row.logo_url!)!;
-        ctx.fillStyle="#ffffff";ctx.beginPath();ctx.roundRect(78,y+10,44,44,6);ctx.fill();const scale=Math.min(38/companyLogo.naturalWidth,38/companyLogo.naturalHeight),w=companyLogo.naturalWidth*scale,h=companyLogo.naturalHeight*scale;ctx.drawImage(companyLogo,81+(38-w)/2,y+13+(38-h)/2,w,h);
-        ctx.textAlign="left";ctx.fillStyle="#ffffff";let size=24;for(;size>16;size--){ctx.font=`500 ${size}px ${body}`;if(ctx.measureText(row.name).width<=304)break;}ctx.fillText(row.name,140,center);
+        // Long names wrap into two even lines; a wrapped name's logo sits level with its first line.
+        const name=balancedRows(ctx,row.name,304,size=>`700 ${size}px ${body}`,{oneLine:[24,23,22],wrapped:[20,19,18,17,16]})??{rows:[row.name],size:16,step:19};
+        ctx.font=`700 ${name.size}px ${body}`;ctx.textBaseline="alphabetic";const cap=ctx.measureText("H").actualBoundingBoxAscent || name.size*0.72,nameTop=center-(cap+(name.rows.length-1)*name.step)/2,logoTop=name.rows.length>1?Math.round(nameTop):y+10;
+        ctx.fillStyle="#ffffff";ctx.beginPath();ctx.roundRect(78,logoTop,44,44,6);ctx.fill();const scale=Math.min(38/companyLogo.naturalWidth,38/companyLogo.naturalHeight),w=companyLogo.naturalWidth*scale,h=companyLogo.naturalHeight*scale;ctx.drawImage(companyLogo,81+(38-w)/2,logoTop+3+(38-h)/2,w,h);
+        ctx.textAlign="left";ctx.fillStyle="#ffffff";name.rows.forEach((line,i)=>ctx.fillText(line,140,nameTop+cap+i*name.step));ctx.textBaseline="middle";
         ctx.textAlign="center";ctx.font=`700 25px ${body}`;[row.petrol,row.diesel].forEach((price,n)=>{ctx.fillStyle="#ffffff";ctx.fillText(formatFuelPrice(price),(edges[n+1]+edges[n+2])/2,center);});
-        const change=fuelRowChange(row,previous);ctx.font=`500 20px ${body}`;[change.petrol,change.diesel].forEach((value,n)=>{ctx.fillStyle=value===null?"#94a3b8":value>0?"#fb7185":value<0?"#34d399":"#94a3b8";ctx.fillText(formatFuelChange(value),(edges[n+3]+edges[n+4])/2,center);});
+        const change=changes[index];ctx.font=`700 20px ${body}`;ctx.textAlign="right";[change.petrol,change.diesel].forEach((value,n)=>{ctx.fillStyle=value===null?"#94a3b8":value>0?"#fb7185":value<0?"#34d399":"#94a3b8";ctx.fillText(formatFuelChange(value),(edges[n+3]+edges[n+4])/2+changeWidths[n]/2,center);});
     });
-    ctx.textBaseline="alphabetic";ctx.textAlign="left";ctx.fillStyle="#cbd5e1";ctx.font=`400 18px ${body}`;
+    ctx.textBaseline="alphabetic";ctx.textAlign="left";ctx.fillStyle="#cbd5e1";ctx.font=`500 18px ${body}`;
     ctx.fillText(previous?`% change vs ${formatFuelDate(previous.report_date)}`:"% change: no earlier report to compare",64,bottom+30);
     if(pageCount>1){ctx.textAlign="right";ctx.fillText(`Page ${page} of ${pageCount}`,1016,bottom+30);}
     ctx.restore();

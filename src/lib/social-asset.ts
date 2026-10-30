@@ -1,4 +1,4 @@
-import { artworkTextTop, beginArtworkContent } from "@/lib/artwork-layout";
+import { artworkTextTop, balancedRows, beginArtworkContent } from "@/lib/artwork-layout";
 import { renderShareCard, type ShareCardInput } from "@/lib/share-card";
 import { logoUrl } from "@/lib/logos";
 import { FX_GROUPS, FX_PROVIDERS, type FxProviderGroup } from "@/lib/fx-providers";
@@ -423,14 +423,19 @@ async function drawWeekReview(ctx: CanvasRenderingContext2D, input: SocialAssetI
     const top=522,headerY=466,rowH=112,bottom=522+week.rows.length*112,edges=[64,624,804,1016];
     ctx.fillStyle="#03172c8c";ctx.beginPath();ctx.roundRect(M,headerY,952,bottom-headerY,18);ctx.fill();ctx.save();ctx.clip();week.rows.forEach((_,n)=>{ctx.fillStyle=n%2===0?"#020e2566":"#06245533";ctx.fillRect(M,top+n*rowH,952,rowH);});ctx.restore();ctx.strokeStyle="#ffffff";ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(M,headerY,952,bottom-headerY,18);ctx.stroke();ctx.beginPath();for(const x of edges.slice(1,-1)){ctx.moveTo(x,headerY);ctx.lineTo(x,bottom);}for(let n=0;n<week.rows.length;n++){ctx.moveTo(M,top+n*rowH);ctx.lineTo(1016,top+n*rowH);}ctx.stroke();
     ctx.font=`700 24px ${BODY}`;ctx.fillStyle="#ffffff";ctx.textAlign="left";ctx.fillText("Company",86,494);ctx.textAlign="center";ctx.font=`700 24px ${BODY}`;ctx.fillText("Price (GHS)",714,494);ctx.fillText(active?"Volume":daily?"Day change":"Weekly change",910,494);
+    // One shared column for every change figure: arrows in a single line, percentages right-aligned.
+    const changeText=(row:WeekReviewRow)=>`${Math.abs(Number(row.change.replace("−","-").replace("%",""))).toFixed(2)}%`;
+    ctx.font=`700 32px ${BODY}`;ctx.letterSpacing="0px";const changeWidth=Math.max(...week.rows.map(row=>ctx.measureText(changeText(row)).width)),changeStart=910-(changeWidth+27)/2;
     week.rows.forEach((row,n)=>{
         const center=top+n*rowH+rowH/2,logo=logos[n],scale=Math.min(44/logo.naturalWidth,44/logo.naturalHeight),w=logo.naturalWidth*scale,h=logo.naturalHeight*scale;
-        ctx.fillStyle="#ffffff";ctx.beginPath();ctx.roundRect(82,center-26,52,52,7);ctx.fill();ctx.drawImage(logo,86+(44-w)/2,center-22+(44-h)/2,w,h);
         const identity=row.name.match(/^(.*?)\s*\(([A-Za-z0-9]+)\)\s*$/),company=identity?.[1] || row.name,ticker=identity?.[2]?.toUpperCase();
-        ctx.textBaseline="top";const name=fitText(ctx,company,452,ticker?66:92,{display:true,weight:700,max:26,min:20,lineHeight:1.18,field:"weekly company"});
-        const nameHeight=name.rows.length*name.step,identityHeight=nameHeight+(ticker?32:0),nameY=center-identityHeight/2;
-        ctx.textAlign="left";ctx.fillStyle="#ffffff";name.rows.forEach((line,i)=>ctx.fillText(line,150,nameY+i*name.step));ctx.letterSpacing="0px";
-        if(ticker){ctx.font=`700 16px ${BODY}`;const chipWidth=ctx.measureText(ticker).width+18,chipY=nameY+nameHeight+8;ctx.fillStyle="#ffffff20";ctx.beginPath();ctx.roundRect(150,chipY,chipWidth,24,4);ctx.fill();ctx.fillStyle="#cbd5e1";ctx.textBaseline="middle";ctx.fillText(ticker,159,chipY+12);}
+        const name=balancedRows(ctx,company,452,size=>`700 ${size}px ${DISPLAY}`,{oneLine:[26],wrapped:[24,23,22,21,20]})??fitText(ctx,company,452,ticker?66:92,{display:true,weight:700,max:26,min:20,lineHeight:1.18,field:"weekly company"});
+        // Centre the visible letters and ticker chip, not the font box, so wrapped names keep equal space above and below.
+        ctx.textBaseline="alphabetic";const cap=ctx.measureText("H").actualBoundingBoxAscent || name.size*0.72,chipGap=Math.round(name.size*0.3)+8,lastBaseline=cap+(name.rows.length-1)*name.step,identityHeight=lastBaseline+(ticker?chipGap+24:0),identityTop=center-identityHeight/2;
+        // The logo tile lines up with the top of the company name.
+        ctx.fillStyle="#ffffff";ctx.beginPath();ctx.roundRect(82,identityTop,52,52,7);ctx.fill();ctx.drawImage(logo,86+(44-w)/2,identityTop+4+(44-h)/2,w,h);
+        ctx.textAlign="left";ctx.fillStyle="#ffffff";name.rows.forEach((line,i)=>ctx.fillText(line,150,identityTop+cap+i*name.step));ctx.letterSpacing="0px";
+        if(ticker){ctx.font=`700 16px ${BODY}`;const chipWidth=ctx.measureText(ticker).width+18,chipY=identityTop+lastBaseline+chipGap;ctx.fillStyle="#ffffff20";ctx.beginPath();ctx.roundRect(150,chipY,chipWidth,24,4);ctx.fill();ctx.fillStyle="#cbd5e1";ctx.textBaseline="middle";ctx.fillText(ticker,159,chipY+12);}
 
         const price=fitText(ctx,Number(row.price).toFixed(2),156,48,{display:true,weight:700,max:34,min:24,singleLine:true,field:"weekly price"});ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#ffffff";ctx.fillText(price.rows[0],714,center);
         if(active){
@@ -438,8 +443,8 @@ async function drawWeekReview(ctx: CanvasRenderingContext2D, input: SocialAssetI
             const text=fitText(ctx,volume,180,48,{display:true,weight:700,max:32,min:22,singleLine:true,field:"trading volume"});
             ctx.fillStyle=accent;ctx.fillText(text.rows[0],910,center);return;
         }
-        ctx.font=`700 32px ${BODY}`;ctx.letterSpacing="0px";const change=`${Math.abs(Number(row.change.replace("−","-").replace("%",""))).toFixed(2)}%`,groupWidth=ctx.measureText(change).width+27,start=910-groupWidth/2;
-        ctx.fillStyle=accent;const negative=!gainers;ctx.beginPath();ctx.moveTo(start,center+(negative?-5:5));ctx.lineTo(start+13,center+(negative?-5:5));ctx.lineTo(start+6.5,center+(negative?5:-5));ctx.closePath();ctx.fill();ctx.textAlign="left";ctx.fillText(change,start+27,center);
+        ctx.font=`700 32px ${BODY}`;ctx.letterSpacing="0px";const change=changeText(row),start=changeStart;
+        ctx.fillStyle=accent;const negative=!gainers;ctx.beginPath();ctx.moveTo(start,center+(negative?-5:5));ctx.lineTo(start+13,center+(negative?-5:5));ctx.lineTo(start+6.5,center+(negative?5:-5));ctx.closePath();ctx.fill();ctx.textAlign="right";ctx.fillText(change,start+27+changeWidth,center);
     });ctx.textAlign="left";
 }
 
@@ -655,9 +660,14 @@ async function drawProviderTable(ctx: CanvasRenderingContext2D,input:SocialAsset
         const items=rows.slice(col*10,col*10+10),x=M+col*width,bottom=top+items.length*rowH,companyWidth=columns===2?230:400,rateWidth=(width-companyWidth)/2;
         ctx.fillStyle="#03172c8c";ctx.beginPath();ctx.roundRect(x,headerY,width,bottom-headerY,16);ctx.fill();ctx.save();ctx.clip();items.forEach((_,n)=>{ctx.fillStyle=n%2===0?"#020e2566":"#06245533";ctx.fillRect(x,top+n*rowH,width,rowH);});ctx.restore();ctx.strokeStyle="#ffffff99";ctx.lineWidth=1.2;ctx.beginPath();ctx.roundRect(x,headerY,width,bottom-headerY,16);ctx.stroke();ctx.beginPath();for(const split of [x+companyWidth,x+companyWidth+rateWidth]){ctx.moveTo(split,headerY);ctx.lineTo(split,bottom);}for(let n=0;n<items.length;n++){ctx.moveTo(x,top+n*rowH);ctx.lineTo(x+width,top+n*rowH);}ctx.stroke();
         ctx.textBaseline="middle";ctx.font=`700 ${columns===2?18:24}px ${BODY}`;ctx.fillStyle="#ffffff";ctx.textAlign="left";ctx.fillText("Bank / Provider",x+14,418);ctx.textAlign="center";ctx.fillText("USD → GHS",x+companyWidth+rateWidth/2,418);ctx.fillText("GHS → USD",x+companyWidth+rateWidth*1.5,418);
-        items.forEach((row,n)=>{const y=top+n*rowH,logo=logos[col*10+n];ctx.textAlign="left";if(logo){ctx.fillStyle="#ffffff";ctx.beginPath();ctx.roundRect(x+10,y+13,38,38,6);ctx.fill();const scale=Math.min(32/logo.naturalWidth,32/logo.naturalHeight),w=logo.naturalWidth*scale,h=logo.naturalHeight*scale;ctx.drawImage(logo,x+13+(32-w)/2,y+16+(32-h)/2,w,h);}const tx=x+(logo?58:14);const name=fitText(ctx,row.label,companyWidth-(tx-x)-10,58,{max:columns===2?21:26,min:16,weight:700,field:"provider name"});ctx.textBaseline="top";ctx.fillStyle="#ffffff";name.rows.forEach((line,i)=>ctx.fillText(line,tx,y+(rowH-name.rows.length*name.step)/2+i*name.step));for(const [value,cx] of [[row.buying,x+companyWidth+rateWidth/2],[row.selling,x+companyWidth+rateWidth*1.5]] as const){const rate=fitText(ctx,value||"—",rateWidth-12,48,{max:26,min:18,singleLine:true,weight:700,field:"provider rate"});ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(rate.rows[0],cx,y+32);} });
+        items.forEach((row,n)=>{const y=top+n*rowH,logo=logos[col*10+n];ctx.textAlign="left";const tx=x+(logo?58:14),nameWidth=companyWidth-(tx-x)-10;
+            const name=balancedRows(ctx,row.label,nameWidth,size=>`700 ${size}px ${BODY}`,columns===2?{oneLine:[21],wrapped:[19,18,17,16]}:{oneLine:[26],wrapped:[22,21,20,19,18,17,16]})??fitText(ctx,row.label,nameWidth,58,{max:columns===2?21:26,min:16,weight:700,field:"provider name"});
+            // Same layout as the movers tables: letters centred in the row, and a wrapped name's logo level with its first line.
+            ctx.textBaseline="alphabetic";const cap=ctx.measureText("H").actualBoundingBoxAscent || name.size*0.72,nameTop=y+rowH/2-(cap+(name.rows.length-1)*name.step)/2,logoTop=name.rows.length>1?Math.round(nameTop):y+13;
+            if(logo){ctx.fillStyle="#ffffff";ctx.beginPath();ctx.roundRect(x+10,logoTop,38,38,6);ctx.fill();const scale=Math.min(32/logo.naturalWidth,32/logo.naturalHeight),w=logo.naturalWidth*scale,h=logo.naturalHeight*scale;ctx.drawImage(logo,x+13+(32-w)/2,logoTop+3+(32-h)/2,w,h);}
+            ctx.font=`700 ${name.size}px ${BODY}`;ctx.fillStyle="#ffffff";name.rows.forEach((line,i)=>ctx.fillText(line,tx,nameTop+cap+i*name.step));for(const [value,cx] of [[row.buying,x+companyWidth+rateWidth/2],[row.selling,x+companyWidth+rateWidth*1.5]] as const){const rate=fitText(ctx,value||"—",rateWidth-12,48,{max:26,min:18,singleLine:true,weight:700,field:"provider rate"});ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(rate.rows[0],cx,y+32);} });
     }
-    if(fxPageCount(input)>1){ctx.textAlign="right";ctx.textBaseline="top";ctx.font=`400 18px ${BODY}`;ctx.fillStyle="#ffffff";ctx.fillText(`Page ${page+1} of ${fxPageCount(input)}`,1016,1094);}ctx.textAlign="left";
+    if(fxPageCount(input)>1){ctx.textAlign="right";ctx.textBaseline="top";ctx.font=`500 18px ${BODY}`;ctx.fillStyle="#ffffff";ctx.fillText(`Page ${page+1} of ${fxPageCount(input)}`,1016,1094);}ctx.textAlign="left";
 }
 
 async function drawFxTable(ctx: CanvasRenderingContext2D, input: SocialAssetInput): Promise<void> {
@@ -681,12 +691,13 @@ async function drawFxTable(ctx: CanvasRenderingContext2D, input: SocialAssetInpu
     ctx.stroke();
     ctx.textBaseline="middle";ctx.font=`700 22px ${BODY}`;ctx.fillStyle="#ffffff";
     ctx.textAlign="left";
-    const groupName=bog?"CURRENCY":FX_GROUPS.find(g=>g.id===(input.fxGroup || "all"))?.label || "All";
-    const groupText=fitText(ctx,groupName,360,45,{display:bog, max:bog?30:22,min:bog?26:18,singleLine:true,weight:700,field:"FX group"});
+    const groupName=bog?"Currency":FX_GROUPS.find(g=>g.id===(input.fxGroup || "all"))?.label || "All";
+    const groupText=fitText(ctx,groupName,360,45,{max:24,min:18,singleLine:true,weight:700,field:"FX group"});
     ctx.textBaseline="middle";ctx.fillText(groupText.rows[0],left+22,headerY+headerH/2);
     if(bog){
-        ctx.font=`700 30px ${BODY}`;ctx.textAlign="center";ctx.fillStyle="#ffffff";
-        ctx.fillText("BUYING",602,headerY+headerH/2);ctx.fillText("SELLING",878,headerY+headerH/2);
+        // Headers follow the stocks table: bold, title case, and the currency named once in the header.
+        ctx.font=`700 24px ${BODY}`;ctx.textAlign="center";ctx.fillStyle="#ffffff";
+        ctx.fillText("Buying (GHS)",602,headerY+headerH/2);ctx.fillText("Selling (GHS)",878,headerY+headerH/2);
     }else{
         drawFxDirectionBadge(ctx,602,headerY+headerH/2,"us","USD → GHS");
         drawFxDirectionBadge(ctx,878,headerY+headerH/2,"gh","GHS → USD");
@@ -698,10 +709,9 @@ async function drawFxTable(ctx: CanvasRenderingContext2D, input: SocialAssetInpu
             ctx.textAlign="left";ctx.textBaseline="middle";ctx.fillStyle="#ffffff";ctx.font=`700 40px ${BODY}`;
             const symbol=({USD:"$",GBP:"£",EUR:"€"} as Record<string,string>)[row.code || ""] || "";
             ctx.fillText(`${symbol}  ${row.code || ""}`,M+110,center-24);
-            const currencyName=fitText(ctx,row.label,266,54,{max:28,min:20,singleLine:true,field:"currency name"});ctx.font=`400 ${currencyName.size}px ${BODY}`;ctx.fillStyle="#ffffff";ctx.textBaseline="middle";ctx.fillText(currencyName.rows[0],M+110,center+28);
+            const currencyName=fitText(ctx,row.label,266,54,{max:26,min:20,singleLine:true,weight:700,field:"currency name"});ctx.font=`700 ${currencyName.size}px ${BODY}`;ctx.fillStyle="#ffffff";ctx.textBaseline="middle";ctx.fillText(currencyName.rows[0],M+110,center+28);
             for(const [rate,middle] of [[row.buying,602],[row.selling,878]] as const){
-                ctx.font=`700 42px ${BODY}`;const rateWidth=ctx.measureText(rate).width;ctx.font=`400 28px ${BODY}`;const prefixWidth=ctx.measureText("GHS").width,start=middle-(prefixWidth+12+rateWidth)/2;
-                ctx.textAlign="left";ctx.textBaseline="middle";ctx.fillStyle="#ffffff";ctx.fillText("GHS",start,center+2);ctx.font=`700 42px ${BODY}`;ctx.fillText(rate,start+prefixWidth+12,center);
+                ctx.font=`700 42px ${BODY}`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#ffffff";ctx.fillText(rate,middle,center);
             }
             return;
         }

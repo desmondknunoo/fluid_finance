@@ -26,3 +26,22 @@ export function beginArtworkContent(ctx: CanvasRenderingContext2D, currentTop: n
     ctx.save();
     ctx.translate(0, offset);
 }
+
+/** Names stay on one line at the `oneLine` sizes; longer ones split into two lines of similar width at the `wrapped` sizes. */
+export function balancedRows(ctx: CanvasRenderingContext2D, text: string, width: number, font: (size: number) => string, sizes: { oneLine: number[]; wrapped: number[] }): { rows: string[]; size: number; step: number } | undefined {
+    const name = text.trim(), words = name.split(/\s+/);
+    for (const size of sizes.oneLine) {
+        ctx.letterSpacing = "0px"; ctx.font = font(size);
+        if (ctx.measureText(name).width <= width) return { rows: [name], size, step: Math.ceil(size * 1.18) };
+    }
+    for (const size of sizes.wrapped) {
+        ctx.letterSpacing = "0px"; ctx.font = font(size);
+        let best: string[] | undefined, bestWidth = Infinity;
+        for (let i = 1; i < words.length; i++) {
+            const rows = [words.slice(0, i).join(" "), words.slice(i).join(" ")], widest = Math.max(...rows.map(row => ctx.measureText(row).width));
+            if (widest <= width && widest < bestWidth) { best = rows; bestWidth = widest; }
+        }
+        if (best) return { rows: best, size, step: Math.ceil(size * 1.18) };
+    }
+    return undefined;
+}
