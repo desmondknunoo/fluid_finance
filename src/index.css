@@ -307,6 +307,7 @@ body { margin: 0; }
 .news-home .text-ink\/40, .news-home .text-ink\/30, .quote-tape .text-ink\/40 { color: var(--news-muted); }
 
 /* Long-form editorial homepage: content-driven bands, rails and media. */
+.editorial-topic.editorial-news { margin-top: 24px; }
 .editorial-topic { margin-block: 44px 64px; border-top: 1px solid var(--news-rule); scroll-margin-top: 24px; }
 .editorial-section-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12px; padding-block: 15px 20px; border-bottom: 1px solid var(--news-rule); }
 .editorial-section-heading h2 { font: 700 clamp(28px,3vw,36px)/1.1 var(--news-display); letter-spacing: -.02em; }

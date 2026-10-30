@@ -1,9 +1,9 @@
-import { EditorialSections } from '@/components/home/editorial-sections';
+import { EditorialSections, NewsSection } from '@/components/home/editorial-sections';
 import { SocialFeed, FEED_LINKS } from '@/components/home/social-feed';
 import { Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ArrowRight, BookOpen, ChevronRight, Fuel, GraduationCap, Landmark, LifeBuoy, MessageSquare, Newspaper, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { categoryLabel, formatRelative, listForumCategories, listLatestFxRates, listPublicFuelReports, listPublishedArticles, listThreads, type Article, type ForumThread, type FxRate } from "@/lib/community";
+import { articleDesk, categoryLabel, formatRelative, listForumCategories, listLatestFxRates, listPublicFuelReports, listPublishedArticles, listThreads, type Article, type ForumThread, type FxRate } from "@/lib/community";
 import { averageFuelPrice, formatFuelChange, formatFuelDate, formatFuelPrice, fuelPriceChange, type FuelReport } from "@/lib/fuel-prices";
 import { formatCedis, formatCompact, type Stock } from "@/lib/gse";
 import { getSeries, periodChange, sliceRange } from "@/lib/history";
@@ -47,6 +47,7 @@ export default function HomePage() {
     const { user } = useAuth();
     const breadth = useMemo(() => marketBreadth(market.stocks), [market.stocks]);
     const [articles, setArticles] = useState<Article[]>([]);
+    const [articlesLoaded, setArticlesLoaded] = useState(false);
     const [threads, setThreads] = useState<ForumThread[]>([]);
     const [fx, setFx] = useState<FxRate[]>([]);
     const [fuel, setFuel] = useState<FuelReport | null>(null);
@@ -57,7 +58,7 @@ export default function HomePage() {
     useEffect(() => { if (share) setShareLoaded(true); }, [share]);
 
     useEffect(() => {
-        listPublishedArticles({ limit: 120 }).then(setArticles).catch(() => setArticles([]));
+        listPublishedArticles({ limit: 100 }).then(setArticles).catch(() => setArticles([])).finally(() => setArticlesLoaded(true));
         listThreads({ page: 0 }).then((data) => setThreads(data.slice(0, 6))).catch(() => setThreads([]));
         listLatestFxRates().then(setFx).catch(() => setFx([]));
         listPublicFuelReports(2).then((reports) => { setFuel(reports[0] ?? null); setPriorFuel(reports[1] ?? null); }).catch(() => setFuel(null));
@@ -67,7 +68,8 @@ export default function HomePage() {
     const composite = useMemo(() => compositeSeries(market.stocks, "1M"), [market.stocks]);
     const compositeChange = useMemo(() => periodChange(composite), [composite]);
     const usd = fx.find((rate) => rate.base_currency === "USD" && rate.quote_currency === "GHS") ?? null;
-    const [lead, ...rest] = articles;
+    const news = useMemo(() => articles.filter((article) => articleDesk(article) === "news"), [articles]);
+    const [lead, ...rest] = useMemo(() => articles.filter((article) => articleDesk(article) === "research"), [articles]);
     const latest = useMemo(() => [
         ...articles.map((article) => ({ key: `a-${article.id}`, at: article.published_at ?? article.created_at, title: article.title, href: articleHref(article.slug), kind: categoryLabel(article.category) })),
         ...threads.map((thread) => ({ key: `t-${thread.id}`, at: thread.last_reply_at ?? thread.created_at, title: thread.title, href: threadHref(thread.id), kind: thread.category?.name ?? "Forum" })),
@@ -102,6 +104,8 @@ export default function HomePage() {
                     <button type="button" onClick={market.refresh} disabled={market.loading} className="ml-auto font-semibold underline underline-offset-4 disabled:opacity-50">{market.loading ? "Updating…" : "Refresh quotes"}</button>
                 </div>
                 {market.error && <p role="status" className="news-feed-notice">{market.stocks.length ? "Showing the last available quotes. " : "Quotes are temporarily unavailable. "}Use Refresh quotes to try again.</p>}
+
+                <NewsSection stories={news} loading={!articlesLoaded} />
 
                 <section id="latest" className="news-top-grid" aria-label="Top of the day">
                     <article className="news-lead">
@@ -170,7 +174,7 @@ export default function HomePage() {
                 <EditorialSections articles={articles} stocks={market.stocks} loading={market.loading} />
 
                 {/* Community band */}
-                <Band id="community" label="Community" links={[["Forum", "/forum"], ["Articles", "/articles"], ...categories.map((category) => [category.name, forumCategoryHref(category.slug)] as [string, string])]}>
+                <Band id="community" label="Community" links={[["Forum", "/forum"], ["News", "/news"], ...categories.map((category) => [category.name, forumCategoryHref(category.slug)] as [string, string])]}>
                     <div className="grid gap-6 p-5 lg:grid-cols-[1.4fr_1fr] md:p-6">
                         <div>
                             {threads.length === 0 ? (
