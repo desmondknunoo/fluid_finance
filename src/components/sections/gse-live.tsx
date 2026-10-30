@@ -285,7 +285,8 @@ export function GseLive({ view }: { view: ViewMode | null }) {
 
                             {filtered.length === 0 ? noMatch : (
                                 <div className="news-table-wrap">
-                                    <table className="news-table min-w-[640px]">
+                                    {/* Phones get Symbol, Price and % change; Change and Volume join from 640px. */}
+                                    <table className="news-table sm:min-w-[640px]">
                                         <thead>
                                             <tr>
                                                 {COLUMNS.map(([key, label, numeric]) => (
@@ -293,7 +294,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                                         key={key}
                                                         scope="col"
                                                         aria-sort={sort === key ? (descending ? "descending" : "ascending") : "none"}
-                                                        className={cn(numeric && "num", key === "company" && "hidden md:table-cell")}
+                                                        className={cn(numeric && "num", key === "company" && "hidden md:table-cell", (key === "change" || key === "volume") && "hidden sm:table-cell")}
                                                     >
                                                         <button
                                                             type="button"
@@ -333,7 +334,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                                                 {/* A real link for crawlers and new-tab clicks; the row keeps the keyboard behaviour. */}
                                                                 <a href={stockHref(stock.symbol)} tabIndex={-1} onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) e.stopPropagation(); }} className="font-bold text-ink">{stock.symbol}</a>
                                                             </div>
-                                                            <span className="mt-1 block max-w-[180px] truncate text-xs text-ink/[0.68] md:hidden">{stock.company}</span>
+                                                            <span className="mt-1 block max-w-[150px] truncate text-xs text-ink/[0.68] sm:max-w-[180px] md:hidden">{stock.company}</span>
                                                         </td>
                                                         <td className="hidden max-w-[220px] truncate text-ink/[0.68] md:table-cell">
                                                             {stock.company}
@@ -341,7 +342,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                                         <td className="num font-semibold text-ink">
                                                             {formatCedis(stock.price)}
                                                         </td>
-                                                        <td className={cn("num", tone)}>
+                                                        <td className={cn("num hidden sm:table-cell", tone)}>
                                                             {positive ? "+" : ""}
                                                             {stock.change.toFixed(2)}
                                                         </td>
@@ -357,7 +358,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                                                                 {stock.changePercent.toFixed(2)}%
                                                             </span>
                                                         </td>
-                                                        <td className="num text-ink/[0.68]">
+                                                        <td className="num hidden text-ink/[0.68] sm:table-cell">
                                                             {stock.volume.toLocaleString()}
                                                         </td>
                                                         <td className="hidden lg:table-cell">
