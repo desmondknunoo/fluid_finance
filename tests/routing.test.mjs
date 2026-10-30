@@ -68,6 +68,7 @@ test('paths parse to the same route set the hash router had', () => {
         ['/fx', { kind: 'fx' }],
         ['/articles', { kind: 'articles' }],
         ['/opinion', { kind: 'articles' }],
+        ['/news', { kind: 'articles' }],
         ['/articles/q3-results', { kind: 'article', slug: 'q3-results' }],
         ['/saved', { kind: 'saved' }],
         ['/forum', { kind: 'forum', category: null }],

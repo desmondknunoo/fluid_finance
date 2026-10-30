@@ -15,7 +15,8 @@
  *   /gse-live                  GSE Live page; /gse-live/<view> opens a given view
  *   /fuel                      public pump-price report
  *   /fx                        public exchange rates
- *   /articles                  research articles (?section=<id> filters); /articles/<slug> opens one
+ *   /news                      news stories
+ *   /articles                  research articles (?section=<id> filters); /articles/<slug> opens any story
  *   /opinion                   opinion articles
  *   /saved                     articles saved on this device
  *   /forum                     discussions; /forum/c/<category>, /forum/t/<id>, /forum/new[/<category>]
@@ -56,7 +57,7 @@ const PAGE_ROUTES = [
     { kind: "gse-live", pattern: /^\/gse-live$/ },
     { kind: "fuel", pattern: /^\/fuel$/ },
     { kind: "fx", pattern: /^\/fx$/ },
-    { kind: "articles", pattern: /^\/(?:articles|opinion)$/ },
+    { kind: "articles", pattern: /^\/(?:articles|opinion|news)$/ },
     { kind: "saved", pattern: /^\/saved$/ },
     { kind: "forum", pattern: /^\/forum$/ },
     { kind: "settings", pattern: /^\/settings$/ },

@@ -4,7 +4,7 @@ import { savedArticle, saveForReading, isSaved, cacheReadingShell } from '@/lib/
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Check, Clock3, Link2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { addArticleComment, categoryLabel, formatLongDate, getArticleBySlug, listArticleComments, readingMinutes, type Article, type ArticleComment } from "@/lib/community";
+import { addArticleComment, articleDesk, categoryLabel, deskLabel, formatLongDate, getArticleBySlug, listArticleComments, readingMinutes, type Article, type ArticleComment } from "@/lib/community";
 import { RichText } from "@/lib/markdown";
 import { Notice, QuietButton } from "@/components/ui/form";
 import { PageIntro } from "@/components/ui/page-intro";
@@ -72,10 +72,12 @@ export default function ArticlePage({ slug }: { slug: string }) {
     return (
         <main className="page-container news-page">
             <article className="mx-auto max-w-4xl pt-6">
-                <a href="/articles" className="news-text-link"><ArrowLeft size={14} aria-hidden="true" /> All articles</a>
+                <a href={articleDesk(article) === "news" ? "/news" : "/articles"} className="news-text-link"><ArrowLeft size={14} aria-hidden="true" /> {articleDesk(article) === "news" ? "All news" : "All research"}</a>
                 <header className="mt-6 border-b-[3px] border-ink pb-5">
                     <p className="news-kicker">
-                        <span className="text-fluid-cyan-ink">{categoryLabel(article.category)}</span>
+                        <span className="text-fluid-cyan-ink">{deskLabel(articleDesk(article))}</span>
+                        <span aria-hidden="true">·</span>
+                        {categoryLabel(article.category)}
                         <span aria-hidden="true">·</span>
                         {formatLongDate(article.published_at)}
                     </p>

@@ -5,7 +5,7 @@ import { BrandLogo } from "@/components/ui/brand-logo";
 
 const GROUPS = [
     { title: "Markets", links: [["GSE Live", "/gse-live"], ["Market trends", "/market-trends"], ["Currencies", "/fx"], ["Fuel prices", "/fuel"]] },
-    { title: "Perspective", links: [["Research", "/articles"], ["Business & economy", "/business-news"], ["Community", "/forum"], ["Join Fluid Finance", "/register"]] },
+    { title: "Perspective", links: [["News", "/news"], ["Research", "/articles"], ["Business & economy", "/business-news"], ["Community", "/forum"], ["Join Fluid Finance", "/register"]] },
     { title: "Learn", links: [["Learning center", "/learning-center"], ["Market education", "/market-education"], ["Help center", "/help-center"], ["Contact support", "/contact-support"]] },
     { title: "Fluid Finance", links: [["About us", "/about-us"], ["Privacy policy", "/privacy-policy"], ["Terms of service", "/terms-of-service"]] },
 ];

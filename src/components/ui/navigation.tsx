@@ -6,6 +6,7 @@ import { ThemeToggleButton } from "@/components/ui/theme-toggle";
 import { onLocationChange } from "@/lib/navigation";
 
 const LINKS = [
+    ["News", "/news"],
     ["Markets", "/gse-live"],
     ["Research", "/articles"],
     ["Opinion", "/opinion"],

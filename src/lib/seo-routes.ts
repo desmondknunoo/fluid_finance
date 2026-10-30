@@ -112,6 +112,7 @@ export const STOCK_SYMBOLS = Object.keys(COMPANY_META).sort();
 const MARKETS: [string, string] = ["Markets", "/gse-live"];
 const COMMUNITY: [string, string] = ["Community", "/forum"];
 const RESEARCH: [string, string] = ["Research", "/articles"];
+const NEWS: [string, string] = ["News", "/news"];
 
 function fit(candidates: string[], min = 140, max = 160): string {
     const inRange = candidates.find((text) => text.length >= min && text.length <= max);
@@ -171,6 +172,7 @@ const HUB_LINKS = [
     { href: "/market-trends", label: "Weekly market trends and closing prices" },
     { href: "/fuel", label: "Fuel prices in Ghana" },
     { href: "/fx", label: "Cedi exchange rates" },
+    { href: "/news", label: "Ghana business and markets news" },
     { href: "/articles", label: "Research and analysis" },
     { href: "/opinion", label: "Fluid Finance Opinion" },
     { href: "/business-news", label: "Business and economy news" },
@@ -294,6 +296,13 @@ export const STATIC_PAGES: Record<string, StaticPage> = {
         heading: "Articles & market notes",
         intro: "Analysis from the Fluid Finance research team on the GSE, the cedi, fuel and the wider economy. Sign in to join the discussion under each piece.",
         crumbs: [RESEARCH],
+    },
+    "/news": {
+        title: suffix("Ghana business and markets news"),
+        description: "News from the Fluid Finance desk on the Ghana Stock Exchange, listed companies, the cedi, fuel prices and the wider Ghanaian economy, as stories break.",
+        heading: "News",
+        intro: "Reporting from the Fluid Finance desk on the GSE, listed companies, the cedi, fuel and the wider economy.",
+        crumbs: [NEWS],
     },
     "/opinion": {
         title: "Fluid Finance Opinion: commentary on Ghana's markets and economy",
@@ -434,6 +443,7 @@ export interface ArticleLike {
     body?: string;
     cover_url: string | null;
     category: string;
+    desk?: string | null;
     tags?: string[];
     published_at: string | null;
     created_at?: string;
@@ -514,7 +524,8 @@ function personJsonLd(author: { username: string; display_name: string } | null)
 
 export function articleMeta(article: ArticleLike): PageMeta {
     const path = `/articles/${article.slug}`;
-    const category = CATEGORY_LABELS[article.category] ?? "Research";
+    const isNews = article.desk !== "research";
+    const category = CATEGORY_LABELS[article.category] ?? (isNews ? "News" : "Research");
     const description = clip(article.excerpt?.trim() || plainText(article.body ?? "") || `${article.title}: research from the Fluid Finance desk on Ghana's markets.`, 160);
     const cover = absoluteImage(article.cover_url);
     const published = article.published_at ?? article.created_at ?? null;
@@ -546,7 +557,7 @@ export function articleMeta(article: ArticleLike): PageMeta {
         modifiedTime: modified,
         section: category,
         tags: article.tags ?? [],
-        jsonLd: [newsArticle, breadcrumbJsonLd([RESEARCH, [clip(article.title, 80), path]])],
+        jsonLd: [newsArticle, breadcrumbJsonLd([isNews ? NEWS : RESEARCH, [clip(article.title, 80), path]])],
         summary: {
             heading: article.title,
             paragraphs: [
@@ -676,6 +687,7 @@ export function routeMeta(route: Route, search = ""): PageMeta {
 export function metaForPath(pathWithQuery: string): PageMeta {
     const url = new URL(pathWithQuery, SITE_URL);
     if (url.pathname === "/opinion") return staticPageMeta("/opinion");
+    if (url.pathname === "/news") return staticPageMeta("/news");
     return routeMeta(parsePath(url.pathname, url.search, url.hash), url.search);
 }
 

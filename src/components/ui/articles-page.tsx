@@ -1,7 +1,7 @@
 import { HOME_SECTIONS, type HomeSection } from '@/lib/content-media';
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { ARTICLE_CATEGORIES, categoryLabel, formatLongDate, listPublishedArticles, type Article, type ArticleCategory } from "@/lib/community";
+import { ARTICLE_CATEGORIES, categoryLabel, formatLongDate, listPublishedArticles, type Article, type ArticleCategory, type ArticleDesk } from "@/lib/community";
 import { articleHref } from "@/lib/navigation";
 import { EmptyState, Notice } from "@/components/ui/form";
 import { PageIntro } from "@/components/ui/page-intro";
@@ -10,9 +10,13 @@ import { useSeo } from "@/lib/seo";
 import { staticPageMeta } from "@/lib/seo-routes";
 
 export default function ArticlesPage() {
-    const opinion = window.location.pathname.replace(/\/+$/, "") === "/opinion";
-    const requested = opinion ? "opinion" : new URLSearchParams(window.location.search).get("section");
+    const path = window.location.pathname.replace(/\/+$/, "");
+    const opinion = path === "/opinion";
+    const news = path === "/news";
+    const requested = opinion ? "opinion" : news ? null : new URLSearchParams(window.location.search).get("section");
     const section = HOME_SECTIONS.find(([id])=>id===requested)?.[0] as HomeSection | undefined;
+    // /news lists News and /articles lists Research; a topic (?section=) or Opinion spans both.
+    const desk: ArticleDesk | null = news ? "news" : !opinion && !section ? "research" : null;
     const [articles, setArticles] = useState<Article[] | null>(null);
     const [error, setError] = useState("");
     const [category, setCategory] = useState<ArticleCategory | null>(null);
@@ -22,17 +26,19 @@ export default function ArticlesPage() {
     useEffect(() => {
         let cancelled = false;
         setArticles(null);setError("");
-        listPublishedArticles({ category, section, limit: 60 })
+        listPublishedArticles({ category, section, desk, limit: 60 })
             .then((data) => { if (!cancelled) setArticles(data); })
             .catch((caught) => { if (!cancelled) setError(caught instanceof Error ? caught.message : "Could not load articles."); });
         return () => { cancelled = true; };
-    }, [category, section]);
+    }, [category, section, desk]);
 
     const [lead, ...rest] = useMemo(() => articles ?? [], [articles]);
 
     return (
         <main className="page-container news-page">
-            <PageIntro eyebrow={opinion ? "Independent perspectives" : "Research desk"} title={opinion ? "Fluid Finance Opinion" : section ? HOME_SECTIONS.find(([id])=>id===section)?.[1] : "Articles & market notes"} description={opinion ? "Commentary, arguments and perspectives on markets, business and the economy. Each piece reflects its author’s views and passes editorial review before publication." : "Analysis from the Fluid Finance research team on the GSE, the cedi, fuel and the wider economy. Sign in to join the discussion under each piece."} />
+            {news
+                ? <PageIntro eyebrow="Fluid Finance desk" title="News" description="Reporting from the Fluid Finance desk on the GSE, listed companies, the cedi, fuel and the wider economy." />
+                : <PageIntro eyebrow={opinion ? "Independent perspectives" : "Research desk"} title={opinion ? "Fluid Finance Opinion" : section ? HOME_SECTIONS.find(([id])=>id===section)?.[1] : "Articles & market notes"} description={opinion ? "Commentary, arguments and perspectives on markets, business and the economy. Each piece reflects its author’s views and passes editorial review before publication." : "Analysis from the Fluid Finance research team on the GSE, the cedi, fuel and the wider economy. Sign in to join the discussion under each piece."} />}
 
             <div className="news-tabs" role="tablist" aria-label="Article categories">
                 <FilterTab active={category === null} onClick={() => setCategory(null)}>All</FilterTab>
@@ -43,15 +49,15 @@ export default function ArticlesPage() {
                 <div className="news-tiles" aria-hidden="true">{[0, 1, 2].map((index) => <div key={index} className="news-skeleton h-56" />)}</div>
             ) : articles.length === 0 ? (
                 <EmptyState title="Nothing published here yet">
-                    The research team is writing. Check back soon or <a href="/forum" className="text-fluid-cyan-ink underline">start a discussion</a>.
+                    {news ? "The desk is reporting." : "The research team is writing."} Check back soon or <a href="/forum" className="text-fluid-cyan-ink underline">start a discussion</a>.
                 </EmptyState>
             ) : (
                 <>
                     {lead && <LeadStory article={lead} />}
                     {rest.length > 0 && (
-                        <section className="news-section" aria-label="More research">
+                        <section className="news-section" aria-label={news ? "More news" : "More research"}>
                             <header className="news-section-header">
-                                <h2>More from the desk</h2>
+                                <h2>{news ? "More news" : "More from the desk"}</h2>
                                 <span>{rest.length} {rest.length === 1 ? "story" : "stories"}</span>
                             </header>
                             <div className="news-tiles mt-5">

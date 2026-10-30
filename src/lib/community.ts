@@ -69,6 +69,23 @@ export const ARTICLE_CATEGORIES: { id: ArticleCategory; label: string }[] = [
     { id: "company-news", label: "Company news" },
 ];
 
+/** The public section a story is filed under: News (reporting) or Research (analysis). */
+export type ArticleDesk = "news" | "research";
+
+export const ARTICLE_DESKS: { id: ArticleDesk; label: string }[] = [
+    { id: "news", label: "News" },
+    { id: "research", label: "Research" },
+];
+
+/** Stories saved before desks existed have no desk and read as News. */
+export function articleDesk(article: { desk?: ArticleDesk | null }): ArticleDesk {
+    return article.desk === "research" ? "research" : "news";
+}
+
+export function deskLabel(desk: ArticleDesk): string {
+    return desk === "research" ? "Research" : "News";
+}
+
 export function categoryLabel(category: string): string {
     return ARTICLE_CATEGORIES.find((item) => item.id === category)?.label ?? category;
 }
@@ -81,6 +98,7 @@ export interface Article {
     body: string;
     cover_url: string | null;
     category: ArticleCategory;
+    desk?: ArticleDesk;
     tags: string[];
     status: ArticleStatus;
     author_id: string;
@@ -187,8 +205,10 @@ export async function updateOwnProfile(_id: string, patch: { display_name: strin
 /* articles                                                            */
 /* ------------------------------------------------------------------ */
 
-export async function listPublishedArticles(options: { category?: ArticleCategory | null; section?: HomeSection | null; limit?: number } = {}): Promise<Article[]> {
-    return (await api<Items<Article>>("/editorial/articles", { auth: false, query: { category: options.category ?? undefined, section: options.section ?? undefined, limit: options.limit ?? 30 } })).items;
+export async function listPublishedArticles(options: { category?: ArticleCategory | null; section?: HomeSection | null; desk?: ArticleDesk | null; limit?: number } = {}): Promise<Article[]> {
+    const items = (await api<Items<Article>>("/editorial/articles", { auth: false, query: { category: options.category ?? undefined, section: options.section ?? undefined, desk: options.desk ?? undefined, limit: options.limit ?? 30 } })).items;
+    // Filter here too, so a desk page stays correct against an API that predates desks.
+    return options.desk ? items.filter((item) => articleDesk(item) === options.desk) : items;
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {

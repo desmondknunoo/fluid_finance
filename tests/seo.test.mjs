@@ -51,6 +51,8 @@ test('route metadata maps paths, aliases and views to clean canonical URLs', () 
     assert.equal(seo.metaForPath('/gse-live/table').path, '/gse-live');
     assert.equal(seo.metaForPath('/gse-live/heatmap').path, '/gse-live/heatmap');
     assert.equal(seo.metaForPath('/opinion').path, '/opinion');
+    assert.equal(seo.metaForPath('/news').path, '/news');
+    assert.match(seo.metaForPath('/news').title, /news/i);
     assert.equal(seo.metaForPath('/stock/mtngh').path, '/stock/MTNGH');
     assert.equal(seo.metaForPath('/articles?section=africa').path, '/articles?section=africa');
     assert.equal(seo.metaForPath('/no/such/page').path, '/');
