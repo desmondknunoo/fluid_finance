@@ -91,16 +91,22 @@ export function deskLabel(desk: ArticleDesk): string {
 export const ARTICLE_INDUSTRIES: { id: string; label: string }[] = [
     { id: "banking", label: "Banking & finance" },
     { id: "insurance", label: "Insurance" },
+    { id: "fintech", label: "Fintech & payments" },
+    { id: "crypto", label: "Crypto & digital assets" },
     { id: "energy", label: "Energy, oil & gas" },
     { id: "mining", label: "Mining" },
     { id: "agriculture", label: "Agriculture & cocoa" },
     { id: "manufacturing", label: "Manufacturing" },
+    { id: "construction", label: "Construction & infrastructure" },
     { id: "telecoms", label: "Telecoms" },
     { id: "technology", label: "Technology" },
+    { id: "media", label: "Media & entertainment" },
     { id: "real-estate", label: "Real estate" },
     { id: "consumer", label: "Consumer & retail" },
+    { id: "tourism", label: "Tourism & hospitality" },
     { id: "transport", label: "Transport & logistics" },
     { id: "health", label: "Health" },
+    { id: "education", label: "Education" },
 ];
 
 /** Whether a story belongs in a home section: its main section, or one its tags add it to. */
@@ -134,7 +140,7 @@ export interface Article {
     homepage_section: HomeSection;
     /** Countries, continents or "World" the story is about; they add it to home sections. */
     places?: string[];
-    /** Industry ids from ARTICLE_INDUSTRIES; they add it to Industries and, for tech, Technology. */
+    /** Industry ids from ARTICLE_INDUSTRIES; they add it to Industries and, for tech, telecoms, fintech and crypto, Technology. */
     industries?: string[];
     /** Every home section the story appears in, worked out by the API from the three fields above. */
     home_sections?: HomeSection[];
