@@ -79,7 +79,6 @@ node --experimental-strip-types --test tests/gse.test.mjs
 All other data is served by the Fluid Finance backend (`fluid_finance_backend`, FastAPI on the
 finance AWS account) under `/api/v1/editorial`: daily closes (`/closes`, recorded by the backend from the live snapshot),
 fuel reports and OMC logos (`/fuel/*`, logos in the S3 documents bucket), FX rates (`/fx`),
-the social desk's posted items for the front page's "From our socials" band (`/social/posts`),
 articles, comments, forum, profiles and reports. `VITE_API_BASE_URL` selects the backend
 (default `https://api.finance.fluidterra.com/api/v1`; the local Compose stack is
 `http://localhost:8001/api/v1`). Live GSE quotes still come from the investor platform's public

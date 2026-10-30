@@ -1,5 +1,4 @@
 import { EditorialSections, NewsSection, OpinionSection } from '@/components/home/editorial-sections';
-import { SocialFeed, FEED_LINKS } from '@/components/home/social-feed';
 import { Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ArrowRight, ChevronRight, Fuel, Landmark, MessageSquare, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { useAuth } from "@/lib/auth";
@@ -182,11 +181,6 @@ export default function HomePage() {
                 </Band>
 
                 <OpinionSection articles={articles} />
-
-                {/* Social desk */}
-                <Band id="socials" label="From our socials" links={FEED_LINKS.map((social) => [social.label, social.href] as [string, string])}>
-                    <SocialFeed />
-                </Band>
 
             </main>
 
