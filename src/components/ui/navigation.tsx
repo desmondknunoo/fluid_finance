@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { ArrowUpRight, ChevronDown, Menu, X } from "lucide-react";
 import { AccountMenu } from "@/components/community/account-menu";
 import { BrandLogo } from "@/components/ui/brand-logo";
@@ -25,6 +25,9 @@ const MORE = [
     ["Help center", "/help-center"],
 ] as const;
 
+/** The sections a story under /articles/<slug> can belong to. */
+const STORY_SECTIONS = new Set<string>(["/news", "/articles", "/opinion"]);
+
 /** The topic a path belongs to: `/articles/x` is under Research, `/forum/t/x` under Community. */
 const isCurrent = (path: string, href: string) => path === href || path.startsWith(`${href}/`);
 
@@ -34,8 +37,14 @@ export const Navigation = memo(() => {
     const [path, setPath] = useState(window.location.pathname);
     const [section, setSection] = useState(getActiveSection);
     useEffect(() => onActiveSectionChange(() => setSection(getActiveSection())), []);
-    // A page that names its section (a News story under /articles/…) wins over the path.
-    const current = (href: string) => section ? section === href : isCurrent(path, href);
+    // A page that names its section (a News story under /articles/…) wins over the path. Until a
+    // story has loaded it cannot name one, so keep the story section the reader came from rather
+    // than flashing Research, and light nothing on a cold open.
+    const carried = useRef<string | null>(null);
+    const story = path.startsWith("/articles/");
+    const highlighted = section ?? (story ? carried.current : LINKS.find(([, href]) => isCurrent(path, href))?.[1] ?? null);
+    useEffect(() => { carried.current = highlighted && STORY_SECTIONS.has(highlighted) ? highlighted : null; });
+    const current = (href: string) => highlighted === href;
 
     useEffect(() => {
         const close = () => { setMobileOpen(false); setMoreOpen(false); setPath(window.location.pathname); };
