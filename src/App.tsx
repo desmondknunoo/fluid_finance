@@ -92,11 +92,14 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, path])
 
+  // A new page starts at the top. Switching the GSE Live board and heatmap is the same page, so the
+  // reader keeps their place instead of being thrown back up.
+  const scrollKey = route.kind === "gse-live" ? "gse-live" : `${key}|${path}`
   useEffect(() => {
     const restored = consumePendingScroll()
     if (restored !== null && restored > 0) return restoreScroll(restored)
     window.scrollTo({ top: 0, behavior: "instant" })
-  }, [key, path])
+  }, [scrollKey])
 
   useEffect(() => {
     if (route.kind !== "home" || !route.section) return
