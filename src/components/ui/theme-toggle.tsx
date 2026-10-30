@@ -8,7 +8,7 @@ const OPTIONS: { mode: ThemeMode; label: string; Icon: typeof Sun }[] = [
     { mode: "dark", label: "Dark", Icon: Moon },
 ];
 
-/** Three-way segmented control: light, system (the default), dark. Square cells behind one hairline. */
+/** Three-way segmented control: light, system, dark (the default). Square cells behind one hairline. */
 export function ThemeToggle({ className }: { className?: string }) {
     const { mode, setMode } = useTheme();
 

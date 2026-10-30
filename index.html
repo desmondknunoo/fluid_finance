@@ -32,9 +32,7 @@
     <script data-seo type="application/ld+json">{"@context":"https://schema.org","@type":"NewsMediaOrganization","@id":"https://finance.fluidterra.com/#organization","name":"Fluid Finance","url":"https://finance.fluidterra.com/","logo":{"@type":"ImageObject","url":"https://finance.fluidterra.com/icons/icon-512.png","width":512,"height":512},"image":"https://finance.fluidterra.com/og/default.png","email":"info@fluidterra.com","areaServed":{"@type":"Country","name":"Ghana"},"sameAs":["https://x.com/FluidFinanceX","https://www.instagram.com/fluidfinanceonline","https://www.tiktok.com/@fluid_finance"],"parentOrganization":{"@type":"Organization","name":"Fluid Terra","url":"https://fluidterra.com"}}</script>
     <script data-seo type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://finance.fluidterra.com/#website","name":"Fluid Finance","url":"https://finance.fluidterra.com/","inLanguage":"en-GH","publisher":{"@id":"https://finance.fluidterra.com/#organization"}}</script>
     <!-- seo:end -->
-
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#121212" />
+    <meta name="theme-color" content="#121212" />
     <meta name="geo.region" content="GH" />
     <meta name="geo.placename" content="Accra" />
 
@@ -59,11 +57,13 @@
         (function () {
             var stored = null;
             try { stored = localStorage.getItem('fluidfinance:theme'); } catch (e) { }
-            var dark = stored === 'dark' || (stored !== 'light' &&
-                window.matchMedia('(prefers-color-scheme: dark)').matches);
+            // Dark unless the visitor chose Light, or chose System on a light device.
+            var dark = stored === 'light' ? false : stored === 'system' ? window.matchMedia('(prefers-color-scheme: dark)').matches : true;
             var root = document.documentElement;
             root.classList.add(dark ? 'dark' : 'light');
             root.style.colorScheme = dark ? 'dark' : 'light';
+            var color = document.querySelector('meta[name="theme-color"]');
+            if (color) color.setAttribute('content', dark ? '#121212' : '#ffffff');
         })();
     </script>
 </head>

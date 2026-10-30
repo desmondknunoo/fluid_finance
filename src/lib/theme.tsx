@@ -3,9 +3,11 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 /**
  * Fluid Finance - colour scheme
  *
- * Three settings, defaulting to `system` so a first visit matches the device.
- * The resolved scheme is written to `<html>` as a `dark` / `light` class, which
- * is what Tailwind's class-based dark mode and the CSS variables key off.
+ * Three settings, defaulting to `dark`: a first visit is dark, `system` follows the
+ * device (live), and `light` stays light. Every choice is saved, `system` included,
+ * so it survives a reload. The resolved scheme is written to `<html>` as a `dark` /
+ * `light` class, which is what Tailwind's class-based dark mode and the CSS variables
+ * key off, and to the browser's theme-color so its toolbar matches the page.
  */
 
 export type ThemeMode = "system" | "light" | "dark";
@@ -32,9 +34,9 @@ function readStoredMode(): ThemeMode {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored === "light" || stored === "dark" || stored === "system") return stored;
     } catch {
-        /* private mode — fall through to system */
+        /* private mode — fall through to the default */
     }
-    return "system";
+    return "dark";
 }
 
 export function applyTheme(resolved: ResolvedTheme): void {
@@ -42,6 +44,7 @@ export function applyTheme(resolved: ResolvedTheme): void {
     root.classList.toggle("dark", resolved === "dark");
     root.classList.toggle("light", resolved === "light");
     root.style.colorScheme = resolved;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", resolved === "dark" ? "#121212" : "#ffffff");
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -66,8 +69,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const setMode = useCallback((next: ThemeMode) => {
         setModeState(next);
         try {
-            if (next === "system") localStorage.removeItem(STORAGE_KEY);
-            else localStorage.setItem(STORAGE_KEY, next);
+            localStorage.setItem(STORAGE_KEY, next);
         } catch {
             /* preference simply won't persist */
         }
