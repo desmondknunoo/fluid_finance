@@ -128,7 +128,6 @@ function TermsOfServicePage() {
             <PageIntro
                 eyebrow="Legal"
                 title="Terms of Service"
-                description="Please read these terms carefully before using our financial platform."
             />
 
             <div className="news-columns news-columns--main">

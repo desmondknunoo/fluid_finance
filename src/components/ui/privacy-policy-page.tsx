@@ -137,7 +137,6 @@ function PrivacyPolicyPage() {
             <PageIntro
                 eyebrow="Legal"
                 title="Privacy Policy"
-                description="Your financial information and personal data are protected with industry-standard security measures."
             />
 
             <div className="news-columns news-columns--main">

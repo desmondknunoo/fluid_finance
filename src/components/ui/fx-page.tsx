@@ -68,7 +68,7 @@ export default function FxPage() {
 
     return (
         <main className="page-container news-page">
-            <PageIntro eyebrow="Currency desk" title="Exchange rates" description="Indicative cedi exchange rates recorded by the Fluid Finance operations team. Bank and forex bureau rates differ; confirm before you transact." />
+            <PageIntro eyebrow="Currency desk" title="Exchange rates" />
 
             {error ? <Notice tone="error">{error}</Notice> : rates === null ? (
                 <div className="news-skeleton h-72" aria-busy="true" />

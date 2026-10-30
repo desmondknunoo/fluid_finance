@@ -8,7 +8,7 @@ export default function SavedReadingPage(){
  const[items,setItems]=useState<SavedArticle[]>(savedArticles);const[error,setError]=useState('');
  useEffect(()=>{const sync=()=>setItems(savedArticles());window.addEventListener('fluid:saved-reading',sync);return()=>window.removeEventListener('fluid:saved-reading',sync);},[]);
  return <main className="page-container news-page">
-  <PageIntro eyebrow="Offline reading" title="Saved for later" description="Public articles saved on this device are available as text copies offline after the site has loaded online. Videos, external websites, live quotes and comments require a connection. Saved copies may differ from the latest published version."/>
+  <PageIntro eyebrow="Offline reading" title="Saved for later"/>
   {error&&<Notice tone="error" className="mb-6">{error}</Notice>}
   {!items.length
    ?<EmptyState title="Keep something worth coming back to." action={<a href="/articles" className="news-text-link">Explore research <ArrowRight size={15} aria-hidden="true"/></a>}>Open a published article and choose “Save for offline.”</EmptyState>

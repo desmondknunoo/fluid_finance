@@ -55,7 +55,6 @@ export default function ForumPage({ categorySlug }: { categorySlug: string | nul
             <PageIntro
                 eyebrow="Community"
                 title={category ? category.name : "Finance forum"}
-                description={category?.description ?? "Discuss the GSE, the cedi, fuel prices and personal finance with other Fluid Finance members. Keep it civil and factual."}
                 action={<PrimaryButton onClick={startThread}><Plus size={16} aria-hidden="true" /> Start a discussion</PrimaryButton>}
             />
 

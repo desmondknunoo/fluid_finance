@@ -41,7 +41,6 @@ function HelpCenterPage() {
             <PageIntro
                 eyebrow="Support"
                 title="Help Center"
-                description="Answers about what Fluid Finance offers, where its data comes from and how to reach our team."
             />
 
             <div className="relative max-w-2xl">

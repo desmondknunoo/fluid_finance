@@ -32,7 +32,6 @@ function AboutUsPage() {
             <PageIntro
                 eyebrow="About"
                 title="About Fluid Finance"
-                description="Decisions that Build Wealth"
                 align="center"
             />
 

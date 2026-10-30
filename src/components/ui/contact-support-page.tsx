@@ -39,7 +39,6 @@ function ContactSupportPage() {
             <PageIntro
                 eyebrow="Support"
                 title="Contact Support"
-                description="Have a question or need assistance? Our team is here to help you with anything related to Fluid Finance."
             />
 
             <div className="news-columns news-columns--main">

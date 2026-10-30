@@ -63,7 +63,7 @@ export default function ArticlePage({ slug }: { slug: string }) {
     if (article === null) {
         return (
             <main className="page-container news-page">
-                <PageIntro eyebrow="Research desk" title="Article not found" description={<>It may have been unpublished. <a href="/articles" className="text-fluid-cyan-ink underline">See all articles</a>.</>} />
+                <PageIntro eyebrow="Research desk" title="Article not found" />
             </main>
         );
     }

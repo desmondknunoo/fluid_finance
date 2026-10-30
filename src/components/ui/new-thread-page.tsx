@@ -48,7 +48,6 @@ export default function NewThreadPage({ categorySlug }: { categorySlug: string |
                 <PageIntro
                     eyebrow="Community"
                     title="Start a discussion"
-                    description="Ask a question or share a view. Posts are public; keep them factual and avoid personal financial details."
                     action={<a href={forumCategoryHref(categorySlug)} className="news-button-quiet news-button-quiet--sm"><ArrowLeft size={14} aria-hidden="true" /> Back to the forum</a>}
                 />
                 <form onSubmit={submit} className="news-form">

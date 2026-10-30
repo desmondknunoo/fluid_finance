@@ -64,7 +64,6 @@ function MarketEducationPage() {
             <PageIntro
                 eyebrow="Market Education"
                 title="Market Education"
-                description="Master financial markets, economic indicators, and investment strategies through expert insights and comprehensive educational resources."
             />
 
             <section className="news-section !mt-0" aria-labelledby="education-recent">

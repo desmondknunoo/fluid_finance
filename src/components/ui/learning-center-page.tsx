@@ -74,7 +74,6 @@ function LearningCenterPage() {
             <PageIntro
                 eyebrow="Learning Center"
                 title="Learning Center"
-                description="Expert analysis, educational content, and courses to help you navigate the Ghana Stock Exchange with confidence."
             />
 
             <section className="news-section !mt-0" aria-labelledby="learning-courses">

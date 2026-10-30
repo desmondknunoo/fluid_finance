@@ -49,7 +49,7 @@ export default function ThreadPage({ id }: { id: string }) {
     if (thread === null || thread.deleted_at) {
         return (
             <main className="page-container news-page">
-                <PageIntro eyebrow="Community" title="Discussion not available" description={<>It may have been removed. <a href="/forum" className="text-fluid-cyan-ink underline">Back to the forum</a>.</>} />
+                <PageIntro eyebrow="Community" title="Discussion not available" />
             </main>
         );
     }

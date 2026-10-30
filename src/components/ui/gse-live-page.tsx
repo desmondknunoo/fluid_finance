@@ -10,7 +10,6 @@ export default function GseLivePage({ view }: { view: ViewMode | null }) {
             <PageIntro
                 eyebrow="Markets · Ghana Stock Exchange"
                 title="Live Market Data"
-                description="Every listed equity on the Ghana Stock Exchange, as a sortable board or a heatmap. Select any ticker for its full price history."
             />
             <GseLive view={view} />
         </main>

@@ -37,7 +37,7 @@ export default function ProfilePage({ username }: { username: string }) {
     if (profile === null) {
         return (
             <main className="page-container news-page">
-                <PageIntro eyebrow="Members" title={`No member called @${username}`} description={<>They may have changed their username. <a href="/forum" className="text-fluid-cyan-ink underline">Browse the forum</a>.</>} />
+                <PageIntro eyebrow="Members" title={`No member called @${username}`} />
             </main>
         );
     }
