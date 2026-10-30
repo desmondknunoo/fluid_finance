@@ -238,6 +238,27 @@ export function normaliseLegacyUrl(): boolean {
 }
 
 /** Subscribe to every address change: our pushState, back/forward and in-page hash changes. */
+/**
+ * The top-bar section a page belongs to when its path alone cannot say: every story lives under
+ * /articles/<slug>, but a News story belongs under News and an opinion piece under Opinion.
+ */
+let activeSection: string | null = null;
+const SECTION_EVENT = "fluid:section";
+
+export function setActiveSection(href: string | null): void {
+    activeSection = href;
+    window.dispatchEvent(new Event(SECTION_EVENT));
+}
+
+export function getActiveSection(): string | null {
+    return activeSection;
+}
+
+export function onActiveSectionChange(listener: () => void): () => void {
+    window.addEventListener(SECTION_EVENT, listener);
+    return () => window.removeEventListener(SECTION_EVENT, listener);
+}
+
 export function onLocationChange(listener: () => void): () => void {
     const onPop = (event: PopStateEvent) => {
         const state = (event.state ?? {}) as HistoryState;

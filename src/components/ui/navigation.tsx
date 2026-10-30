@@ -3,7 +3,7 @@ import { ArrowUpRight, ChevronDown, Menu, X } from "lucide-react";
 import { AccountMenu } from "@/components/community/account-menu";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { ThemeToggleButton } from "@/components/ui/theme-toggle";
-import { onLocationChange } from "@/lib/navigation";
+import { getActiveSection, onActiveSectionChange, onLocationChange } from "@/lib/navigation";
 
 const LINKS = [
     ["News", "/news"],
@@ -32,6 +32,10 @@ export const Navigation = memo(() => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [moreOpen, setMoreOpen] = useState(false);
     const [path, setPath] = useState(window.location.pathname);
+    const [section, setSection] = useState(getActiveSection);
+    useEffect(() => onActiveSectionChange(() => setSection(getActiveSection())), []);
+    // A page that names its section (a News story under /articles/…) wins over the path.
+    const current = (href: string) => section ? section === href : isCurrent(path, href);
 
     useEffect(() => {
         const close = () => { setMobileOpen(false); setMoreOpen(false); setPath(window.location.pathname); };
@@ -66,14 +70,14 @@ export const Navigation = memo(() => {
             <div className="news-topic-bar">
                 <nav aria-label="Main navigation" className="page-container hidden items-center lg:flex">
                     <a href="/" className="news-nav-link" aria-current={path === "/" ? "page" : undefined}>Home</a>
-                    {LINKS.map(([label, href]) => <a key={href} href={href} className="news-nav-link" aria-current={isCurrent(path, href) ? "page" : undefined}>{label}</a>)}
+                    {LINKS.map(([label, href]) => <a key={href} href={href} className="news-nav-link" aria-current={current(href) ? "page" : undefined}>{label}</a>)}
                     <div className="relative ml-auto" onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setMoreOpen(false); }}>
                         <button type="button" className="news-nav-link flex items-center gap-1.5" onClick={() => setMoreOpen(!moreOpen)} aria-expanded={moreOpen} aria-controls="news-more">More <ChevronDown size={13} aria-hidden="true" /></button>
                         {moreOpen && <div id="news-more" className="absolute right-0 top-full z-50 w-56 border border-ink/[0.12] bg-canvas p-2 shadow-lg rounded-2xl">{MORE.map(([label, href]) => <a key={href} href={href} className="block px-3 py-3 text-sm hover:bg-ink/[0.06]">{label}</a>)}</div>}
                     </div>
                 </nav>
                 <nav aria-label="Quick navigation" className="page-container flex overflow-x-auto lg:hidden">
-                    {LINKS.slice(0, 5).map(([label, href]) => <a key={href} href={href} className="news-nav-link shrink-0" aria-current={isCurrent(path, href) ? "page" : undefined}>{label}</a>)}
+                    {LINKS.slice(0, 5).map(([label, href]) => <a key={href} href={href} className="news-nav-link shrink-0" aria-current={current(href) ? "page" : undefined}>{label}</a>)}
                 </nav>
             </div>
             {mobileOpen && <nav id="news-mobile-menu" aria-label="Expanded navigation" className="page-container border-b border-ink/[0.12] py-5 lg:hidden">

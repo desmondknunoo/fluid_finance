@@ -12,11 +12,18 @@ import { PostComposer } from "@/components/community/post-composer";
 import { PostList } from "@/components/community/post-list";
 import { UserChip } from "@/components/community/user-chip";
 import { useSeo } from "@/lib/seo";
+import { setActiveSection } from "@/lib/navigation";
 import { articleMeta, notFoundMeta } from "@/lib/seo-routes";
 
 export default function ArticlePage({ slug }: { slug: string }) {
     const { user } = useAuth();
     const [article, setArticle] = useState<Article | null | undefined>(undefined);
+    // Light up the story's own section in the top bar: News, Opinion or Research.
+    const sectionHref = article ? (article.homepage_section === "opinion" ? "/opinion" : articleDesk(article) === "news" ? "/news" : "/articles") : null;
+    useEffect(() => {
+        setActiveSection(sectionHref);
+        return () => setActiveSection(null);
+    }, [sectionHref]);
     const [comments, setComments] = useState<ArticleComment[]>([]);
     const [error, setError] = useState("");
     const [saved,setSaved] = useState(false);
