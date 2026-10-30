@@ -58,7 +58,7 @@ test('a full first page of articles widens coverage through the category feeds',
     ]);
     const urls = locs(await sitemap.buildSitemap(fetchJson));
     assert.equal(urls.filter((url) => url.includes('/articles/')).length, 101);
-    assert.equal(calls.filter((path) => path.includes('category=')).length, 8);
+    assert.equal(calls.filter((path) => path.includes('category=')).length, 9);
 });
 
 test('API failures leave a valid sitemap of static and stock pages', async () => {

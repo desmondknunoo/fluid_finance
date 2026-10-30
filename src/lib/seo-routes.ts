@@ -478,7 +478,7 @@ export interface CategoryLike {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-    markets: "Markets", stocks: "Stocks", economy: "Economy", fuel: "Fuel", fx: "FX",
+    markets: "Markets", stocks: "Stocks", economy: "Economy", fuel: "Fuel", fx: "FX", crypto: "Crypto",
     "personal-finance": "Personal finance", education: "Education", "company-news": "Company news",
 };
 

@@ -56,7 +56,7 @@ export interface Invite {
 export type Author = Pick<Profile, "id" | "username" | "display_name" | "avatar_url" | "role">;
 
 export type ArticleStatus = "draft" | "review" | "head_review" | "changes_requested" | "published" | "archived";
-export type ArticleCategory = "markets" | "stocks" | "economy" | "fuel" | "fx" | "personal-finance" | "education" | "company-news";
+export type ArticleCategory = "markets" | "stocks" | "economy" | "fuel" | "fx" | "crypto" | "personal-finance" | "education" | "company-news";
 
 export const ARTICLE_CATEGORIES: { id: ArticleCategory; label: string }[] = [
     { id: "markets", label: "Markets" },
@@ -64,6 +64,7 @@ export const ARTICLE_CATEGORIES: { id: ArticleCategory; label: string }[] = [
     { id: "economy", label: "Economy" },
     { id: "fuel", label: "Fuel" },
     { id: "fx", label: "FX" },
+    { id: "crypto", label: "Crypto" },
     { id: "personal-finance", label: "Personal finance" },
     { id: "education", label: "Education" },
     { id: "company-news", label: "Company news" },
