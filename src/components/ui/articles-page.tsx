@@ -1,7 +1,7 @@
 import { HOME_SECTIONS, type HomeSection } from '@/lib/content-media';
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { ARTICLE_CATEGORIES, categoryLabel, formatLongDate, listPublishedArticles, type Article, type ArticleCategory, type ArticleDesk } from "@/lib/community";
+import { ARTICLE_CATEGORIES, categoryLabel, formatLongDate, listPublishedArticles, readersLabel, type Article, type ArticleCategory, type ArticleDesk } from "@/lib/community";
 import { articleHref } from "@/lib/navigation";
 import { EmptyState, Notice } from "@/components/ui/form";
 import { PageIntro } from "@/components/ui/page-intro";
@@ -85,6 +85,7 @@ function Kicker({ article }: { article: Article }) {
             <span className="text-fluid-cyan-ink">{categoryLabel(article.category)}</span>
             <span aria-hidden="true">·</span>
             {formatLongDate(article.published_at)}
+            {(article.read_count ?? 0) > 0 && <><span aria-hidden="true">·</span>{readersLabel(article.read_count)}</>}
         </span>
     );
 }

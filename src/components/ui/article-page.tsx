@@ -4,7 +4,7 @@ import { savedArticle, saveForReading, isSaved, cacheReadingShell } from '@/lib/
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Check, Clock3, Link2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { addArticleComment, articleDesk, categoryLabel, deskLabel, formatLongDate, getArticleBySlug, listArticleComments, readingMinutes, type Article, type ArticleComment } from "@/lib/community";
+import { addArticleComment, articleDesk, categoryLabel, deskLabel, formatLongDate, getArticleBySlug, listArticleComments, readersLabel, readingMinutes, recordArticleRead, type Article, type ArticleComment } from "@/lib/community";
 import { RichText } from "@/lib/markdown";
 import { Notice, QuietButton } from "@/components/ui/form";
 import { PageIntro } from "@/components/ui/page-intro";
@@ -33,6 +33,7 @@ export default function ArticlePage({ slug }: { slug: string }) {
             .then(async (found) => {
                 if (cancelled) return;
                 setArticle(found);
+                if (found?.status === "published") void recordArticleRead(found.id).then((count) => { if (!cancelled && count !== null) setArticle((current) => (current ? { ...current, read_count: count } : current)); });
                 if (found) { try { const loadedComments=await listArticleComments(found.id);if(!cancelled)setComments(loadedComments); } catch { /* article remains readable when comments cannot load */ } }
             })
             .catch((caught) => { if (!cancelled) { const stored=savedArticle(slug);if(stored){setArticle(stored);setOfflineCopy(true);}else setError(caught instanceof Error ? caught.message : "Could not load this article."); } });
@@ -84,7 +85,7 @@ export default function ArticlePage({ slug }: { slug: string }) {
                     <h1 className="news-headline-lg mt-4 text-ink">{article.title}</h1>
                     {article.excerpt && <p className="news-standfirst mt-5">{article.excerpt}</p>}
                     <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-ink/[0.12] pt-4">
-                        <UserChip showRole={false} author={article.author} meta={`${formatLongDate(article.published_at)} · ${readingMinutes(article.body)} min read`} />
+                        <UserChip showRole={false} author={article.author} meta={[formatLongDate(article.published_at), `${readingMinutes(article.body)} min read`, readersLabel(article.read_count)].filter(Boolean).join(" · ")} />
                         <div className="flex flex-wrap items-center gap-3">
                             <span className="news-byline inline-flex items-center gap-1.5"><Clock3 size={12} aria-hidden="true" /> Updated {formatLongDate(article.updated_at)}</span>
                             <QuietButton size="sm" onClick={() => void copyLink()}>

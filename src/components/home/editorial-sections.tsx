@@ -1,6 +1,6 @@
 import { ArrowRight, ArrowUpRight, BookOpen, Headphones, Play } from 'lucide-react';
 import type { Article } from '@/lib/community';
-import { articleDesk, formatRelative, inHomeSection } from '@/lib/community';
+import { articleDesk, formatRelative, inHomeSection, readersLabel } from '@/lib/community';
 import { articleHref } from '@/lib/navigation';
 import { mediaSource, type HomeSection } from '@/lib/content-media';
 import { ApprovedMedia } from '@/components/media/approved-media';
@@ -38,7 +38,7 @@ function Story({item,lead=false}:{item:Article;lead?:boolean}){
  const thumb=item.cover_url??(source?.provider==='YouTube'?`https://i.ytimg.com/vi/${source.id}/hqdefault.jpg`:null);
  return <article className={`editorial-story ${lead?'editorial-story-lead':''}`}>
   <a href={articleHref(item.slug)}>{thumb&&<div className="editorial-story-image"><img src={thumb} alt="" loading="lazy"/>{['video','live'].includes(item.media_kind??'')&&<span><Play size={18} fill="currentColor" aria-hidden="true"/></span>}</div>}<h3>{item.title}</h3></a>
-  {lead&&item.excerpt&&<p>{item.excerpt}</p>}<div className="editorial-story-meta">{source?.provider??'Fluid Finance'} · {formatRelative(item.published_at??item.created_at)}</div>
+  {lead&&item.excerpt&&<p>{item.excerpt}</p>}<div className="editorial-story-meta">{[source?.provider??'Fluid Finance',formatRelative(item.published_at??item.created_at),readersLabel(item.read_count)].filter(Boolean).join(' · ')}</div>
  </article>;
 }
 function Topic({topic,items}:{topic:typeof TOPICS[number];items:Article[]}){

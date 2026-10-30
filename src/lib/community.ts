@@ -137,6 +137,8 @@ export interface Article {
     industries?: string[];
     /** Every home section the story appears in, worked out by the API from the three fields above. */
     home_sections?: HomeSection[];
+    /** Distinct readers: each browser counts once per story. */
+    read_count?: number;
     distribution: Distribution;
     social_channels: string[];
     social_caption: string;
@@ -249,6 +251,37 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
 
 export async function listArticleComments(articleId: string): Promise<ArticleComment[]> {
     return (await api<Items<ArticleComment>>(`/editorial/articles/${articleId}/comments`)).items;
+}
+
+const READER_ID_KEY = "fluid-finance-reader";
+
+/** A random id for this browser, so a story counts each reader once; it identifies nobody. */
+function readerId(): string {
+    try {
+        const stored = window.localStorage.getItem(READER_ID_KEY);
+        if (stored && /^[A-Za-z0-9-]{8,64}$/.test(stored)) return stored;
+        const fresh = crypto.randomUUID();
+        window.localStorage.setItem(READER_ID_KEY, fresh);
+        return fresh;
+    } catch {
+        return crypto.randomUUID();
+    }
+}
+
+/** Count this browser as a reader of a published story; returns the new count, or null on failure. */
+export async function recordArticleRead(articleId: string): Promise<number | null> {
+    try {
+        const result = await api<{ read_count: number }>(`/editorial/articles/${encodeURIComponent(articleId)}/reads`, { method: "POST", auth: false, body: { visitor: readerId() } });
+        return result.read_count;
+    } catch {
+        return null;
+    }
+}
+
+/** "1 reader", "1,240 readers"; empty until someone has read the story. */
+export function readersLabel(count: number | null | undefined): string {
+    if (!count) return "";
+    return `${count.toLocaleString("en-GB")} ${count === 1 ? "reader" : "readers"}`;
 }
 
 export async function addArticleComment(input: { articleId: string; authorId?: string; body: string; parentId?: string | null }): Promise<ArticleComment> {
