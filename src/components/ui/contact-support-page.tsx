@@ -26,7 +26,7 @@ function ContactSupportPage() {
         {
             icon: MapPin,
             title: "Location",
-            description: "Ghana. Our team is available remotely to serve clients across the country.",
+            description: "HN D8, Mar Vly Road, East Legon, Accra, Ghana. Ghana Post GPS: GD-214-0939.",
             action: null,
         },
     ];
