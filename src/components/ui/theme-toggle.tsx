@@ -16,7 +16,7 @@ export function ThemeToggle({ className }: { className?: string }) {
         <div
             role="radiogroup"
             aria-label="Colour scheme"
-            className={cn("inline-flex items-stretch border border-ink/[0.12] divide-x divide-ink/[0.19] rounded-xl", className)}
+            className={cn("inline-flex items-stretch border border-ink/[0.12] divide-x divide-ink/[0.19]", className)}
         >
             {OPTIONS.map(({ mode: value, label, Icon }) => (
                 <button
@@ -48,7 +48,7 @@ export function ThemeToggleButton({ className }: { className?: string }) {
             type="button"
             onClick={toggle}
             aria-label={resolved === "dark" ? "Switch to light theme" : "Switch to dark theme"}
-            className={cn("news-icon-button h-10 w-10 text-ink", className)}
+            className={cn("news-icon-button news-control-square h-10 w-10 text-ink", className)}
         >
             {resolved === "dark" ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
         </button>

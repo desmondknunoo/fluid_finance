@@ -1,7 +1,7 @@
 import { HOME_SECTIONS, type HomeSection } from '@/lib/content-media';
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { ARTICLE_CATEGORIES, categoryLabel, formatLongDate, listPublishedArticles, readersLabel, type Article, type ArticleCategory, type ArticleDesk } from "@/lib/community";
+import { ARTICLE_CATEGORIES, categoryLabel, formatLongDate, listPublishedArticles, readersLabel, subsectionsOf, type Article, type ArticleCategory, type ArticleDesk } from "@/lib/community";
 import { articleHref } from "@/lib/navigation";
 import { EmptyState, Notice } from "@/components/ui/form";
 import { PageIntro } from "@/components/ui/page-intro";
@@ -20,30 +20,47 @@ export default function ArticlesPage() {
     const [articles, setArticles] = useState<Article[] | null>(null);
     const [error, setError] = useState("");
     const [category, setCategory] = useState<ArticleCategory | null>(null);
+    // Technology and Industries split into sub-sections (?sub=), shown as tabs in place of categories.
+    const subsections = subsectionsOf(section);
+    const [sub, setSub] = useState<string | null>(() => { const id = new URLSearchParams(window.location.search).get("sub"); return subsections.some((item) => item.id === id) ? id : null; });
+    const activeSub = subsections.find((item) => item.id === sub);
+    const chooseSub = (id: string | null) => {
+        setSub(id);
+        const url = new URL(window.location.href);
+        if (id) url.searchParams.set("sub", id); else url.searchParams.delete("sub");
+        window.history.replaceState(window.history.state, "", url);
+    };
 
     const sectionTitle = !opinion && section ? HOME_SECTIONS.find(([id])=>id===section)?.[1] : undefined;
-    useSeo(sectionTitle ? { ...staticPageMeta("/articles"), title: `${sectionTitle} · Research · Fluid Finance`, path: `/articles?section=${section}` } : null);
+    useSeo(sectionTitle ? { ...staticPageMeta("/articles"), title: `${activeSub ? `${activeSub.label} · ` : ""}${sectionTitle} · Research · Fluid Finance`, path: `/articles?section=${section}${activeSub ? `&sub=${activeSub.id}` : ""}` } : null);
     useEffect(() => {
         let cancelled = false;
         setArticles(null);setError("");
-        listPublishedArticles({ category, section, desk, limit: 60 })
+        listPublishedArticles({ category: subsections.length ? null : category, section, desk, industries: activeSub?.industries, limit: 60 })
             .then((data) => { if (!cancelled) setArticles(data); })
             .catch((caught) => { if (!cancelled) setError(caught instanceof Error ? caught.message : "Could not load articles."); });
         return () => { cancelled = true; };
-    }, [category, section, desk]);
+    }, [category, section, desk, activeSub, subsections.length]);
 
     const [lead, ...rest] = useMemo(() => articles ?? [], [articles]);
 
     return (
         <main className="page-container news-page">
             {news
-                ? <PageIntro eyebrow="Fluid Finance desk" title="News" description="Reporting from the Fluid Finance desk on the GSE, listed companies, the cedi, fuel and the wider economy." />
-                : <PageIntro eyebrow={opinion ? "Independent perspectives" : "Research desk"} title={opinion ? "Fluid Finance Opinion" : section ? HOME_SECTIONS.find(([id])=>id===section)?.[1] : "Articles & market notes"} description={opinion ? "Commentary, arguments and perspectives on markets, business and the economy. Each piece reflects its author’s views and passes editorial review before publication." : "Analysis from the Fluid Finance research team on the GSE, the cedi, fuel and the wider economy. Sign in to join the discussion under each piece."} />}
+                ? <PageIntro eyebrow="Fluid Finance desk" title="News" />
+                : <PageIntro eyebrow={opinion ? "Independent perspectives" : "Research desk"} title={opinion ? "Fluid Finance Opinion" : section ? HOME_SECTIONS.find(([id])=>id===section)?.[1] : "Articles & market notes"} />}
 
-            <div className="news-tabs" role="tablist" aria-label="Article categories">
-                <FilterTab active={category === null} onClick={() => setCategory(null)}>All</FilterTab>
-                {ARTICLE_CATEGORIES.map((item) => <FilterTab key={item.id} active={category === item.id} onClick={() => setCategory(item.id)}>{item.label}</FilterTab>)}
-            </div>
+            {subsections.length ? (
+                <div className="news-tabs" role="tablist" aria-label={`${sectionTitle} sub-sections`}>
+                    <FilterTab active={!activeSub} onClick={() => chooseSub(null)}>All</FilterTab>
+                    {subsections.map((item) => <FilterTab key={item.id} active={activeSub?.id === item.id} onClick={() => chooseSub(item.id)}>{item.label}</FilterTab>)}
+                </div>
+            ) : (
+                <div className="news-tabs" role="tablist" aria-label="Article categories">
+                    <FilterTab active={category === null} onClick={() => setCategory(null)}>All</FilterTab>
+                    {ARTICLE_CATEGORIES.map((item) => <FilterTab key={item.id} active={category === item.id} onClick={() => setCategory(item.id)}>{item.label}</FilterTab>)}
+                </div>
+            )}
 
             {error ? <Notice tone="error">{error}</Notice> : articles === null ? (
                 <div className="news-tiles" aria-hidden="true">{[0, 1, 2].map((index) => <div key={index} className="news-skeleton h-56" />)}</div>

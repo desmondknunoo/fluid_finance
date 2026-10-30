@@ -280,7 +280,6 @@ export default function MarketTrendsPage({ shareFooter }: { shareFooter?: Weekly
             <PageIntro
                 eyebrow="Week in review"
                 title="Market Trends"
-                description="Weekly winners and losers on the Ghana Stock Exchange, measured week-over-week."
             />
 
             {/* Week in Review */}
@@ -375,7 +374,7 @@ function MoverBoard({ title, tone, items, onShare }: { title: string; tone: "up"
         <div>
             <div className="flex items-start justify-between gap-3">
                 <h3 className={cn("news-subhead flex-1", tone === "up" ? "news-up" : "news-down")}>{title}</h3>
-                <button type="button" onClick={onShare} aria-label={`Share ${title.toLowerCase()}`} title={`Share ${title.toLowerCase()}`} className="news-icon-button mt-2">
+                <button type="button" onClick={onShare} aria-label={`Share ${title.toLowerCase()}`} title={`Share ${title.toLowerCase()}`} className="news-icon-button news-control-square mt-2">
                     <Share2 size={14} aria-hidden="true" />
                 </button>
             </div>

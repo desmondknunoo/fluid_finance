@@ -109,6 +109,34 @@ export const ARTICLE_INDUSTRIES: { id: string; label: string }[] = [
     { id: "education", label: "Education" },
 ];
 
+/** Narrower views of the Technology and Industries home sections, each gathering related industry tags. */
+export interface IndustrySubsection { id: string; label: string; section: "technology" | "industries"; industries: string[] }
+
+export const INDUSTRY_SUBSECTIONS: IndustrySubsection[] = [
+    { id: "tech-telecoms", label: "Tech & telecoms", section: "technology", industries: ["technology", "telecoms"] },
+    { id: "fintech", label: "Fintech & payments", section: "technology", industries: ["fintech"] },
+    { id: "crypto", label: "Crypto", section: "technology", industries: ["crypto"] },
+    { id: "banking-insurance", label: "Banking & insurance", section: "industries", industries: ["banking", "insurance"] },
+    { id: "energy-mining", label: "Energy & mining", section: "industries", industries: ["energy", "mining"] },
+    { id: "agriculture", label: "Agriculture", section: "industries", industries: ["agriculture"] },
+    { id: "manufacturing-property", label: "Manufacturing & property", section: "industries", industries: ["manufacturing", "construction", "real-estate"] },
+    { id: "consumer-services", label: "Consumer & services", section: "industries", industries: ["consumer", "tourism", "transport", "media", "health", "education"] },
+];
+
+export function subsectionsOf(section: HomeSection | null | undefined): IndustrySubsection[] {
+    return INDUSTRY_SUBSECTIONS.filter((item) => item.section === section);
+}
+
+/** The sub-section a story is listed under within a home section: the one holding its first matching tag. */
+export function storySubsection(article: Pick<Article, "industries">, section: HomeSection): IndustrySubsection | undefined {
+    const options = subsectionsOf(section);
+    for (const tag of article.industries ?? []) {
+        const match = options.find((item) => item.industries.includes(tag));
+        if (match) return match;
+    }
+    return undefined;
+}
+
 /** Whether a story belongs in a home section: its main section, or one its tags add it to. */
 export function inHomeSection(article: Pick<Article, "homepage_section" | "home_sections">, section: HomeSection): boolean {
     return (article.home_sections ?? [article.homepage_section]).includes(section);
@@ -140,7 +168,7 @@ export interface Article {
     homepage_section: HomeSection;
     /** Countries, continents or "World" the story is about; they add it to home sections. */
     places?: string[];
-    /** Industry ids from ARTICLE_INDUSTRIES; they add it to Industries and, for tech, telecoms, fintech and crypto, Technology. */
+    /** Industry ids from ARTICLE_INDUSTRIES; technology, telecoms, fintech and crypto add it to Technology, every other industry to Industries. */
     industries?: string[];
     /** Every home section the story appears in, worked out by the API from the three fields above. */
     home_sections?: HomeSection[];
@@ -237,12 +265,44 @@ export async function updateOwnProfile(_id: string, patch: { display_name: strin
     return api<Profile>("/editorial/me", { method: "PATCH", body: patch });
 }
 
+/** The API accepts images up to 4 MB; a base64 data URL is about a third larger than the file. */
+const MAX_UPLOAD_DATA_URL = Math.floor(4 * 1024 * 1024 * 4 / 3);
+
+/**
+ * Upload an image picked from the device (gallery, camera or files) and get back its public link.
+ * Phone photos are often HEIC or larger than 4 MB, and Instagram only takes JPEG, so every image is
+ * resized to at most `maxEdge` pixels on its longest side and re-encoded as JPEG before it is sent.
+ * Avatars may be uploaded by any member; covers and post images by the team.
+ */
+export async function uploadImage(file: File, kind: "avatar" | "cover" | "asset", maxEdge = kind === "avatar" ? 800 : 2400): Promise<string> {
+    if (!file.type.startsWith("image/")) throw new Error("Choose an image file (JPEG, PNG or WebP).");
+    let bitmap: ImageBitmap;
+    try { bitmap = await createImageBitmap(file); }
+    catch { throw new Error("That image could not be read. Choose a JPEG, PNG or WebP."); }
+    const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Your browser could not prepare the image.");
+    // JPEG has no transparency: transparent PNG areas become white instead of black.
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    let dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+    for (const quality of [0.78, 0.66]) if (dataUrl.length > MAX_UPLOAD_DATA_URL) dataUrl = canvas.toDataURL("image/jpeg", quality);
+    if (dataUrl.length > MAX_UPLOAD_DATA_URL) throw new Error("That image is too large to upload. Choose a smaller one.");
+    const { url } = await api<{ url: string }>("/editorial/media", { method: "POST", body: { image: dataUrl, kind } });
+    return url;
+}
+
 /* ------------------------------------------------------------------ */
 /* articles                                                            */
 /* ------------------------------------------------------------------ */
 
-export async function listPublishedArticles(options: { category?: ArticleCategory | null; section?: HomeSection | null; desk?: ArticleDesk | null; limit?: number } = {}): Promise<Article[]> {
-    const items = (await api<Items<Article>>("/editorial/articles", { auth: false, query: { category: options.category ?? undefined, section: options.section ?? undefined, desk: options.desk ?? undefined, limit: options.limit ?? 30 } })).items;
+export async function listPublishedArticles(options: { category?: ArticleCategory | null; section?: HomeSection | null; desk?: ArticleDesk | null; industries?: string[] | null; limit?: number } = {}): Promise<Article[]> {
+    const items = (await api<Items<Article>>("/editorial/articles", { auth: false, query: { category: options.category ?? undefined, section: options.section ?? undefined, desk: options.desk ?? undefined, industries: options.industries?.length ? options.industries.join(",") : undefined, limit: options.limit ?? 30 } })).items;
     // Filter here too, so a desk page stays correct against an API that predates desks.
     return options.desk ? items.filter((item) => articleDesk(item) === options.desk) : items;
 }

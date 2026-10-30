@@ -44,8 +44,7 @@ export default function FuelPublicPage() {
             <PageIntro
                 eyebrow="Fluid Pump Report"
                 title="Fuel prices across Ghana"
-                description="Pump prices by oil marketing company, recorded by the Fluid Finance team. Prices are in GHS per litre and may change at the pump."
-                action={report && <button type="button" onClick={() => setSharing(report)} aria-label="Share report" title="Share report" className="news-icon-button h-10 w-10"><Share2 size={16} aria-hidden="true" /></button>}
+                action={report && <button type="button" onClick={() => setSharing(report)} aria-label="Share report" title="Share report" className="news-icon-button news-control-square h-10 w-10"><Share2 size={16} aria-hidden="true" /></button>}
             />
 
             {error ? <Notice tone="error">{error}</Notice> : reports === null ? (

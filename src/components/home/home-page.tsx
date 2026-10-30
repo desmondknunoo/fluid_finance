@@ -79,7 +79,6 @@ export default function HomePage() {
                 </div>
                 <div className="news-page-heading">
                     <h1>Today<span className="text-fluid-cyan-ink">.</span><span className="sr-only"> Ghana&apos;s markets on Fluid Finance</span></h1>
-                    <div className="news-topic-links"><a href="/gse-live">Equities</a><a href="/fx">Currencies</a><a href="/fuel">Energy</a><a href="/market-trends">Week in review <ArrowRight size={14} aria-hidden="true" /></a></div>
                 </div>
                 <div className="news-session" aria-label="Market session">
                     <span className="inline-flex items-center gap-2 font-semibold"><span className={cn("h-1.5 w-1.5 rounded-full", market.open ? "bg-fluid-green" : "bg-ink/50")} aria-hidden="true" />GSE {market.open ? "open" : "closed"}</span>
@@ -219,7 +218,7 @@ function MoverList({ title, stocks, tone, onShare }: { title: string; stocks: St
         <div className="bg-canvas">
             <div className="flex items-center justify-between px-4 py-2.5">
                 <h3 className={cn("text-[11px] font-bold uppercase tracking-wider", tone === "up" ? "text-fluid-green" : tone === "down" ? "text-fluid-rose" : "text-fluid-cyan-ink")}>{title}</h3>
-                <button type="button" onClick={onShare} disabled={!stocks.length} aria-label={`Share ${title.toLowerCase()}`} className="rounded-md p-1 text-ink/40 hover:bg-ink/[0.05] hover:text-ink disabled:opacity-30"><Share2 size={13} /></button>
+                <button type="button" onClick={onShare} disabled={!stocks.length} aria-label={`Share ${title.toLowerCase()}`} className="p-1 text-ink/40 hover:bg-ink/[0.05] hover:text-ink disabled:opacity-30"><Share2 size={13} /></button>
             </div>
             {stocks.length === 0 ? <p className="px-4 pb-4 text-xs text-ink/40">{"No data yet"}</p> : (
                 <ul>

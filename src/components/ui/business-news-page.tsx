@@ -166,7 +166,6 @@ export default function BusinessNewsPage() {
             <PageIntro
                 eyebrow="Business & Economy"
                 title="Business & Economy News"
-                description="Real-time updates on the Ghanaian economy, GSE markets, and business developments."
             />
 
             {/* Market Movers */}
@@ -195,7 +194,7 @@ export default function BusinessNewsPage() {
                         type="button"
                         onClick={() => setShareOpen(true)}
                         disabled={movers.length === 0}
-                        className="news-button-quiet news-button-quiet--sm mb-2 ml-auto"
+                        className="news-button-quiet news-button-quiet--sm news-control-square mb-2 ml-auto"
                     >
                         <Share2 size={13} aria-hidden="true" />
                         Share

@@ -1,6 +1,6 @@
 import { ArrowRight, ArrowUpRight, BookOpen, Headphones, Play } from 'lucide-react';
 import type { Article } from '@/lib/community';
-import { articleDesk, formatRelative, inHomeSection, readersLabel } from '@/lib/community';
+import { articleDesk, formatRelative, inHomeSection, readersLabel, storySubsection, subsectionsOf } from '@/lib/community';
 import { articleHref } from '@/lib/navigation';
 import { mediaSource, type HomeSection } from '@/lib/content-media';
 import { ApprovedMedia } from '@/components/media/approved-media';
@@ -33,18 +33,20 @@ const EXPLAINERS=[
  {title:'The cedi, beyond a single rate.',body:'Buying and selling rates differ. The provider, transaction size, fees and timing can all change the amount you receive. Desk rates are indicative.',href:'/fx',label:'Explore the currency converter'},
  {title:'What is behind the pump price?',body:'Compare dated petrol and diesel reports across oil marketing companies. Look at the reporting date and availability before comparing suppliers.',href:'/fuel',label:'Compare the latest pump report'},
 ];
-function Story({item,lead=false}:{item:Article;lead?:boolean}){
+function Story({item,lead=false,label}:{item:Article;lead?:boolean;label?:string}){
  const source=item.external_url?mediaSource(item.external_url):null;
  const thumb=item.cover_url??(source?.provider==='YouTube'?`https://i.ytimg.com/vi/${source.id}/hqdefault.jpg`:null);
  return <article className={`editorial-story ${lead?'editorial-story-lead':''}`}>
   <a href={articleHref(item.slug)}>{thumb&&<div className="editorial-story-image"><img src={thumb} alt="" loading="lazy"/>{['video','live'].includes(item.media_kind??'')&&<span><Play size={18} fill="currentColor" aria-hidden="true"/></span>}</div>}<h3>{item.title}</h3></a>
-  {lead&&item.excerpt&&<p>{item.excerpt}</p>}<div className="editorial-story-meta">{[source?.provider??'Fluid Finance',formatRelative(item.published_at??item.created_at),readersLabel(item.read_count)].filter(Boolean).join(' · ')}</div>
+  {lead&&item.excerpt&&<p>{item.excerpt}</p>}<div className="editorial-story-meta">{[label??source?.provider??'Fluid Finance',formatRelative(item.published_at??item.created_at),readersLabel(item.read_count)].filter(Boolean).join(' · ')}</div>
  </article>;
 }
 function Topic({topic,items}:{topic:typeof TOPICS[number];items:Article[]}){
+ const subsections=subsectionsOf(topic.id);
  return <section className="editorial-topic" id={topic.id} aria-label={topic.title}>
   <header className="editorial-section-heading"><h2>{topic.title}</h2><a href={topic.id === "opinion" ? "/opinion" : `/articles?section=${topic.id}`}>Explore coverage <ArrowRight size={15} aria-hidden="true"/></a></header>
-  {items.length?<div className="editorial-topic-grid">{items.slice(0,5).map((item,index)=><Story key={item.id} item={item} lead={index===0}/>)}</div>:<div className="editorial-awaiting"><div><p className="editorial-topic-description">{topic.description}</p><p>Coverage appears here when the team publishes approved stories and links.</p></div><div className="editorial-sources"><strong>Sources to follow</strong>{topic.links.map(([label,href])=><a key={href} href={href} target={href.startsWith('https')?'_blank':undefined} rel="noreferrer noopener">{label}<ArrowUpRight size={14} aria-hidden="true"/></a>)}</div></div>}
+  {subsections.length>0&&<nav className="editorial-subsections" aria-label={`${topic.title} sub-sections`}>{subsections.map(item=><a key={item.id} href={`/articles?section=${topic.id}&sub=${item.id}`}>{item.label}</a>)}</nav>}
+  {items.length?<div className="editorial-topic-grid">{items.slice(0,5).map((item,index)=><Story key={item.id} item={item} lead={index===0} label={storySubsection(item,topic.id)?.label}/>)}</div>:<div className="editorial-awaiting"><div><p className="editorial-topic-description">{topic.description}</p><p>Coverage appears here when the team publishes approved stories and links.</p></div><div className="editorial-sources"><strong>Sources to follow</strong>{topic.links.map(([label,href])=><a key={href} href={href} target={href.startsWith('https')?'_blank':undefined} rel="noreferrer noopener">{label}<ArrowUpRight size={14} aria-hidden="true"/></a>)}</div></div>}
  </section>;
 }
 /** The newest News stories, first under Today, in the same layout as the topic sections below. */

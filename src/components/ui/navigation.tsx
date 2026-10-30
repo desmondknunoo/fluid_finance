@@ -16,15 +16,13 @@ const LINKS = [
     ["Community", "/forum"],
     ["Education", "/learning-center"],
 ] as const;
+/** Only what the top bar and footer do not already reach; About, Contact and Market education live in the footer. */
 const MORE = [
     ["Watch & live", "/#watch"],
     ["Listen", "/#listen"],
     ["Saved for later", "/saved"],
     ["Market trends", "/market-trends"],
-    ["Market education", "/market-education"],
-    ["About Fluid", "/about-us"],
     ["Help center", "/help-center"],
-    ["Contact support", "/contact-support"],
 ] as const;
 
 /** The topic a path belongs to: `/articles/x` is under Research, `/forum/t/x` under Community. */
