@@ -36,6 +36,9 @@ workspace-wide backlog lives in the parent folder's `TODO.md`.
 
 ## To do
 
+- [ ] Home page "Inside the exchange" (sector tables of GSE listings) is commented out in
+      `src/components/home/editorial-sections.tsx` since 30 October 2026. Decide whether to restyle it
+      for the current editorial design, fold it into GSE Live, or delete it.
 - [ ] Browser acceptance with real accounts: register, verify email, comment, start a thread,
       reply, report.
 - [ ] Manual acceptance of historical-date browsing and Excel export.

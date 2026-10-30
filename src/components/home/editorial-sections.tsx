@@ -1,6 +1,6 @@
 import { ArrowRight, ArrowUpRight, BookOpen, Headphones, Play } from 'lucide-react';
 import type { Article } from '@/lib/community';
-import { articleDesk, formatRelative } from '@/lib/community';
+import { articleDesk, formatRelative, inHomeSection } from '@/lib/community';
 import { articleHref } from '@/lib/navigation';
 import { mediaSource, type HomeSection } from '@/lib/content-media';
 import { ApprovedMedia } from '@/components/media/approved-media';
@@ -19,6 +19,13 @@ const TOPICS: {id:HomeSection;title:string;description:string;links:[string,stri
  {id:'industries',title:'Industries & enterprise',description:'Banking, energy, agriculture, manufacturing and the companies behind them.',links:[['Company data','/gse-live'],['Fuel prices','/fuel']]},
  {id:'personal-finance',title:'Your money',description:'Practical context for saving, investing and financial decisions.',links:[['Learning center','/learning-center'],['Market education','/market-education']]},
  {id:'opinion',title:'Fluid Finance Opinion',description:'Approved commentary and analysis from the Fluid Finance team.',links:[['Research','/articles'],['Join the discussion','/forum']]},
+];
+/** Where to keep learning, listed under The explainer (this replaced the Learn & follow band). */
+const LEARN_LINKS:[string,string,string][]=[
+ ['/learning-center','Learning Center','Courses and guidance from BoG, SEC and the Ghana Securities Institute.'],
+ ['/market-education','Market Education','GSE releases, filings, notices and brochures explained.'],
+ ['/business-news','Business & Economy',"Today's movers and the Ghanaian business press."],
+ ['/help-center','Help Center','Opening an account, minimums, withdrawals and verification.'],
 ];
 const EXPLAINERS=[
  {title:'Price is only part of the story.',body:'A share price tells you the cost of one unit. Market capitalisation, earnings, trading activity and the company’s disclosures help put that number in context.',href:'/market-education',label:'Understand company data'},
@@ -49,24 +56,32 @@ export function NewsSection({stories,loading}:{stories:Article[];loading:boolean
   :<div className="editorial-awaiting"><div><p className="editorial-topic-description">Reporting on Ghana&apos;s markets and economy.</p><p>News from the Fluid Finance desk appears here as it is published.</p></div></div>}
  </section>;
 }
+/** Fluid Finance Opinion, placed on the home page straight after the Community band. */
+export function OpinionSection({articles}:{articles:Article[]}){
+ const topic=TOPICS.find(item=>item.id==='opinion')!;
+ return <Topic topic={topic} items={articles.filter(item=>inHomeSection(item,topic.id))}/>;
+}
 export function EditorialSections({articles,stocks,loading}:{articles:Article[];stocks:Stock[];loading:boolean}){
  const video=articles.filter(item=>['video','live'].includes(item.media_kind??''));
  const audio=articles.filter(item=>item.media_kind==='audio');
  const marketStories=articles.filter(item=>!['video','audio','live'].includes(item.media_kind??''));
  // The first three News stories lead the page; the rail picks up from the fourth.
  const moreNews=marketStories.filter(item=>articleDesk(item)==='news').slice(3);
- const sectors=[...new Set(stocks.map(stock=>stock.sector))];
+ // Used by Inside the exchange, switched off for now (see TODO.md):
+ // const sectors=[...new Set(stocks.map(stock=>stock.sector))];
  return <>
-  <section className="editorial-topic" aria-label="More to explore"><header className="editorial-section-heading"><h2>More to explore</h2><a href="/news">All news <ArrowRight size={15} aria-hidden="true"/></a></header>{moreNews.length?<div className="editorial-story-rail">{moreNews.slice(0,4).map(item=><Story key={item.id} item={item}/>)}</div>:<div className="editorial-primer-grid">{[{title:"A market in motion.",body:"Compare Ghana’s listed companies by price, volume and sector, then open a company for its available trading history.",href:"/gse-live",label:"Explore the exchange"},{title:"The context behind the headline.",body:"Follow company disclosures and economic releases alongside published research and conversations from the community.",href:"/business-news",label:"Browse business & economy"}].map(item=><a href={item.href} key={item.title}><h3>{item.title}</h3><p>{item.body}</p><span>{item.label} <ArrowRight size={14}/></span></a>)}</div>}</section>
+  <section className="editorial-topic" aria-label="More to explore"><header className="editorial-section-heading"><h2>More to explore</h2>{moreNews.length>0&&<a href="/news">All news <ArrowRight size={15} aria-hidden="true"/></a>}</header>{moreNews.length?<div className="editorial-story-rail">{moreNews.slice(0,4).map(item=><Story key={item.id} item={item}/>)}</div>:<div className="editorial-primer-grid">{[{title:"A market in motion.",body:"Compare Ghana’s listed companies by price, volume and sector, then open a company for its available trading history.",href:"/gse-live",label:"Explore the exchange"},{title:"The context behind the headline.",body:"Follow company disclosures and economic releases alongside published research and conversations from the community.",href:"/business-news",label:"Browse business & economy"}].map(item=><a href={item.href} key={item.title}><h3>{item.title}</h3><p>{item.body}</p><span>{item.label} <ArrowRight size={14}/></span></a>)}</div>}</section>
   <MemberWatchlist stocks={stocks}/>
   <section className="editorial-topic editorial-watch" id="watch" aria-label="Watch and live"><header className="editorial-section-heading"><h2>Watch & live</h2><span>Video, interviews and live coverage</span></header>{video.length?<div className="editorial-video-grid"><div><ApprovedMedia url={video[0].external_url} title={video[0].title} cover={video[0].cover_url}/><a href={articleHref(video[0].slug)}><h3 className="editorial-video-title">{video[0].title}</h3></a>{video[0].excerpt&&<p className="editorial-video-summary">{video[0].excerpt}</p>}</div><div className="editorial-video-list">{video.slice(1,6).map(item=><Story item={item} key={item.id}/>)}{video.length===1&&<p className="text-sm text-ink/60">More approved videos will appear here.</p>}</div></div>:<div className="editorial-media-empty"><Play size={36} aria-hidden="true"/><div><h3>Markets have a story. See it unfold.</h3><p>Approved YouTube, X, Instagram and Vimeo videos, interviews and live streams will appear here. Players load only when you choose to watch.</p></div></div>}</section>
-  {TOPICS.slice(0,4).map(topic=><Topic key={topic.id} topic={topic} items={articles.filter(item=>item.homepage_section===topic.id)}/>)}
+  {TOPICS.slice(0,4).map(topic=><Topic key={topic.id} topic={topic} items={articles.filter(item=>inHomeSection(item,topic.id))}/>)}
   <section className="editorial-topic" aria-label="Company spotlight"><header className="editorial-section-heading"><h2>Companies to follow</h2><a href="/gse-live">All listed companies <ArrowRight size={15}/></a></header>{stocks.length?<div className="editorial-company-grid">{[...stocks].sort((a,b)=>b.volume-a.volume).slice(0,8).map(stock=><a href={`/stock/${stock.symbol}`} key={stock.symbol}><div className="flex items-center gap-3"><TickerLogo symbol={stock.symbol} size={32}/><div><strong>{stock.symbol}</strong><p>{stock.company}</p></div></div><div className="editorial-company-price"><span>{formatCedis(stock.price)}</span><span className={stock.changePercent>=0?'text-fluid-green':'text-fluid-rose'}>{stock.changePercent>=0?'+':''}{stock.changePercent.toFixed(2)}%</span></div><Sparkline points={sliceRange(getSeries(stock.symbol,stock.price),'1M').map(point=>point.close)} positive={stock.changePercent>=0} flat={stock.changePercent===0} width={240} height={48} className="w-full"/><p className="mt-2">{formatCompact(stock.volume)} shares · trend includes illustrative backfill</p></a>)}</div>:<p className="py-6 text-sm text-ink/60">{loading?'Loading company data…':'Company quotes are temporarily unavailable.'}</p>}</section>
-  {TOPICS.slice(4,6).map(topic=><Topic key={topic.id} topic={topic} items={articles.filter(item=>item.homepage_section===topic.id)}/>)}
+  {TOPICS.slice(4,6).map(topic=><Topic key={topic.id} topic={topic} items={articles.filter(item=>inHomeSection(item,topic.id))}/>)}
   <section className="editorial-topic editorial-listen" id="listen" aria-label="Listen"><header className="editorial-section-heading"><h2>Listen</h2><span>Podcasts, conversations & radio</span></header>{audio.length?<div className="editorial-audio-grid">{audio.slice(0,3).map(item=><article key={item.id}><Headphones size={22} aria-hidden="true"/><h3>{item.title}</h3>{item.excerpt&&<p>{item.excerpt}</p>}<ApprovedMedia url={item.external_url} title={item.title} cover={item.cover_url} compact/></article>)}</div>:<div className="editorial-media-empty"><Headphones size={36} aria-hidden="true"/><div><h3>Make room for a wider perspective.</h3><p>Approved podcast episodes, financial conversations and radio links will be available here. Read the latest news while the listening library grows.</p><a href="/news" className="news-text-link mt-4">Read the news <ArrowRight size={14} aria-hidden="true"/></a></div></div>}</section>
-  {TOPICS.slice(6).map(topic=><Topic key={topic.id} topic={topic} items={articles.filter(item=>item.homepage_section===topic.id)}/>)}
+  {TOPICS.slice(6).filter(topic=>topic.id!=='opinion').map(topic=><Topic key={topic.id} topic={topic} items={articles.filter(item=>inHomeSection(item,topic.id))}/>)}
+  {/* Inside the exchange (sector tables) is switched off for now; see TODO.md.
   <section className="editorial-topic" aria-label="Market sectors"><header className="editorial-section-heading"><h2>Inside the exchange</h2><a href="/gse-live/heatmap">Open heatmap <ArrowRight size={15}/></a></header><div className="editorial-sector-grid">{sectors.map(sector=>{const items=stocks.filter(stock=>stock.sector===sector);return <article key={sector}><h3>{sector}</h3><p>{items.length} listed {items.length===1?'company':'companies'} · {formatCompact(items.reduce((sum,stock)=>sum+stock.volume,0))} shares</p><ul>{items.slice(0,5).map(stock=><li key={stock.symbol}><a href={`/stock/${stock.symbol}`}><strong>{stock.symbol}</strong><span>{formatCedis(stock.price)}</span><span className={stock.changePercent>=0?'text-fluid-green':'text-fluid-rose'}>{stock.changePercent>=0?'+':''}{stock.changePercent.toFixed(2)}%</span></a></li>)}</ul></article>})}</div></section>
-  <section className="editorial-topic" aria-label="Explainers"><header className="editorial-section-heading"><h2>The explainer</h2><a href="/learning-center">Keep learning <ArrowRight size={15}/></a></header><div className="editorial-primer-grid">{EXPLAINERS.map(item=><a key={item.title} href={item.href}><BookOpen size={20} aria-hidden="true"/><h3>{item.title}</h3><p>{item.body}</p><span>{item.label} <ArrowRight size={14}/></span></a>)}</div></section>
+  */}
+  <section className="editorial-topic" aria-label="Explainers"><header className="editorial-section-heading"><h2>The explainer</h2><a href="/learning-center">Keep learning <ArrowRight size={15}/></a></header><div className="editorial-primer-grid">{EXPLAINERS.map(item=><a key={item.title} href={item.href}><BookOpen size={20} aria-hidden="true"/><h3>{item.title}</h3><p>{item.body}</p><span>{item.label} <ArrowRight size={14}/></span></a>)}</div><ul className="editorial-learn-links" aria-label="Keep learning">{LEARN_LINKS.map(([href,title,note])=><li key={href}><a href={href}><strong>{title}<ArrowRight size={14} aria-hidden="true"/></strong><span>{note}</span></a></li>)}</ul></section>
   {articles.length>5&&<section className="editorial-topic" aria-label="Latest coverage"><header className="editorial-section-heading"><h2>Latest coverage</h2><a href="/articles">All coverage <ArrowRight size={15}/></a></header><div className="editorial-latest-coverage">{articles.slice(5,17).map(item=><Story key={item.id} item={item}/>)}</div></section>}
  </>;
 }

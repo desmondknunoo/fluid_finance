@@ -1,7 +1,7 @@
-import { EditorialSections, NewsSection } from '@/components/home/editorial-sections';
+import { EditorialSections, NewsSection, OpinionSection } from '@/components/home/editorial-sections';
 import { SocialFeed, FEED_LINKS } from '@/components/home/social-feed';
 import { Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
-import { ArrowRight, BookOpen, ChevronRight, Fuel, GraduationCap, Landmark, LifeBuoy, MessageSquare, Newspaper, Share2, TrendingDown, TrendingUp } from "lucide-react";
+import { ArrowRight, ChevronRight, Fuel, Landmark, MessageSquare, Share2, TrendingDown, TrendingUp } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { articleDesk, categoryLabel, formatRelative, listForumCategories, listLatestFxRates, listPublicFuelReports, listPublishedArticles, listThreads, type Article, type ForumThread, type FxRate } from "@/lib/community";
 import { averageFuelPrice, formatFuelChange, formatFuelDate, formatFuelPrice, fuelPriceChange, type FuelReport } from "@/lib/fuel-prices";
@@ -22,20 +22,6 @@ import { lazyRoute } from "@/lib/lazy-route";
  * (Markets Wrap · lead story · Latest), then labelled section bands. Every panel has a quiet
  * state so the page reads well before the feeds or the community have data.
  */
-
-const PRESS = [
-    { title: "B&FT", note: "Business & Financial Times", href: "https://thebftonline.com" },
-    { title: "Citi Business News", note: "Breaking business news", href: "https://www.citinewsroom.com/category/business/" },
-    { title: "Graphic Online Business", note: "Business desk", href: "https://www.graphic.com.gh/business/business-news.html" },
-    { title: "GSE market notices", note: "Circulars from the exchange", href: "https://gse.com.gh/gse-market-notice/" },
-];
-
-const LEARN = [
-    { href: "/learning-center", title: "Learning Center", note: "Courses and guidance from BoG, SEC and the Ghana Securities Institute.", icon: GraduationCap },
-    { href: "/market-education", title: "Market Education", note: "GSE releases, filings, notices and brochures explained.", icon: BookOpen },
-    { href: "/business-news", title: "Business & Economy", note: "Today's movers and the Ghanaian business press.", icon: Newspaper },
-    { href: "/help-center", title: "Help Center", note: "Opening an account, minimums, withdrawals and verification.", icon: LifeBuoy },
-];
 
 // The share sheet (motion and the canvas card renderer) loads the first time someone shares.
 const MoversShareSheet = lazyRoute(() => import("@/components/stock/movers-share-sheet").then((module) => ({ default: module.MoversShareSheet })));
@@ -136,11 +122,10 @@ export default function HomePage() {
                             <div className="mt-4"><UserChip showRole={false} author={lead.author} size="sm" meta={formatRelative(lead.published_at ?? lead.created_at)} /></div>
                             <p className="mt-3 text-xs text-ink/60">{categoryLabel(lead.category)}</p>
                         </article> : <>
-                            <a href="/market-education" className="group block"><h3 className="news-story-headline group-hover:underline">Understand the market behind the numbers.</h3><p className="mt-3 text-sm leading-relaxed text-ink/70">Explore exchange notices, company filings and the essentials of investing on the Ghana Stock Exchange.</p><span className="news-text-link mt-4">Explore market education <ArrowRight size={15} aria-hidden="true" /></span></a>
-                            <div className="news-research-note"><BookOpen size={20} className="text-fluid-cyan-ink" aria-hidden="true" /><p>Research articles appear here as the Fluid Finance team publishes.</p></div>
+                            <a href="/market-education" className="group block"><h3 className="news-story-headline group-hover:underline">Understand the market behind the numbers.</h3><p className="mt-3 text-sm leading-relaxed text-ink/70">Notices, filings and investing basics for the GSE.</p><span className="news-text-link mt-4">Market education <ArrowRight size={15} aria-hidden="true" /></span></a>
                         </>}
                         {rest.slice(0, 2).map((article) => <a key={article.id} href={articleHref(article.slug)} className="news-secondary-story"><h3>{article.title}</h3><span>{formatRelative(article.published_at ?? article.created_at)}</span></a>)}
-                        <a href="/articles" className="news-text-link mt-6">All research <ArrowRight size={15} aria-hidden="true" /></a>
+                        {lead && <a href="/articles" className="news-text-link mt-6">All research <ArrowRight size={15} aria-hidden="true" /></a>}
                     </div>
                     <aside className="news-latest">
                         <h2 className="news-column-title">The latest</h2>
@@ -196,28 +181,13 @@ export default function HomePage() {
                     </div>
                 </Band>
 
+                <OpinionSection articles={articles} />
+
                 {/* Social desk */}
                 <Band id="socials" label="From our socials" links={FEED_LINKS.map((social) => [social.label, social.href] as [string, string])}>
                     <SocialFeed />
                 </Band>
 
-                {/* Press + Learn */}
-                <Band id="learn" label="Learn & follow" links={[["Learning Center", "/learning-center"], ["Market Education", "/market-education"], ["Help", "/help-center"]]}>
-                    <div className="grid gap-px overflow-hidden rounded-2xl border border-ink/[0.08] bg-ink/[0.08] sm:grid-cols-2 lg:grid-cols-4">
-                        {LEARN.map((item) => (
-                            <a key={item.href} href={item.href} className="group bg-canvas p-5 transition-colors hover:bg-ink/[0.02]">
-                                <item.icon size={24} strokeWidth={1.5} className="mb-6 text-fluid-cyan-ink" aria-hidden="true" />
-                                <h3 className="mt-3 text-base font-bold leading-snug text-ink group-hover:text-fluid-cyan-ink">{item.title}</h3>
-                                <p className="mt-1 text-sm text-ink/55">{item.note}</p>
-                            </a>
-                        ))}
-                    </div>
-                    <div className="mt-3 grid gap-px overflow-hidden rounded-2xl border border-ink/[0.08] bg-ink/[0.08] sm:grid-cols-2 lg:grid-cols-4">
-                        {PRESS.map((source) => (
-                            <a key={source.href} href={source.href} target="_blank" rel="noreferrer noopener" className="flex items-center gap-3 bg-canvas px-5 py-3 text-sm hover:bg-ink/[0.02]"><Newspaper size={15} className="shrink-0 text-ink/40" aria-hidden="true" /><span className="min-w-0"><span className="block font-semibold text-ink">{source.title}</span><span className="block truncate text-xs text-ink/45">{source.note}</span></span></a>
-                        ))}
-                    </div>
-                </Band>
             </main>
 
             {(shareLoaded || share !== null) && <Suspense fallback={null}><MoversShareSheet open={share !== null} onClose={() => setShare(null)} card={{ category: share ?? "gainers", stocks: share === "losers" ? breadth.losers : share === "active" ? breadth.active : breadth.gainers }} /></Suspense>}
