@@ -84,7 +84,7 @@ export default function ArticlePage({ slug }: { slug: string }) {
                     <h1 className="news-headline-lg mt-4 text-ink">{article.title}</h1>
                     {article.excerpt && <p className="news-standfirst mt-5">{article.excerpt}</p>}
                     <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-ink/[0.12] pt-4">
-                        <UserChip author={article.author} meta={`${formatLongDate(article.published_at)} · ${readingMinutes(article.body)} min read`} />
+                        <UserChip showRole={false} author={article.author} meta={`${formatLongDate(article.published_at)} · ${readingMinutes(article.body)} min read`} />
                         <div className="flex flex-wrap items-center gap-3">
                             <span className="news-byline inline-flex items-center gap-1.5"><Clock3 size={12} aria-hidden="true" /> Updated {formatLongDate(article.updated_at)}</span>
                             <QuietButton size="sm" onClick={() => void copyLink()}>

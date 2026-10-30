@@ -133,7 +133,7 @@ export default function HomePage() {
                                 <h3 className="news-story-headline group-hover:underline">{lead.title}</h3>
                                 {lead.excerpt && <p className="mt-3 text-sm leading-relaxed text-ink/70">{lead.excerpt}</p>}
                             </a>
-                            <div className="mt-4"><UserChip author={lead.author} size="sm" meta={formatRelative(lead.published_at ?? lead.created_at)} /></div>
+                            <div className="mt-4"><UserChip showRole={false} author={lead.author} size="sm" meta={formatRelative(lead.published_at ?? lead.created_at)} /></div>
                             <p className="mt-3 text-xs text-ink/60">{categoryLabel(lead.category)}</p>
                         </article> : <>
                             <a href="/market-education" className="group block"><h3 className="news-story-headline group-hover:underline">Understand the market behind the numbers.</h3><p className="mt-3 text-sm leading-relaxed text-ink/70">Explore exchange notices, company filings and the essentials of investing on the Ghana Stock Exchange.</p><span className="news-text-link mt-4">Explore market education <ArrowRight size={15} aria-hidden="true" /></span></a>

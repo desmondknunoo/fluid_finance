@@ -21,7 +21,11 @@ export function RolePill({ role, className }: { role: Author["role"]; className?
     return <span className={cn("news-pill", className)}>{ROLE_LABELS[role].replace(" team", "")}</span>;
 }
 
-export function UserChip({ author, meta, size = "md", className }: { author: Author | null; meta?: string; size?: "sm" | "md"; className?: string }) {
+/**
+ * `showRole={false}` on story bylines: the badge names the author's staff role (Research team,
+ * Operations team), which readers took for the story's section, so stories leave it out.
+ */
+export function UserChip({ author, meta, size = "md", className, showRole = true }: { author: Author | null; meta?: string; size?: "sm" | "md"; className?: string; showRole?: boolean }) {
     const name = author?.display_name ?? "Former member";
     const body = (
         <>
@@ -29,7 +33,7 @@ export function UserChip({ author, meta, size = "md", className }: { author: Aut
             <span className="min-w-0">
                 <span className="flex items-center gap-2">
                     <span className={cn("truncate font-semibold text-ink", size === "sm" ? "text-xs" : "text-sm")}>{name}</span>
-                    {author && <RolePill role={author.role} />}
+                    {author && showRole && <RolePill role={author.role} />}
                 </span>
                 {meta && <span className="news-byline block truncate">{meta}</span>}
             </span>

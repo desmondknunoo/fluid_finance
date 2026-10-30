@@ -98,7 +98,7 @@ function LeadStory({ article }: { article: Article }) {
             </a>
             {article.excerpt && <p className="news-standfirst mt-4">{article.excerpt}</p>}
             <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-                <UserChip author={article.author} size="sm" />
+                <UserChip showRole={false} author={article.author} size="sm" />
                 <a href={articleHref(article.slug)} className="news-text-link">Read the story <ArrowRight size={14} aria-hidden="true" /></a>
             </div>
         </div>
@@ -125,7 +125,7 @@ function StoryTile({ article }: { article: Article }) {
                 <h3 className="mt-2 text-ink">{article.title}</h3>
             </a>
             {article.excerpt && <p className="line-clamp-3">{article.excerpt}</p>}
-            <div className="news-byline"><UserChip author={article.author} size="sm" /></div>
+            <div className="news-byline"><UserChip showRole={false} author={article.author} size="sm" /></div>
         </article>
     );
 }
