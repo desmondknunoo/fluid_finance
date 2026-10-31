@@ -227,7 +227,9 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                 </div>
 
                 <div className="flex items-center gap-3 pb-3">
-                    <div className="flex flex-1 items-center border border-ink/[0.12] focus-within:border-ink md:w-72 rounded-xl">
+                    {/* min-w-0 lets the field shrink: with Android text scaling its default
+                        width plus the count can exceed a phone screen and push the page sideways */}
+                    <div className="flex min-w-0 flex-1 items-center border border-ink/[0.12] focus-within:border-ink md:w-72 rounded-xl">
                         <Search size={15} className="ml-3 shrink-0 text-ink/[0.68]" aria-hidden="true" />
                         <input
                             value={query}
@@ -237,7 +239,7 @@ export function GseLive({ view }: { view: ViewMode | null }) {
                             className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-ink placeholder:text-ink/40 focus:outline-none"
                         />
                     </div>
-                    <span className="news-byline news-mono whitespace-nowrap">
+                    <span className="news-byline news-mono shrink-0 whitespace-nowrap">
                         {filtered.length} stocks
                     </span>
                 </div>
